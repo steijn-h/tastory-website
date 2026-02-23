@@ -204,13 +204,14 @@ const { stats } = Astro.props;
     }
 
     .stats-intro-arrow {
-      display: none;
+      display: block;
+      order: -1;
+      width: 50px;
+      height: 14px;
     }
 
     .stats-intro-text::after {
-      content: ' →';
-      font-style: normal;
-      color: var(--orange);
+      content: none;
     }
 
     .stats-inner {
@@ -232,10 +233,6 @@ const { stats } = Astro.props;
     .stats-bar,
     .solution-bar {
       padding: 2rem 1.25rem;
-    }
-
-    .stats-intro-text::after {
-      content: ' ↓';
     }
 
     .stats-inner {
