@@ -7,6 +7,7 @@ const base = import.meta.env.BASE_URL;
     <img src={`${base}/tastory-logo-header.png`} alt="Tastory" class="logo-img" />
   </a>
   <ul class="nav-links">
+    <li><a href={`${base}/`}>Home</a></li>
     <li class="has-dropdown">
       <a href={`${base}/oplossingen`}>Oplossingen</a>
       <ul class="dropdown">
@@ -38,6 +39,7 @@ const base = import.meta.env.BASE_URL;
 <aside id="mobile-menu" class="mobile-menu" aria-label="Mobiel menu">
   <div class="mobile-menu-inner">
     <span class="mobile-menu-label">Menu</span>
+    <a href={`${base}/`}>Home</a>
     <a href={`${base}/oplossingen`}>Oplossingen</a>
     <div class="mobile-submenu">
       <a href={`${base}/oplossingen/restaurants`} class="mobile-submenu-link">Voor restaurants</a>

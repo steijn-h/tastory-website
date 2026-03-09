@@ -213,7 +213,7 @@ const base = import.meta.env.BASE_URL;
 
   .phone-mockup {
     width: 300px;
-    height: clamp(580px, calc(100vh - 14rem), 720px);
+    height: 640px;
     background: #1a1714;
     border-radius: 44px;
     position: relative;
@@ -223,6 +223,7 @@ const base = import.meta.env.BASE_URL;
       0 0 0 1px rgba(255, 255, 255, 0.04),
       0 0 80px rgba(255, 142, 62, 0.08),
       inset 0 1px 0 rgba(255, 255, 255, 0.06);
+    --screenshot-scroll: -48%;
   }
 
   .phone-notch {
@@ -249,6 +250,24 @@ const base = import.meta.env.BASE_URL;
     width: 100%;
     height: auto;
     display: block;
+    animation: scroll-app 10s ease-in-out 1s infinite alternate;
+  }
+
+  @keyframes scroll-app {
+    0%,
+    15% {
+      transform: translateY(0);
+    }
+    85%,
+    100% {
+      transform: translateY(var(--screenshot-scroll));
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .phone-screenshot {
+      animation: none;
+    }
   }
 
   /* Float cards */
