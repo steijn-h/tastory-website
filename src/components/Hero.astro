@@ -3,7 +3,7 @@ const base = import.meta.env.BASE_URL;
 ---
 
 <section class="hero" id="hero">
-  <div class="hero-sticky">
+  <div class="hero-sticky" id="hero-sticky">
     <div class="hero-bg">
       <div class="hero-orb hero-orb-1"></div>
       <div class="hero-orb hero-orb-2"></div>
@@ -66,7 +66,6 @@ const base = import.meta.env.BASE_URL;
     max-width: 100%;
     padding: 0;
     margin: 0;
-    background: var(--white);
   }
 
   .hero-sticky {
@@ -436,8 +435,9 @@ const base = import.meta.env.BASE_URL;
   const screenshot = document.getElementById('phone-screenshot') as HTMLImageElement;
   const phoneScreen = document.getElementById('phone-screen');
   const hero = document.getElementById('hero');
+  const heroSticky = document.getElementById('hero-sticky') as HTMLElement | null;
 
-  if (screenshot && phoneScreen && hero) {
+  if (screenshot && phoneScreen && hero && heroSticky) {
     const isDesktop = () => window.innerWidth > 1024;
 
     const setup = () => {
@@ -454,11 +454,21 @@ const base = import.meta.env.BASE_URL;
       const update = () => {
         if (!isDesktop()) {
           screenshot.style.transform = '';
+          heroSticky.style.clipPath = '';
           return;
         }
         const scrolled = window.scrollY;
         const progress = Math.min(1, Math.max(0, scrolled / scrollRange));
         screenshot.style.transform = `translateY(-${progress * maxScroll}px)`;
+
+        // Clip hero-sticky as hero exits the viewport bottom
+        const heroBottom = hero.getBoundingClientRect().bottom;
+        if (heroBottom < window.innerHeight) {
+          heroSticky.style.clipPath = `inset(0 0 ${window.innerHeight - heroBottom}px 0)`;
+        } else {
+          heroSticky.style.clipPath = '';
+        }
+
         ticking = false;
       };
 
