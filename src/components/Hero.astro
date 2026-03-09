@@ -454,20 +454,11 @@ const base = import.meta.env.BASE_URL;
       const update = () => {
         if (!isDesktop()) {
           screenshot.style.transform = '';
-          heroSticky.style.clipPath = '';
           return;
         }
         const scrolled = window.scrollY;
         const progress = Math.min(1, Math.max(0, scrolled / scrollRange));
         screenshot.style.transform = `translateY(-${progress * maxScroll}px)`;
-
-        // Clip hero-sticky as hero exits the viewport bottom
-        const heroBottom = hero.getBoundingClientRect().bottom;
-        if (heroBottom < window.innerHeight) {
-          heroSticky.style.clipPath = `inset(0 0 ${window.innerHeight - heroBottom}px 0)`;
-        } else {
-          heroSticky.style.clipPath = '';
-        }
 
         ticking = false;
       };
