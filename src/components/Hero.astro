@@ -3,14 +3,13 @@ const base = import.meta.env.BASE_URL;
 ---
 
 <section class="hero" id="hero">
-  <div class="hero-sticky" id="hero-sticky">
-    <div class="hero-bg">
-      <div class="hero-orb hero-orb-1"></div>
-      <div class="hero-orb hero-orb-2"></div>
-      <div class="hero-orb hero-orb-3"></div>
-    </div>
+  <div class="hero-bg">
+    <div class="hero-orb hero-orb-1"></div>
+    <div class="hero-orb hero-orb-2"></div>
+    <div class="hero-orb hero-orb-3"></div>
+  </div>
 
-    <div class="hero-content">
+  <div class="hero-content">
     <div class="hero-text">
       <div class="hero-badge">
         <span class="hero-badge-dot"></span>
@@ -32,12 +31,11 @@ const base = import.meta.env.BASE_URL;
       <div class="phone-wrapper">
         <div class="phone-mockup">
           <div class="phone-notch"></div>
-          <div class="phone-screen" id="phone-screen">
+          <div class="phone-screen">
             <img
               src={`${base}/homepage-long-screenshot.png`}
               alt="Tastory app screenshot"
               class="phone-screenshot"
-              id="phone-screenshot"
               width="1170"
               height="4944"
               loading="eager"
@@ -56,26 +54,15 @@ const base = import.meta.env.BASE_URL;
       </div>
     </div>
   </div>
-  </div>
 </section>
 
 <style>
   .hero {
     position: relative;
-    height: 300vh;
-    max-width: 100%;
-    padding: 0;
-    margin: 0;
-    background: #2e2318;
-  }
-
-  .hero-sticky {
-    position: sticky;
-    top: 0;
-    height: 100vh;
     display: flex;
     align-items: center;
     justify-content: center;
+    min-height: 100vh;
     overflow: hidden;
     padding: 9rem 3rem 5rem;
   }
@@ -260,7 +247,6 @@ const base = import.meta.env.BASE_URL;
     width: 100%;
     height: auto;
     display: block;
-    will-change: transform;
   }
 
   /* Float cards */
@@ -305,13 +291,6 @@ const base = import.meta.env.BASE_URL;
 
   @media (max-width: 1024px) {
     .hero {
-      height: auto;
-    }
-
-    .hero-sticky {
-      position: relative;
-      height: auto;
-      overflow: visible;
       padding: 7rem 2rem 4rem;
     }
 
@@ -327,11 +306,15 @@ const base = import.meta.env.BASE_URL;
     .phone-mockup {
       grid-column: 1 / -1;
       justify-self: center;
+      width: 240px;
+      height: 500px;
+      border-radius: 38px;
     }
 
     .float-card {
       position: static;
       animation: none;
+      padding: 0.3rem 0.6rem;
     }
 
     .float-card-1,
@@ -369,19 +352,9 @@ const base = import.meta.env.BASE_URL;
       justify-content: center;
     }
 
-    .phone-mockup {
-      width: 240px;
-      height: 500px;
-      border-radius: 38px;
-    }
-
     .phone-glow {
       width: 280px;
       height: 280px;
-    }
-
-    .float-card {
-      padding: 0.3rem 0.6rem;
     }
 
     .fc-label {
@@ -390,7 +363,7 @@ const base = import.meta.env.BASE_URL;
   }
 
   @media (max-width: 640px) {
-    .hero-sticky {
+    .hero {
       padding: 6rem 1.5rem 3rem;
     }
 
@@ -414,70 +387,8 @@ const base = import.meta.env.BASE_URL;
       padding: 0.25rem 0.5rem;
     }
 
-    .float-card-1 {
-      right: -35px;
-    }
-
-    .float-card-2 {
-      left: -32px;
-    }
-
-    .float-card-3 {
-      right: -38px;
-    }
-
     .fc-label {
       font-size: 0.6rem;
     }
   }
 </style>
-
-<script>
-  const screenshot = document.getElementById('phone-screenshot') as HTMLImageElement;
-  const phoneScreen = document.getElementById('phone-screen');
-  const hero = document.getElementById('hero');
-  const heroSticky = document.getElementById('hero-sticky') as HTMLElement | null;
-
-  if (screenshot && phoneScreen && hero && heroSticky) {
-    const isDesktop = () => window.innerWidth > 1024;
-
-    const setup = () => {
-      if (!isDesktop()) return;
-
-      const screenH = phoneScreen.clientHeight;
-      const imgH = screenshot.clientHeight;
-      const maxScroll = Math.max(0, imgH - screenH);
-      if (maxScroll === 0) return;
-
-      const scrollRange = hero.offsetHeight - window.innerHeight;
-
-      let ticking = false;
-      const update = () => {
-        if (!isDesktop()) {
-          screenshot.style.transform = '';
-          return;
-        }
-        const scrolled = window.scrollY;
-        const progress = Math.min(1, Math.max(0, scrolled / scrollRange));
-        screenshot.style.transform = `translateY(-${progress * maxScroll}px)`;
-
-        ticking = false;
-      };
-
-      window.addEventListener('scroll', () => {
-        if (!ticking) {
-          requestAnimationFrame(update);
-          ticking = true;
-        }
-      });
-
-      update();
-    };
-
-    if (screenshot.complete) {
-      setup();
-    } else {
-      screenshot.addEventListener('load', setup);
-    }
-  }
-</script>
