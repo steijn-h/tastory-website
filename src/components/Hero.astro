@@ -43,7 +43,9 @@ const base = import.meta.env.BASE_URL;
           </div>
         </div>
         <div class="float-card float-card-1">
-          <div class="fc-label">Betrouwbare reviews</div>
+          <div class="fc-stars">★★★★★</div>
+          <div class="fc-quote">"Precies wat ik zocht!"</div>
+          <div class="fc-author">— Lisa V.</div>
         </div>
         <div class="float-card float-card-2">
           <div class="fc-label">Jouw verhaal</div>
@@ -307,6 +309,28 @@ const base = import.meta.env.BASE_URL;
     text-transform: uppercase;
     letter-spacing: 0.06em;
     color: var(--text);
+    font-weight: 500;
+  }
+
+  .fc-stars {
+    font-size: 0.75rem;
+    color: var(--orange);
+    letter-spacing: 0.05em;
+    line-height: 1;
+    margin-bottom: 0.25rem;
+  }
+
+  .fc-quote {
+    font-size: 0.78rem;
+    color: var(--text);
+    font-style: italic;
+    line-height: 1.35;
+    margin-bottom: 0.2rem;
+  }
+
+  .fc-author {
+    font-size: 0.68rem;
+    color: var(--text-muted, #888);
     font-weight: 500;
   }
 
