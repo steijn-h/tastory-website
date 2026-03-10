@@ -10,27 +10,72 @@
       Op de hoogte blijven van alle Tastory nieuws? Meld je aan voor de nieuwsbrief en ontvang
       updates over de lancering van onze app!
     </p>
-    <form class="email-form" action="https://formsubmit.co/Info@tastory.nl" method="POST">
-      <input type="hidden" name="_subject" value="Nieuwe nieuwsbrief aanmelding — Tastory" />
-      <input type="hidden" name="_captcha" value="false" />
-      <input type="hidden" name="_next" value="https://www.tastory.nl/?aangemeld=true" />
-      <input type="hidden" name="_template" value="table" />
+    <form class="email-form" id="newsletter-form">
       <input
         type="email"
-        name="email"
+        id="newsletter-email"
         placeholder="Jouw e-mailadres"
         required
         aria-label="E-mailadres"
       />
       <button type="submit">Aanmelden</button>
     </form>
+    <div class="form-feedback" id="form-feedback"></div>
     <div class="cta-note">
       Geen spam. Altijd opzegbaar. Binnenkort beschikbaar op iOS &amp; Android.
     </div>
   </div>
 </section>
 
+<script>
+  const form = document.getElementById('newsletter-form') as HTMLFormElement;
+  const emailInput = document.getElementById('newsletter-email') as HTMLInputElement;
+  const feedback = document.getElementById('form-feedback') as HTMLDivElement;
+  const submitBtn = form.querySelector('button') as HTMLButtonElement;
 
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const email = emailInput.value.trim();
+    if (!email) return;
+
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Verzenden...';
+
+    try {
+      const res = await fetch('https://formsubmit.co/ajax/Info@tastory.nl', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+        body: JSON.stringify({
+          name: 'Nieuwsbrief aanmelding',
+          email,
+          message: 'Nieuwe aanmelding voor de Tastory nieuwsbrief.',
+          _subject: 'Nieuwe nieuwsbrief aanmelding — Tastory',
+          _captcha: 'false',
+          _template: 'table',
+        }),
+      });
+
+      if (res.ok) {
+        feedback.textContent = 'Bedankt voor je aanmelding! We houden je op de hoogte.';
+        feedback.className = 'form-feedback form-feedback--success';
+        emailInput.value = '';
+      } else {
+        throw new Error('Submit failed');
+      }
+    } catch {
+      feedback.textContent = 'Er ging iets mis. Probeer het later opnieuw.';
+      feedback.className = 'form-feedback form-feedback--error';
+    }
+
+    submitBtn.disabled = false;
+    submitBtn.textContent = 'Aanmelden';
+
+    setTimeout(() => {
+      feedback.textContent = '';
+      feedback.className = 'form-feedback';
+    }, 5000);
+  });
+</script>
 
 <style>
   .cta-section {
