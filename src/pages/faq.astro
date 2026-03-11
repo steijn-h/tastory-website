@@ -1,0 +1,180 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHero from '../components/PageHero.astro';
+---
+
+<BaseLayout
+  title="Veelgestelde vragen — Tastory"
+  description="Antwoorden op de meest gestelde vragen over Tastory, voor gasten en restaurants."
+>
+  <PageHero
+    tag="FAQ"
+    title="Veelgestelde <em>vragen</em>"
+    description="Alles wat je wilt weten over Tastory, voor gasten en restaurants."
+  />
+
+  <section class="faq-content">
+    <div class="faq-inner">
+
+      <div class="faq-group reveal">
+        <h2 class="group-title">Voor gasten</h2>
+        <div class="faq-list">
+          <details class="faq-item">
+            <summary>Wat is Tastory?</summary>
+            <p>Tastory is een Nederlandse restaurantontdek-app die restaurants presenteert via kwalitatieve videocontent. Zo zie je vooraf hoe een restaurant er écht uitziet, wat de sfeer is en wat er op het menu staat.</p>
+          </details>
+          <details class="faq-item">
+            <summary>Is Tastory gratis te gebruiken?</summary>
+            <p>Ja, Tastory is gratis te downloaden en te gebruiken voor gasten.</p>
+          </details>
+          <details class="faq-item">
+            <summary>Op welke apparaten is Tastory beschikbaar?</summary>
+            <p>Tastory is beschikbaar voor iOS en Android. Download de app via de App Store of Google Play.</p>
+          </details>
+          <details class="faq-item">
+            <summary>Hoe vind ik restaurants bij mij in de buurt?</summary>
+            <p>Open de app en gebruik de zoekfunctie of de kaartweergave om restaurants in jouw omgeving te ontdekken. Je kunt filteren op keuken, sfeer en afstand.</p>
+          </details>
+        </div>
+      </div>
+
+      <div class="faq-group reveal">
+        <h2 class="group-title">Voor restaurants</h2>
+        <div class="faq-list">
+          <details class="faq-item">
+            <summary>Hoe kan ik mijn restaurant aanmelden bij Tastory?</summary>
+            <p>Neem contact met ons op via de <a href={`${import.meta.env.BASE_URL}/contact`}>contactpagina</a> of stuur een e-mail naar <a href="mailto:Info@tastory.nl">Info@tastory.nl</a>. We bespreken dan samen de mogelijkheden.</p>
+          </details>
+          <details class="faq-item">
+            <summary>Wie maakt de video's voor mijn restaurant?</summary>
+            <p>Afhankelijk van het gekozen pakket schiet Tastory zelf professionele video's, of lever jij eigen content aan volgens onze richtlijnen. Zo waarborgen we een uniforme en kwalitatieve standaard in de app.</p>
+          </details>
+          <details class="faq-item">
+            <summary>Wat kost deelname aan Tastory?</summary>
+            <p>We bieden verschillende pakketten aan. Neem contact op voor een offerte op maat, afgestemd op de grootte en behoeften van jouw restaurant.</p>
+          </details>
+          <details class="faq-item">
+            <summary>Kan ik mijn restaurantprofiel zelf bijwerken?</summary>
+            <p>Ja, via het restaurantportaal kun je jouw gegevens, openingstijden en menu actueel houden.</p>
+          </details>
+        </div>
+      </div>
+
+      <div class="faq-cta reveal">
+        <p>Staat jouw vraag er niet bij?</p>
+        <a href={`${import.meta.env.BASE_URL}/contact`} class="btn-primary">Neem contact op</a>
+      </div>
+
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .faq-content {
+    max-width: 860px;
+    margin: 0 auto;
+  }
+
+  .faq-inner {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3xl);
+  }
+
+  .faq-group {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-lg);
+  }
+
+  .group-title {
+    font-family: var(--serif);
+    font-size: var(--text-2xl);
+    color: var(--text);
+    font-weight: 600;
+    border-bottom: 2px solid var(--beige-dark);
+    padding-bottom: var(--space-sm);
+  }
+
+  .faq-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+  }
+
+  .faq-item {
+    background: var(--white);
+    border: 1px solid rgba(136, 101, 69, 0.08);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    transition: box-shadow 0.3s;
+  }
+
+  .faq-item:hover {
+    box-shadow: var(--shadow-md);
+  }
+
+  .faq-item summary {
+    font-family: var(--serif);
+    font-size: var(--text-lg);
+    font-weight: 500;
+    color: var(--text);
+    padding: 1.4rem 1.8rem;
+    cursor: pointer;
+    list-style: none;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .faq-item summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .faq-item summary::after {
+    content: '+';
+    font-size: 1.5rem;
+    color: var(--orange);
+    font-weight: 300;
+    flex-shrink: 0;
+    transition: transform 0.3s;
+  }
+
+  .faq-item[open] summary::after {
+    transform: rotate(45deg);
+  }
+
+  .faq-item p {
+    padding: 0 1.8rem 1.4rem;
+    font-size: var(--text-base);
+    line-height: 1.75;
+    color: var(--text-muted);
+  }
+
+  .faq-item p a {
+    color: var(--orange);
+    text-decoration: none;
+  }
+
+  .faq-item p a:hover {
+    text-decoration: underline;
+  }
+
+  .faq-cta {
+    text-align: center;
+    padding: var(--space-2xl);
+    background: var(--beige-dark);
+    border-radius: var(--radius-lg);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-lg);
+  }
+
+  .faq-cta p {
+    font-family: var(--serif);
+    font-size: var(--text-xl);
+    color: var(--text);
+  }
+</style>
