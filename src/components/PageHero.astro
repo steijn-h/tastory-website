@@ -1,6 +1,6 @@
 ---
 interface Props {
-  tag: string;
+  tag?: string;
   title: string;
   description?: string;
 }
@@ -10,7 +10,7 @@ const { tag, title, description } = Astro.props;
 
 <section class="page-hero">
   <div class="page-hero-inner">
-    <div class="section-tag">{tag}</div>
+    {tag && <div class="section-tag">{tag}</div>}
     <h1 class="section-title section-title--light" set:html={title} />
     {description && <p class="page-hero-desc">{description}</p>}
   </div>
