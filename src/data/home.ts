@@ -16,7 +16,7 @@ export const features = [
     icon: 'target',
     title: 'Gericht op klanten',
     description:
-      'Via ons platform vinden gebruikers het beste restaurant op het juiste moment. Met een sterke en representatieve presentatie laten restaurants zien waar ze voor staan.',
+      'Via ons platform vinden gasten het beste restaurant op het juiste moment. Met een sterke en representatieve presentatie laten restaurants zien waar ze voor staan.',
   },
   {
     icon: 'gem',
@@ -28,7 +28,7 @@ export const features = [
     icon: 'repeat',
     title: 'Terugkerende gasten',
     description:
-      'Bezoekers komen niet alleen langs, maar ze komen ook terug. Tastory helpt restaurants met zichtbaarheid, imago en het vergroten van een loyale gastenkring.',
+      'Gasten komen niet alleen langs, maar ze komen ook terug. Tastory helpt restaurants met zichtbaarheid, imago en het vergroten van een loyale gastenkring.',
   },
   {
     icon: 'share',
@@ -40,7 +40,7 @@ export const features = [
     icon: 'tag',
     title: 'Doelgroep',
     description:
-      'Gun jouw verhaal een podium. Jouw doelgroep is al gebruiker.',
+      'Gun jouw verhaal een podium. Jouw doelgroep is al gast.',
   },
 ];
 

@@ -25,10 +25,10 @@ We identificeerden vijf kernproblemen met de huidige manier waarop we restaurant
 
 Deze frustratie leidde tot twee fundamentele vragen die de basis vormen voor de ontwikkeling van ons platform:
 
-- **Wordt deze frustratie breed gedeeld** door andere restaurantbezoekers?
+- **Wordt deze frustratie breed gedeeld** door andere restaurantgasten?
 - **Is een dedicated platform** de juiste oplossing hiervoor?
 
-Het antwoord op beide vragen bleek een overtuigend *ja*. Uit gesprekken met tientallen restaurantbezoekers en -eigenaren bleek dat de behoefte aan een eerlijk, visueel en compleet restaurantplatform groot is.
+Het antwoord op beide vragen bleek een overtuigend *ja*. Uit gesprekken met tientallen restaurantgasten en -eigenaren bleek dat de behoefte aan een eerlijk, visueel en compleet restaurantplatform groot is.
 
 ## Van frustratie naar innovatie
 
