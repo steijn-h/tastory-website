@@ -5,7 +5,7 @@ date: 2025-06-09
 tags: ["origin story", "innovatie", "restaurants"]
 ---
 
-Het verhaal van Tastory begint met een frustrerende ervaring. Na afloop van het **KLM Open** tennistoernooi stonden we voor een ogenschijnlijk eenvoudige vraag: waar gaan we eten? Ondanks het raadplegen van meerdere platforms bleek het kiezen van een geschikt restaurant verrassend lastig.
+Het verhaal van Tastory begint met een frustrerende ervaring. Na afloop van het **KLM Open** tennistoernooi stonden we voor een ogenschijnlijk eenvoudige vraag: waar gaan we eten? Ondanks het raadplegen van meerdere apps bleek het kiezen van een geschikt restaurant verrassend lastig.
 
 ## Vijf frustraties
 
@@ -23,15 +23,15 @@ We identificeerden vijf kernproblemen met de huidige manier waarop we restaurant
 
 ## De kernvraag
 
-Deze frustratie leidde tot twee fundamentele vragen die de basis vormen voor de ontwikkeling van ons platform:
+Deze frustratie leidde tot twee fundamentele vragen die de basis vormen voor de ontwikkeling van onze app:
 
-- **Wordt deze frustratie breed gedeeld** door andere restaurantbezoekers?
-- **Is een dedicated platform** de juiste oplossing hiervoor?
+- **Wordt deze frustratie breed gedeeld** door andere restaurantgasten?
+- **Is een dedicated app** de juiste oplossing hiervoor?
 
-Het antwoord op beide vragen bleek een overtuigend *ja*. Uit gesprekken met tientallen restaurantbezoekers en -eigenaren bleek dat de behoefte aan een eerlijk, visueel en compleet restaurantplatform groot is.
+Het antwoord op beide vragen bleek een overtuigend *ja*. Uit gesprekken met tientallen restaurantgasten en -eigenaren bleek dat de behoefte aan een eerlijke, visuele en complete restaurantapp groot is.
 
 ## Van frustratie naar innovatie
 
-Tastory is geboren vanuit de overtuiging dat het kiezen van een restaurant een leuke, inspirerende ervaring moet zijn — niet een bron van stress. Ons platform brengt alle relevante informatie samen op één plek, gepresenteerd op een authentieke en aantrekkelijke manier.
+Tastory is geboren vanuit de overtuiging dat het kiezen van een restaurant een leuke, inspirerende ervaring moet zijn — niet een bron van stress. Onze app brengt alle relevante informatie samen op één plek, gepresenteerd op een authentieke en aantrekkelijke manier.
 
 Zo transformeren we de restaurantkeuze van giswerk naar een weloverwogen keuze.

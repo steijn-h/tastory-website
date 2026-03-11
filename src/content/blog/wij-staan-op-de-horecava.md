@@ -9,7 +9,7 @@ In de week van 12 tot en met 15 januari vindt de jaarlijkse **Horecava** beurs p
 
 ## Tastory op de Horecava
 
-Tastory is aanwezig met een eigen stand op de beurs. We zullen niet alleen ons platform presenteren, maar ook een pitch geven waarin we laten zien hoe Tastory de brug slaat tussen restaurants en gasten.
+Tastory is aanwezig met een eigen stand op de beurs. We zullen niet alleen onze app presenteren, maar ook een pitch geven waarin we laten zien hoe Tastory de brug slaat tussen restaurants en gasten.
 
 Daarnaast hebben we diverse **prijzen** en giveaways klaarstaan voor bezoekers aan onze stand. Het wordt een fantastische week om in contact te komen met de horecabranche en te laten zien wat Tastory te bieden heeft.
 
@@ -19,7 +19,7 @@ De Horecava is het grootste hospitality-evenement van de Benelux. Het biedt ons 
 
 - **Onze propositie te valideren** bij horecaprofessionals
 - **Netwerk op te bouwen** met restauranteigenaren en -managers
-- **Feedback te verzamelen** op ons platform
+- **Feedback te verzamelen** op onze app
 - **Partnerships te verkennen** met andere innovatieve partijen in de branche
 
 We kijken ernaar uit om jullie daar te ontmoeten!

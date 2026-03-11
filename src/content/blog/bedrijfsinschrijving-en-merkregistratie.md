@@ -23,4 +23,4 @@ De naam Tastory — een samenvoegsel van *taste* en *story* — vat perfect same
 
 ## Vooruit kijken
 
-Met de bedrijfsinschrijving en merkregistratie op zak, kunnen we ons nu volledig richten op de verdere ontwikkeling van ons platform. De basis is gelegd, en we zijn klaar voor de volgende stappen in onze reis.
+Met de bedrijfsinschrijving en merkregistratie op zak, kunnen we ons nu volledig richten op de verdere ontwikkeling van onze app. De basis is gelegd, en we zijn klaar voor de volgende stappen in onze reis.
