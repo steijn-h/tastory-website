@@ -157,7 +157,7 @@ section {
 
 .section-title em {
   color: var(--orange);
-  font-style: italic;
+  font-style: normal;
 }
 
 .section-title--light {
