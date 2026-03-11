@@ -1,14 +1,11 @@
 
-Copy
-
 ---
 ---
 <section class="hero" id="hero">
-  <div class="hero-bg">
-    <div class="hero-orb hero-orb-1"></div>
-    <div class="hero-orb hero-orb-2"></div>
-    <div class="hero-orb hero-orb-3"></div>
-  </div>
+  <video class="hero-video" autoplay muted loop playsinline>
+    <source src="/Achtergrondvideo HD.mp4" type="video/mp4" />
+  </video>
+  <div class="hero-overlay"></div>
   <div class="hero-content">
     <div class="hero-text">
       <div class="hero-badge">
@@ -26,33 +23,6 @@ Copy
         <a href="#oplossingen" class="btn-secondary">Meer informatie</a>
       </div>
     </div>
-    <div class="hero-visual">
-      <div class="phone-glow"></div>
-      <div class="phone-wrapper">
-        <div class="phone-mockup">
-          <div class="phone-notch"></div>
-          <div class="phone-screen">
-            <img
-              src="/homepage-long-screenshot.png"
-              alt="Tastory app screenshot"
-              class="phone-screenshot"
-              width="1170"
-              height="4944"
-              loading="eager"
-            />
-          </div>
-        </div>
-        <div class="float-card float-card-1">
-          <div class="fc-label">Reviews met hoge<br>betrouwbaarheid</div>
-        </div>
-        <div class="float-card float-card-2">
-          <div class="fc-label">Jouw verhaal</div>
-        </div>
-        <div class="float-card float-card-3">
-          <div class="fc-label">Actuele content</div>
-        </div>
-      </div>
-    </div>
   </div>
 </section>
 <style>
@@ -67,59 +37,38 @@ Copy
     max-width: none;
     margin: 0;
   }
-  .hero-bg {
+  .hero-video {
     position: absolute;
     inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
     z-index: 0;
+  }
+  .hero-overlay {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
     background: linear-gradient(
       160deg,
-      #2e2318 0%,
-      #3d2f1f 25%,
-      #4a3828 50%,
-      #3a2e22 75%,
-      #2e2318 100%
+      rgba(46, 35, 24, 0.72) 0%,
+      rgba(61, 47, 31, 0.65) 50%,
+      rgba(46, 35, 24, 0.72) 100%
     );
-  }
-  .hero-orb {
-    position: absolute;
-    border-radius: 50%;
-    filter: blur(80px);
-    pointer-events: none;
-  }
-  .hero-orb-1 {
-    width: 600px;
-    height: 600px;
-    background: rgba(255, 142, 62, 0.07);
-    top: -10%;
-    right: 10%;
-  }
-  .hero-orb-2 {
-    width: 400px;
-    height: 400px;
-    background: rgba(136, 101, 69, 0.08);
-    bottom: -15%;
-    left: 5%;
-  }
-  .hero-orb-3 {
-    width: 300px;
-    height: 300px;
-    background: rgba(255, 142, 62, 0.04);
-    top: 50%;
-    left: 40%;
   }
   .hero-content {
     position: relative;
     z-index: 2;
-    max-width: 1400px;
+    max-width: 800px;
     margin: 0 auto;
     width: 100%;
-    display: grid;
-    grid-template-columns: 1.15fr 1fr;
-    gap: 4rem;
-    align-items: center;
+    text-align: center;
   }
   .hero-text {
     animation: fadeUp 1s 0.2s ease both;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
   }
   .hero-badge {
     display: inline-flex;
@@ -162,7 +111,7 @@ Copy
     font-size: 1.15rem;
     line-height: 1.85;
     color: rgba(255, 252, 248, 0.78);
-    max-width: 520px;
+    max-width: 560px;
     margin-bottom: 2.8rem;
   }
   .hero-actions {
@@ -170,222 +119,11 @@ Copy
     gap: 1.2rem;
     align-items: center;
     flex-wrap: wrap;
-  }
-  /* Phone */
-  .hero-visual {
-    display: flex;
     justify-content: center;
-    animation: fadeUp 1s 0.5s ease both;
-    position: relative;
-  }
-  .phone-glow {
-    position: absolute;
-    width: 350px;
-    height: 350px;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    background: radial-gradient(circle, rgba(255, 142, 62, 0.15) 0%, transparent 70%);
-    border-radius: 50%;
-    filter: blur(40px);
-    pointer-events: none;
-    z-index: 0;
-  }
-  .phone-wrapper {
-    position: relative;
-    z-index: 1;
-  }
-  .phone-mockup {
-    width: 300px;
-    height: 640px;
-    background: #1a1714;
-    border-radius: 44px;
-    position: relative;
-    overflow: hidden;
-    box-shadow:
-      0 60px 120px rgba(0, 0, 0, 0.4),
-      0 0 0 1px rgba(255, 255, 255, 0.04),
-      0 0 80px rgba(255, 142, 62, 0.08),
-      inset 0 1px 0 rgba(255, 255, 255, 0.06);
-    --screenshot-scroll: -48%;
-  }
-  .phone-notch {
-    position: absolute;
-    top: 0;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 100px;
-    height: 26px;
-    background: #0e0c0a;
-    border-radius: 0 0 18px 18px;
-    z-index: 5;
-  }
-  .phone-screen {
-    position: absolute;
-    inset: 5px;
-    border-radius: 40px;
-    overflow: hidden;
-    background: #161310;
-  }
-  .phone-screenshot {
-    width: 100%;
-    height: auto;
-    display: block;
-    animation: scroll-app 10s ease-in-out 1s infinite alternate;
-  }
-  @keyframes scroll-app {
-    0%,
-    15% {
-      transform: translateY(0);
-    }
-    85%,
-    100% {
-      transform: translateY(var(--screenshot-scroll));
-    }
-  }
-  @media (prefers-reduced-motion: reduce) {
-    .phone-screenshot {
-      animation: none;
-    }
-  }
-  /* Float cards */
-  .float-card {
-    position: absolute;
-    background: rgba(255, 252, 248, 0.95);
-    backdrop-filter: blur(24px);
-    border: 1.5px solid rgba(255, 142, 62, 0.35);
-    border-radius: var(--radius-sm);
-    padding: 0.4rem 0.75rem;
-    animation: float 6s ease-in-out infinite;
-    white-space: nowrap;
-    box-shadow:
-      0 4px 12px rgba(58, 46, 34, 0.08),
-      0 12px 40px rgba(58, 46, 34, 0.1),
-      0 0 0 1px rgba(255, 142, 62, 0.08);
-  }
-  .float-card-1 {
-    top: 22%;
-    right: -135px;
-    animation-delay: 0s;
-  }
-  .float-card-2 {
-    bottom: 16%;
-    left: -108px;
-    animation-delay: 2s;
-  }
-  .float-card-3 {
-    top: 52%;
-    right: -130px;
-    animation-delay: 4s;
-  }
-  .fc-label {
-    font-size: 0.8rem;
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-    color: var(--text);
-    font-weight: 500;
-  }
-  @media (max-width: 1024px) {
-    .hero {
-      padding: 7rem 2rem 4rem;
-    }
-    .phone-wrapper {
-      padding: 0 70px;
-    }
-    .phone-mockup {
-      width: 240px;
-      height: 500px;
-      border-radius: 38px;
-    }
-    .float-card {
-      padding: 0.3rem 0.6rem;
-    }
-    .float-card-1 {
-      right: -1px;
-    }
-    .float-card-2 {
-      left: -1px;
-    }
-    .float-card-3 {
-      right: -20px;
-    }
-    .hero-content {
-      grid-template-columns: 1fr;
-      text-align: center;
-      gap: 2.5rem;
-    }
-    .hero-visual {
-      order: -1;
-    }
-    .hero-desc {
-      margin-left: auto;
-      margin-right: auto;
-    }
-    .hero-actions {
-      justify-content: center;
-    }
-    .hero-badge {
-      margin-left: auto;
-      margin-right: auto;
-    }
-    .hero-visual {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    .phone-glow {
-      width: 280px;
-      height: 280px;
-    }
-    .fc-label {
-      font-size: 0.65rem;
-    }
   }
   @media (max-width: 640px) {
     .hero {
       padding: 6rem 1.5rem 3rem;
-    }
-    .phone-mockup {
-      width: 220px;
-      height: 460px;
-      border-radius: 36px;
-    }
-    .phone-notch {
-      width: 80px;
-      height: 22px;
-      border-radius: 0 0 14px 14px;
-    }
-    .phone-screen {
-      border-radius: 32px;
-    }
-    .float-card {
-      padding: 0.25rem 0.5rem;
-    }
-    .float-card-1 {
-      right: -28px;
-    }
-    .float-card-2 {
-      left: -10px;
-    }
-    .float-card-3 {
-      right: -25px;
-    }
-    .fc-label {
-      font-size: 0.6rem;
-    }
-  }
-  @media (max-width: 430px) {
-    .phone-wrapper {
-      padding: 0 40px;
-    }
-    .float-card-1 {
-      right: -12px;
-    }
-    .float-card-2 {
-      left: -4px;
-    }
-    .float-card-3 {
-      right: -10px;
     }
   }
 </style>
