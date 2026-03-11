@@ -104,6 +104,30 @@ import PageHero from '../../components/PageHero.astro';
     </div>
   </section>
 
+  <section class="how-it-works">
+    <div class="reveal">
+      <div class="section-tag">Zo werkt het</div>
+      <h2 class="section-title">In drie stappen <em>live</em></h2>
+    </div>
+    <div class="steps-grid">
+      <div class="step reveal">
+        <div class="step-number">01</div>
+        <h3>Aanmelden</h3>
+        <p>Meld je restaurant aan en kies het pakket dat bij jou past. We nemen snel contact met je op.</p>
+      </div>
+      <div class="step reveal">
+        <div class="step-number">02</div>
+        <h3>Content creëren</h3>
+        <p>Tastory schiet professionele foto's en video's die het karakter van jouw restaurant laten zien.</p>
+      </div>
+      <div class="step reveal">
+        <div class="step-number">03</div>
+        <h3>Ontdekt worden</h3>
+        <p>Jouw restaurant verschijnt in de Tastory app en bereikt gasten die écht bij jou passen.</p>
+      </div>
+    </div>
+  </section>
+
   <section class="cta-restaurants">
     <div class="cta-restaurants-inner reveal">
       <h2 class="section-title">Klaar om <em>ontdekt te worden?</em></h2>
@@ -166,7 +190,7 @@ import PageHero from '../../components/PageHero.astro';
   /* Pricing */
   .pricing-section {
     background: var(--white);
-    padding: 7rem 3rem;
+    padding: 6rem 3rem;
     max-width: 100%;
   }
 
@@ -259,9 +283,61 @@ import PageHero from '../../components/PageHero.astro';
     color: var(--text-muted);
   }
 
+  /* How it works */
+  .how-it-works {
+    background: var(--white);
+    max-width: 100%;
+    padding: 6rem 3rem;
+  }
+
+  .how-it-works > .reveal {
+    max-width: 1400px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .steps-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+    margin-top: 3rem;
+    max-width: 1400px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .step {
+    background: var(--beige);
+    border: 1px solid rgba(136, 101, 69, 0.08);
+    border-radius: var(--radius-md);
+    padding: 2.5rem;
+    position: relative;
+  }
+
+  .step-number {
+    font-size: 3.5rem;
+    font-weight: 700;
+    color: var(--orange);
+    opacity: 0.18;
+    line-height: 1;
+    margin-bottom: 1.2rem;
+  }
+
+  .step h3 {
+    font-size: 1.2rem;
+    color: var(--text);
+    margin-bottom: 0.8rem;
+  }
+
+  .step p {
+    font-size: var(--text-base);
+    line-height: 1.75;
+    color: var(--text-muted);
+  }
+
   /* CTA */
   .cta-restaurants {
-    padding: 8rem 3rem;
+    padding: 6rem 3rem;
     text-align: center;
     background: var(--beige);
     max-width: 100%;
@@ -365,6 +441,15 @@ import PageHero from '../../components/PageHero.astro';
     }
     .pricing-grid {
       grid-template-columns: 1fr;
+    }
+    .steps-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  @media (max-width: 640px) {
+    .how-it-works {
+      padding: 4rem 1.5rem;
     }
   }
 
