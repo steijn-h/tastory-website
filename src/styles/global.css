@@ -14,7 +14,7 @@
   --white: #fffcf8;
 
   /* Typography */
-  --serif: 'DM Serif Display', Georgia, serif;
+  --serif: 'Outfit', sans-serif;
   --sans: 'Outfit', sans-serif;
 
   /* Spacing scale */
@@ -69,6 +69,18 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   overflow-x: hidden;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  font-weight: 600;
+}
+
+.brand-name {
+  color: var(--orange);
+  font-style: normal;
 }
 
 /* Subtle grain overlay */
@@ -138,7 +150,7 @@ section {
   font-family: var(--serif);
   font-size: clamp(2rem, 3.5vw, 3rem);
   color: var(--text);
-  font-weight: 400;
+  font-weight: 600;
   line-height: 1.15;
   margin-bottom: 1.4rem;
 }

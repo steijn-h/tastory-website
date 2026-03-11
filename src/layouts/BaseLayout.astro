@@ -46,7 +46,7 @@ const ogImage = new URL(`${import.meta.env.BASE_URL}/tastory-logo.png`, Astro.si
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Outfit:wght@300;400;500;600;700&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap"
       rel="stylesheet"
     />
 
@@ -118,6 +118,38 @@ const ogImage = new URL(`${import.meta.env.BASE_URL}/tastory-logo.png`, Astro.si
       mobileMenu?.querySelectorAll('a').forEach((link) => {
         link.addEventListener('click', closeMenu);
       });
+
+      // Color "Tastory" brand name orange in all text content
+      (function () {
+        const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, {
+          acceptNode(node) {
+            const tag = (node as Text).parentElement?.tagName ?? '';
+            if (['SCRIPT', 'STYLE', 'NOSCRIPT'].includes(tag)) return NodeFilter.FILTER_REJECT;
+            return (node as Text).textContent?.includes('Tastory')
+              ? NodeFilter.FILTER_ACCEPT
+              : NodeFilter.FILTER_SKIP;
+          },
+        });
+        const nodes: Text[] = [];
+        let node: Node | null;
+        while ((node = walker.nextNode())) nodes.push(node as Text);
+        nodes.forEach((textNode) => {
+          const parts = textNode.textContent!.split(/(Tastory)/g);
+          if (parts.length < 2) return;
+          const frag = document.createDocumentFragment();
+          parts.forEach((part, i) => {
+            if (i % 2 === 1) {
+              const span = document.createElement('span');
+              span.className = 'brand-name';
+              span.textContent = part;
+              frag.appendChild(span);
+            } else if (part) {
+              frag.appendChild(document.createTextNode(part));
+            }
+          });
+          textNode.parentNode!.replaceChild(frag, textNode);
+        });
+      })();
     </script>
   </body>
 </html>
