@@ -43,6 +43,45 @@ export const features = [
   },
 ];
 
+export const appFunctions = [
+  {
+    icon: 'search',
+    title: 'Restaurants ontdekken',
+    description:
+      'Zoek en filter restaurants op locatie, keuken, sfeer of gelegenheid. Vind altijd het perfecte restaurant voor jouw moment.',
+  },
+  {
+    icon: 'film',
+    title: "Video's bekijken",
+    description:
+      "Bekijk sfeervolle video's van gerechten, de ambiance en de keuken. Beleef het restaurant al vóór je de deur uitstapt.",
+  },
+  {
+    icon: 'map',
+    title: 'Ontdek in de buurt',
+    description:
+      'Bekijk restaurants op de interactieve kaart en ontdek verborgen pareltjes in jouw omgeving.',
+  },
+  {
+    icon: 'star',
+    title: 'Favorieten bewaren',
+    description:
+      'Sla restaurants op in persoonlijke lijstjes en kom altijd terug op jouw favorieten. Nooit meer zoeken, altijd klaar.',
+  },
+  {
+    icon: 'message-circle',
+    title: 'Ervaringen delen',
+    description:
+      "Deel jouw restaurantbeleving via korte video's of reviews. Inspireer vrienden en andere foodies met jouw smaak.",
+  },
+  {
+    icon: 'user',
+    title: 'Vrienden volgen',
+    description:
+      'Volg vrienden en zie waar zij van genieten. Zo wordt elke avond uit eten een gedeelde ontdekking.',
+  },
+];
+
 export const highlights = [
   {
     date: '2 januari 2026',
