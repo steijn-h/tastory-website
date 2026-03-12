@@ -36,6 +36,10 @@ const { features } = Astro.props;
 </section>
 
 <style>
+  section :global(.section-desc) {
+    max-width: none;
+  }
+
   .features-list {
     display: grid;
     grid-template-columns: 1fr 1fr;
