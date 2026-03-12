@@ -78,10 +78,6 @@ h4 {
   font-weight: 600;
 }
 
-.brand-name {
-  color: var(--text);
-  font-style: normal;
-}
 
 /* Subtle grain overlay */
 body::after {
