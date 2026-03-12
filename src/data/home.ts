@@ -46,21 +46,21 @@ export const features = [
 export const appFunctions = [
   {
     icon: 'search',
-    title: 'Voel de sfeer van tevoren',
+    title: 'Betrouwbare reviews die ertoe doen',
     description:
-      'Geen sterretjes of anonieme cijfers — maar échte video­beelden van het eten, de ruimte en de sfeer. Zo weet je wat je kiest, nog vóór je reserveert.',
+      'Elke review op Tastory wordt gevalideerd. Geen beoordelingen waar je vraagtekens bij kunt zetten — alleen eerlijke ervaringen van echte gasten die je kunt vertrouwen.',
   },
   {
     icon: 'film',
-    title: 'Video als eerste indruk',
+    title: "Foto's en video's als eerste indruk",
     description:
-      "Restaurants presenteren zichzelf via korte, eerlijke video's. Geen gefotoshopte gerechten, maar het verhaal zoals het is — rauw, smaakvol en authentiek.",
+      "Restaurants presenteren zichzelf via beelden die de beleving écht overbrengen. Geen misleidende stockfoto's, maar authentieke content die laat zien waar een restaurant voor staat.",
   },
   {
     icon: 'map',
-    title: 'Ontdek wat verborgen blijft',
+    title: 'Eerlijk ontdekken, zonder betaalde posities',
     description:
-      'De beste restaurants staan zelden bovenaan een lijst. Tastory helpt je de verborgen pareltjes in jouw omgeving te vinden — op basis van beleving, niet populariteit.',
+      'Bij Tastory koop je je plek niet. Restaurants worden zichtbaar op basis van kwaliteit en beleving — zodat jij altijd het beste vindt, niet het hoogst biedende.',
   },
   {
     icon: 'star',
