@@ -39,7 +39,7 @@ export const features = [
     icon: 'tag',
     title: 'Doelgroep',
     description:
-      'Gun jouw verhaal een podium. Jouw doelgroep is al gast.',
+      'Gun jouw verhaal een podium. Jouw doelgroep is al gebruiker.',
   },
 ];
 
