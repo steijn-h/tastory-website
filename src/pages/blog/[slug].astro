@@ -44,6 +44,8 @@ const { Content } = await post.render();
 <style>
   .blog-article {
     max-width: 1400px;
+    margin: 0 auto;
+    padding: 6rem 3rem;
   }
   .blog-article-inner {
     max-width: 740px;
@@ -135,5 +137,10 @@ const { Content } = await post.render();
     background: rgba(136, 101, 69, 0.1);
     border-color: rgba(136, 101, 69, 0.18);
     color: var(--text);
+  }
+  @media (max-width: 640px) {
+    .blog-article {
+      padding: 4rem 1.5rem;
+    }
   }
 </style>

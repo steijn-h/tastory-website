@@ -63,6 +63,8 @@ const { testimonials } = Astro.props;
     border-radius: 16px;
     padding: 2rem;
     position: relative;
+    display: flex;
+    flex-direction: column;
   }
 
   .testimonial-card::before {
@@ -83,6 +85,7 @@ const { testimonials } = Astro.props;
     font-style: normal;
     margin-bottom: 1.5rem;
     padding-top: 1rem;
+    flex: 1;
   }
 
   .testimonial-author {

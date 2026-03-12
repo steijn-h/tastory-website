@@ -43,8 +43,8 @@ import Icon from './Icon.astro';
               src="/SCR-20260312-notu.jpeg"
               alt="Tastory app screenshot"
               class="phone-screenshot"
-              width="1170"
-              height="4944"
+              width="751"
+              height="3905"
               loading="lazy"
             />
           </div>
@@ -70,7 +70,7 @@ import Icon from './Icon.astro';
 
   .ps-grid {
     display: grid;
-    grid-template-columns: 1fr auto;
+    grid-template-columns: 1fr 430px;
     gap: 4rem;
     margin-top: 3.5rem;
     align-items: center;
@@ -138,7 +138,7 @@ import Icon from './Icon.astro';
   /* Phone mockup */
   .ps-phone {
     display: flex;
-    justify-content: center;
+    justify-content: flex-start;
     position: relative;
   }
 
@@ -172,7 +172,7 @@ import Icon from './Icon.astro';
       0 20px 60px rgba(0, 0, 0, 0.2),
       0 0 0 1.5px rgba(255, 255, 255, 0.1),
       inset 0 1px 0 rgba(255, 255, 255, 0.12);
-    --screenshot-scroll: -48%;
+    --screenshot-scroll: -60%;
   }
 
   .phone-notch {
@@ -230,19 +230,19 @@ import Icon from './Icon.astro';
 
   .float-card-1 {
     top: 22%;
-    left: -220px;
+    right: -135px;
     animation-delay: 0s;
   }
 
   .float-card-2 {
     bottom: 16%;
-    left: -115px;
+    right: -120px;
     animation-delay: 2s;
   }
 
   .float-card-3 {
     top: 52%;
-    left: -140px;
+    right: -130px;
     animation-delay: 4s;
   }
 
@@ -255,9 +255,9 @@ import Icon from './Icon.astro';
   }
 
   @media (max-width: 1200px) {
-    .float-card-1 { left: -200px; }
-    .float-card-2 { left: -105px; }
-    .float-card-3 { left: -125px; }
+    .float-card-1 { right: -80px; }
+    .float-card-2 { right: -70px; }
+    .float-card-3 { right: -75px; }
   }
 
   @media (max-width: 1024px) {
@@ -276,9 +276,9 @@ import Icon from './Icon.astro';
       border-radius: 38px;
     }
 
-    .float-card-1 { left: auto; right: -60px; }
-    .float-card-2 { left: auto; right: -55px; }
-    .float-card-3 { left: auto; right: -55px; }
+    .float-card-1 { right: -60px; }
+    .float-card-2 { right: -55px; }
+    .float-card-3 { right: -55px; }
 
     .fc-label { font-size: 0.65rem; }
   }
@@ -290,9 +290,9 @@ import Icon from './Icon.astro';
       border-radius: 42px;
     }
 
-    .float-card-1 { left: auto; right: -45px; }
-    .float-card-2 { left: auto; right: -40px; }
-    .float-card-3 { left: auto; right: -42px; }
+    .float-card-1 { right: -45px; }
+    .float-card-2 { right: -40px; }
+    .float-card-3 { right: -42px; }
 
     .fc-label { font-size: 0.65rem; }
   }
@@ -304,8 +304,8 @@ import Icon from './Icon.astro';
       border-radius: 38px;
     }
 
-    .float-card-1 { left: auto; right: -20px; }
-    .float-card-2 { left: auto; right: -18px; }
-    .float-card-3 { left: auto; right: -19px; }
+    .float-card-1 { right: -20px; }
+    .float-card-2 { right: -18px; }
+    .float-card-3 { right: -19px; }
   }
 </style>
