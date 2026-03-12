@@ -46,39 +46,39 @@ export const features = [
 export const appFunctions = [
   {
     icon: 'search',
-    title: 'Restaurants ontdekken',
+    title: 'Voel de sfeer van tevoren',
     description:
-      'Zoek en filter restaurants op locatie, keuken, sfeer of gelegenheid. Vind altijd het perfecte restaurant voor jouw moment.',
+      'Geen sterretjes of anonieme cijfers — maar échte video­beelden van het eten, de ruimte en de sfeer. Zo weet je wat je kiest, nog vóór je reserveert.',
   },
   {
     icon: 'film',
-    title: "Video's bekijken",
+    title: 'Video als eerste indruk',
     description:
-      "Bekijk sfeervolle video's van gerechten, de ambiance en de keuken. Beleef het restaurant al vóór je de deur uitstapt.",
+      "Restaurants presenteren zichzelf via korte, eerlijke video's. Geen gefotoshopte gerechten, maar het verhaal zoals het is — rauw, smaakvol en authentiek.",
   },
   {
     icon: 'map',
-    title: 'Ontdek in de buurt',
+    title: 'Ontdek wat verborgen blijft',
     description:
-      'Bekijk restaurants op de interactieve kaart en ontdek verborgen pareltjes in jouw omgeving.',
+      'De beste restaurants staan zelden bovenaan een lijst. Tastory helpt je de verborgen pareltjes in jouw omgeving te vinden — op basis van beleving, niet populariteit.',
   },
   {
     icon: 'star',
-    title: 'Favorieten bewaren',
+    title: 'Jouw persoonlijke smaakprofiel',
     description:
-      'Sla restaurants op in persoonlijke lijstjes en kom altijd terug op jouw favorieten. Nooit meer zoeken, altijd klaar.',
+      'Bewaar restaurants die bij jóu passen. Geen eindeloze lijsten van anderen, maar jouw eigen culinaire wereld — gebouwd op wat jij écht lekker vindt.',
   },
   {
     icon: 'message-circle',
-    title: 'Ervaringen delen',
+    title: 'Deel het verhaal, niet de score',
     description:
-      "Deel jouw restaurantbeleving via korte video's of reviews. Inspireer vrienden en andere foodies met jouw smaak.",
+      "Bij Tastory deel je geen cijfer — je deelt een beleving. Een sfeer, een gerecht, een moment. Dat raakt mensen meer dan welke beoordeling dan ook.",
   },
   {
     icon: 'user',
-    title: 'Vrienden volgen',
+    title: 'Vertrouw mensen die je kent',
     description:
-      'Volg vrienden en zie waar zij van genieten. Zo wordt elke avond uit eten een gedeelde ontdekking.',
+      'Een tip van een vriend is meer waard dan duizend reviews van vreemden. Volg mensen die jouw smaak begrijpen en ontdek samen nieuwe favorieten.',
   },
 ];
 
