@@ -48,7 +48,7 @@ export const appFunctions = [
     icon: 'search',
     title: 'Betrouwbare reviews die ertoe doen',
     description:
-      'Elke review op Tastory wordt gevalideerd. Geen neppe beoordelingen of anonieme meningen — alleen eerlijke ervaringen van echte gasten die je kunt vertrouwen.',
+      'Elke review op Tastory wordt gevalideerd. Geen beoordelingen waar je vraagtekens bij kunt zetten — alleen eerlijke ervaringen van echte gasten die je kunt vertrouwen.',
   },
   {
     icon: 'film',
