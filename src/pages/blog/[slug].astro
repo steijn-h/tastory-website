@@ -18,7 +18,6 @@ const { Content } = await post.render();
 ---
 <BaseLayout title={`${post.data.title} — Tastory Blog`} description={post.data.description}>
   <PageHero
-    tag="Blog"
     title={`<em>${post.data.title}</em>`}
     description={formatDate(post.data.date)}
   />
