@@ -1,8 +1,7 @@
 export const stats = [
   { number: '58%', label: "van de gasten het eten fotografeert, maar de foto's niet delen of gebruiken" },
   { number: '69%', label: 'kiest op basis van reviews van anderen' },
-  { number: '75%', label: 'het restaurant kiest op basis van foto\'s' },
-  { number: '80%', label: "restaurants bezoekt door 'in de buurt' te zoeken" },
+  { number: '75%', label: 'het restaurant kiest op basis van content' },
 ];
 
 export const features = [

@@ -10,7 +10,7 @@ const { features } = Astro.props;
 
 <section>
   <div class="reveal">
-    <div class="section-tag">Kernwaarden</div>
+    <div class="section-tag">Onze focus</div>
     <div class="section-title">Wordt geïnspireerd en <em>inspireer</em> anderen!</div>
     <div class="section-desc">
       Tastory creëert waarde voor zowel restaurantbezoekers als restaurants. Bezoekers worden
@@ -18,15 +18,17 @@ const { features } = Astro.props;
       van hun bereik en conversie.
     </div>
   </div>
-  <div class="features-grid">
+  <div class="features-list">
     {
       features.map((feature) => (
-        <div class="feature-card reveal">
-          <div class="feature-bg-icon">
-            <Icon name={feature.icon} size={120} />
+        <div class="feature-item reveal">
+          <div class="feature-icon">
+            <Icon name={feature.icon} size={24} />
           </div>
-          <h3>{feature.title}</h3>
-          <p>{feature.description}</p>
+          <div class="feature-body">
+            <h3>{feature.title}</h3>
+            <p>{feature.description}</p>
+          </div>
         </div>
       ))
     }
@@ -34,83 +36,50 @@ const { features } = Astro.props;
 </section>
 
 <style>
-  .features-grid {
+  .features-list {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 1.5rem;
+    grid-template-columns: 1fr 1fr;
+    gap: 2.5rem 4rem;
     margin-top: 4rem;
   }
 
-  .feature-card {
-    background: var(--white);
-    border: 1px solid rgba(136, 101, 69, 0.06);
-    border-radius: 16px;
-    padding: 2.5rem 2rem;
-    position: relative;
-    overflow: hidden;
-    transition: all 0.4s;
-    cursor: default;
+  .feature-item {
+    display: flex;
+    gap: 1.2rem;
+    align-items: flex-start;
   }
 
-  .feature-card::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 3px;
-    background: linear-gradient(90deg, transparent, var(--orange), transparent);
-    opacity: 0;
-    transition: opacity 0.4s;
-  }
-
-  .feature-card:hover {
-    border-color: rgba(255, 142, 62, 0.15);
-    transform: translateY(-4px);
-    box-shadow: 0 20px 60px rgba(136, 101, 69, 0.08);
-  }
-
-  .feature-card:hover::before {
-    opacity: 1;
-  }
-
-  .feature-bg-icon {
-    position: absolute;
-    bottom: 10px;
-    right: 10px;
+  .feature-icon {
+    flex-shrink: 0;
+    width: 44px;
+    height: 44px;
+    background: rgba(255, 142, 62, 0.1);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     color: var(--orange);
-    opacity: 0.14;
-    pointer-events: none;
-    transition: opacity 0.4s;
+    margin-top: 2px;
   }
 
-  .feature-card:hover .feature-bg-icon {
-    opacity: 0.2;
-  }
-
-  .feature-card h3 {
+  .feature-body h3 {
     font-family: var(--serif);
-    font-size: 1.2rem;
+    font-size: 1.1rem;
     color: var(--text);
     font-weight: 600;
-    margin-bottom: 0.8rem;
+    margin-bottom: 0.4rem;
   }
 
-  .feature-card p {
-    font-size: 1rem;
+  .feature-body p {
+    font-size: 0.95rem;
     line-height: 1.75;
     color: var(--text-muted);
   }
 
-  @media (max-width: 1024px) {
-    .features-grid {
-      grid-template-columns: 1fr 1fr;
-    }
-  }
-
-  @media (max-width: 640px) {
-    .features-grid {
+  @media (max-width: 768px) {
+    .features-list {
       grid-template-columns: 1fr;
+      gap: 2rem;
     }
   }
 </style>

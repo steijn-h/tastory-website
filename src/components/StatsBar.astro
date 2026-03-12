@@ -59,13 +59,6 @@ const { stats } = Astro.props;
         </svg>
         <span>Professionele content te tonen</span>
       </div>
-      <div class="solution-item">
-        <svg class="solution-icon" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-          <circle cx="10" cy="10" r="9" stroke="currentColor" stroke-width="1.5"/>
-          <polyline points="6,10 9,13 14,7" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-        <span>Restaurants vinden o.b.v. locatie</span>
-      </div>
     </div>
   </div>
 </div>
@@ -116,7 +109,7 @@ const { stats } = Astro.props;
   .stats-inner {
     flex: 1;
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(3, 1fr);
     gap: 2rem;
     text-align: center;
   }
@@ -217,12 +210,12 @@ const { stats } = Astro.props;
 
     .stats-inner {
       width: 100%;
-      grid-template-columns: repeat(2, 1fr);
+      grid-template-columns: repeat(3, 1fr);
       gap: 1.5rem;
     }
 
     .solution-inner {
-      grid-template-columns: repeat(2, 1fr);
+      grid-template-columns: 1fr;
     }
 
     .solution-item {
