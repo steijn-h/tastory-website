@@ -16,7 +16,6 @@ const base = import.meta.env.BASE_URL;
   description="Lees de laatste artikelen en updates van Tastory. Blijf op de hoogte van onze reis."
 >
   <PageHero
-    tag="Blog"
     title="Laatste <em>artikelen</em>"
     description="Blijf op de hoogte van de laatste ontwikkelingen, inzichten en verhalen van Tastory."
   />
@@ -25,7 +24,7 @@ const base = import.meta.env.BASE_URL;
     <div class="blog-grid">
       {
         posts.map((post) => (
-          <a href={`${base}/blog/${post.slug}`} class="blog-card reveal">
+          <a href={`${base}blog/${post.slug}`} class="blog-card reveal">
             <div class="blog-card-date">{formatDate(post.data.date)}</div>
             <h2 class="blog-card-title">{post.data.title}</h2>
             <p class="blog-card-desc">{post.data.description}</p>

@@ -9,7 +9,6 @@ import Icon from '../../components/Icon.astro';
   description="Tastory biedt oplossingen voor zowel restaurants als gasten. Ontdek hoe wij jullie samenbrengen."
 >
   <PageHero
-    tag="Oplossingen"
     title="Oplossingen voor <em>restaurants</em> en <em>gasten</em>"
     description="Tastory brengt restaurants en gasten samen. Ontdek hoe onze app waarde creëert voor beide kanten."
   />
@@ -95,7 +94,8 @@ import Icon from '../../components/Icon.astro';
     border-radius: 20px;
     padding: 3rem;
     text-decoration: none;
-    display: block;
+    display: flex;
+    flex-direction: column;
     transition: all 0.4s;
     position: relative;
     overflow: hidden;
@@ -167,6 +167,8 @@ import Icon from '../../components/Icon.astro';
     display: inline-flex;
     align-items: center;
     gap: 0.5rem;
+    margin-top: auto;
+    align-self: flex-start;
     background: var(--orange);
     color: var(--white);
     font-size: var(--text-base);
