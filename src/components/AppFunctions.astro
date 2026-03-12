@@ -14,15 +14,15 @@ interface Props {
 const { functions } = Astro.props;
 ---
 
-<section class="app-functions">
-  <div class="container">
-    <div class="header reveal">
+<div class="app-functions-wrapper">
+  <section>
+    <div class="reveal">
       <div class="section-tag">De app</div>
-      <h2 class="section-title">Wat kan <em>Tastory</em>?</h2>
-      <p class="section-desc">
-        Van ontdekken tot delen — Tastory begeleidt je bij elke stap van jouw restaurant­beleving.
+      <div class="section-title">Wat kan <em>Tastory</em>?</div>
+      <div class="section-desc">
+        Van ontdekken tot delen — Tastory begeleidt je bij elke stap van jouw restaurantbeleving.
         Dit zijn de kernfuncties van onze app.
-      </p>
+      </div>
     </div>
 
     <div class="functions-grid">
@@ -39,63 +39,19 @@ const { functions } = Astro.props;
         ))
       }
     </div>
-  </div>
-</section>
+  </section>
+</div>
 
 <style>
-  .app-functions {
+  .app-functions-wrapper {
     background: var(--white);
-    padding: var(--space-3xl) 0;
-  }
-
-  .container {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 0 2rem;
-  }
-
-  .header {
-    text-align: center;
-    max-width: 620px;
-    margin: 0 auto 4rem;
-  }
-
-  .section-tag {
-    display: inline-block;
-    font-size: 0.8rem;
-    font-weight: 600;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    color: var(--orange);
-    background: rgba(255, 142, 62, 0.1);
-    padding: 0.35rem 0.9rem;
-    border-radius: var(--radius-sm);
-    margin-bottom: 1rem;
-  }
-
-  .section-title {
-    font-family: var(--serif);
-    font-size: clamp(1.8rem, 3vw, 2.4rem);
-    color: var(--text);
-    line-height: 1.2;
-    margin-bottom: 1rem;
-  }
-
-  .section-title em {
-    color: var(--orange);
-    font-style: normal;
-  }
-
-  .section-desc {
-    font-size: 1rem;
-    line-height: 1.75;
-    color: var(--text-muted);
   }
 
   .functions-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     gap: 1.5rem;
+    margin-top: 4rem;
   }
 
   .fn-card {
