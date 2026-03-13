@@ -1,7 +1,6 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import PageHero from '../../components/PageHero.astro';
-import Icon from '../../components/Icon.astro';
 import AppFunctions from '../../components/AppFunctions.astro';
 import { appFunctions } from '../../data/home';
 ---
@@ -45,58 +44,6 @@ import { appFunctions } from '../../data/home';
           Deel jouw ervaring met de community en help anderen bij het maken van hun volgende, nog
           betere restaurantkeuze. Tip: je kunt op onze app jouw eigen foodmap maken met alle
           bezochte restaurants!
-        </p>
-      </div>
-    </div>
-  </section>
-
-  <section class="features-section">
-    <div class="reveal">
-      <div class="section-tag">Functies</div>
-      <h2 class="section-title">De belangrijkste functies van <em>Tastory</em></h2>
-    </div>
-    <div class="user-features-grid">
-      <div class="user-feature reveal">
-        <div class="user-feature-bg-icon"><Icon name="search" size={100} /></div>
-        <h3>Gericht zoeken</h3>
-        <p>
-          Filter op stemming, budget, keuken en gezelschap om precies het juiste restaurant te
-          vinden.
-        </p>
-      </div>
-      <div class="user-feature reveal">
-        <div class="user-feature-bg-icon"><Icon name="film" size={100} /></div>
-        <h3>Restaurantprofielen</h3>
-        <p>
-          Bekijk gepersonaliseerde restaurantprofielen zodat je vooraf een goed beeld hebt van de
-          beleving.
-        </p>
-      </div>
-      <div class="user-feature reveal">
-        <div class="user-feature-bg-icon"><Icon name="map" size={100} /></div>
-        <h3>Persoonlijke foodmap</h3>
-        <p>Maak je eigen foodmap met alle bezochte restaurants en deel deze met vrienden.</p>
-      </div>
-      <div class="user-feature reveal">
-        <div class="user-feature-bg-icon"><Icon name="message-circle" size={100} /></div>
-        <h3>Community reviews</h3>
-        <p>
-          Lees en schrijf eerlijke reviews die andere gasten helpen bij het maken van hun keuze.
-        </p>
-      </div>
-      <div class="user-feature reveal">
-        <div class="user-feature-bg-icon"><Icon name="smartphone" size={100} /></div>
-        <h3>Delen met vrienden</h3>
-        <p>
-          Deel jouw favoriete restaurants en ervaringen eenvoudig via de app met vrienden en
-          familie.
-        </p>
-      </div>
-      <div class="user-feature reveal">
-        <div class="user-feature-bg-icon"><Icon name="star" size={100} /></div>
-        <h3>Betrouwbare matches</h3>
-        <p>
-          Onze matching met jouw profiel zorgt ervoor dat je verwachtingen beter overeenkomen met de werkelijke ervaring.
         </p>
       </div>
     </div>
@@ -175,71 +122,6 @@ import { appFunctions } from '../../data/home';
   }
 
   .step-card p {
-    font-size: var(--text-base);
-    line-height: 1.7;
-    color: var(--text-muted);
-  }
-
-  /* Features */
-  .features-section {
-    background: var(--beige);
-    padding: 6rem 3rem;
-    max-width: 100%;
-  }
-
-  .features-section > .reveal {
-    max-width: 1400px;
-    margin-left: auto;
-    margin-right: auto;
-  }
-
-  .user-features-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 1.5rem;
-    margin-top: 3rem;
-    max-width: 1400px;
-    margin-left: auto;
-    margin-right: auto;
-  }
-
-  .user-feature {
-    background: var(--white);
-    border: 1px solid rgba(136, 101, 69, 0.06);
-    border-radius: var(--radius-md);
-    padding: 2rem;
-    transition: all 0.4s;
-    position: relative;
-    overflow: hidden;
-  }
-
-  .user-feature:hover {
-    transform: translateY(-3px);
-    box-shadow: var(--shadow-lg);
-  }
-
-  .user-feature-bg-icon {
-    position: absolute;
-    bottom: 10px;
-    right: 10px;
-    color: var(--orange);
-    opacity: 0.06;
-    pointer-events: none;
-    transition: opacity 0.4s;
-  }
-
-  .user-feature:hover .user-feature-bg-icon {
-    opacity: 0.1;
-  }
-
-  .user-feature h3 {
-    font-family: var(--serif);
-    font-size: var(--text-xl);
-    color: var(--text);
-    margin-bottom: 0.6rem;
-  }
-
-  .user-feature p {
     font-size: var(--text-base);
     line-height: 1.7;
     color: var(--text-muted);
@@ -348,15 +230,9 @@ import { appFunctions } from '../../data/home';
     .steps-grid {
       grid-template-columns: 1fr;
     }
-    .user-features-grid {
-      grid-template-columns: 1fr 1fr;
-    }
   }
 
   @media (max-width: 640px) {
-    .user-features-grid {
-      grid-template-columns: 1fr;
-    }
     .email-form {
       flex-direction: column;
       border-radius: 16px;
