@@ -56,21 +56,20 @@ import PageHero from '../../components/PageHero.astro';
     </div>
     <div class="pricing-grid">
       <div class="pricing-card reveal">
-        <div class="option-slider" id="option-slider">
-          <button class="slider-btn slider-btn--prev" id="slider-prev" aria-label="Vorige optie">&#8592;</button>
-          <div class="slider-stage">
-            <div class="slider-counter"><span id="slider-current">1</span> / 7</div>
-            <div class="slider-items" id="slider-items">
-              <div class="slider-item is-active"><span class="slider-icon">✦</span>Gepersonaliseerd profiel</div>
-              <div class="slider-item"><span class="slider-icon">✦</span>Professionele foto's</div>
-              <div class="slider-item"><span class="slider-icon">✦</span>Professionele video</div>
-              <div class="slider-item"><span class="slider-icon">✦</span>Reserveringsbevestiging</div>
-              <div class="slider-item"><span class="slider-icon">✦</span>Webpagina op Google</div>
-              <div class="slider-item"><span class="slider-icon">✦</span>Uniek loyaliteitsprogramma</div>
-              <div class="slider-item"><span class="slider-icon">✦</span>Inzicht in lokale populariteit</div>
-            </div>
+        <div class="card-ticker" aria-hidden="true">
+          <div class="card-ticker-track">
+            {[...Array(4)].map(() => (
+              <ul class="card-ticker-list">
+                <li><span class="card-ticker-dot">✦</span>Gepersonaliseerd profiel</li>
+                <li><span class="card-ticker-dot">✦</span>Professionele foto's</li>
+                <li><span class="card-ticker-dot">✦</span>Professionele video</li>
+                <li><span class="card-ticker-dot">✦</span>Reserveringsbevestiging</li>
+                <li><span class="card-ticker-dot">✦</span>Webpagina op Google</li>
+                <li><span class="card-ticker-dot">✦</span>Uniek loyaliteitsprogramma</li>
+                <li><span class="card-ticker-dot">✦</span>Inzicht in lokale populariteit</li>
+              </ul>
+            ))}
           </div>
-          <button class="slider-btn slider-btn--next" id="slider-next" aria-label="Volgende optie">&#8594;</button>
         </div>
         <h3>Stel je eigen menu samen</h3>
         <p class="pricing-description">Kies zelf welke gerechten je aan jouw restaurantprofiel toevoegt. Betaal alleen voor wat bij jou past.</p>
@@ -437,98 +436,48 @@ import PageHero from '../../components/PageHero.astro';
     margin-top: 1rem;
   }
 
-  /* Option slider */
-  .option-slider {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
+  /* Card ticker */
+  .card-ticker {
+    overflow: hidden;
     background: var(--brown);
     border-radius: 16px 16px 0 0;
     margin: -2.5rem -2.5rem 1.75rem;
-    padding: 2.25rem 1.5rem;
-    min-height: 120px;
-  }
-
-  .slider-stage {
-    flex: 1;
-    text-align: center;
-    overflow: hidden;
-  }
-
-  .slider-counter {
-    font-size: 0.75rem;
-    font-weight: 600;
-    color: rgba(255,255,255,0.45);
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    margin-bottom: 0.75rem;
-  }
-
-  .slider-items {
-    position: relative;
-    height: 2.2rem;
-  }
-
-  .slider-item {
-    position: absolute;
-    inset: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.65rem;
-    font-family: var(--sans);
-    font-size: 1.05rem;
-    font-weight: 600;
-    color: var(--white);
-    opacity: 0;
-    transform: translateX(60px);
-    transition: opacity 0.3s ease, transform 0.3s ease;
-    pointer-events: none;
+    padding: 1.6rem 0;
     white-space: nowrap;
   }
 
-  .slider-item.is-active {
-    opacity: 1;
-    transform: translateX(0);
-    pointer-events: auto;
+  .card-ticker-track {
+    display: inline-flex;
+    animation: card-ticker-scroll 30s linear infinite;
   }
 
-  .slider-item.is-exit-left {
-    opacity: 0;
-    transform: translateX(-60px);
-    transition: opacity 0.3s ease, transform 0.3s ease;
-  }
-
-  .slider-item.is-exit-right {
-    opacity: 0;
-    transform: translateX(60px);
-    transition: opacity 0.3s ease, transform 0.3s ease;
-  }
-
-  .slider-icon {
-    color: var(--orange);
-    font-size: 0.7rem;
-    flex-shrink: 0;
-  }
-
-  .slider-btn {
-    background: rgba(255,255,255,0.12);
-    border: 1px solid rgba(255,255,255,0.2);
-    color: var(--white);
-    border-radius: 50%;
-    width: 2.4rem;
-    height: 2.4rem;
-    font-size: 1rem;
-    cursor: pointer;
-    flex-shrink: 0;
-    transition: background 0.2s;
-    display: flex;
+  .card-ticker-list {
+    display: inline-flex;
     align-items: center;
-    justify-content: center;
+    list-style: none;
+    gap: 0;
   }
 
-  .slider-btn:hover {
-    background: rgba(255,255,255,0.22);
+  .card-ticker-list li {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-family: var(--sans);
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: var(--white);
+    padding: 0 2rem;
+  }
+
+  .card-ticker-dot {
+    color: var(--orange);
+    font-size: 0.5rem;
+    flex-shrink: 0;
+  }
+
+  @keyframes card-ticker-scroll {
+    from { transform: translateX(0); }
+    to { transform: translateX(-25%); }
   }
 
   @media (max-width: 1024px) {
@@ -562,52 +511,6 @@ import PageHero from '../../components/PageHero.astro';
 </style>
 
 <script>
-  // Option slider
-  const items = document.querySelectorAll<HTMLElement>('#slider-items .slider-item');
-  const currentLabel = document.getElementById('slider-current');
-  let current = 0;
-  let animating = false;
-
-  function goTo(index: number, direction: 'next' | 'prev') {
-    if (animating) return;
-    animating = true;
-
-    const next = (index + items.length) % items.length;
-    const exitClass = direction === 'next' ? 'is-exit-left' : 'is-exit-right';
-    const enterClass = direction === 'next' ? 'is-enter-right' : 'is-enter-left';
-
-    // Exit current
-    items[current].classList.remove('is-active');
-    items[current].classList.add(exitClass);
-
-    // Prepare next (enter from correct side, no transition yet)
-    items[next].style.transition = 'none';
-    items[next].classList.add(enterClass);
-    items[next].style.transform = direction === 'next' ? 'translateX(60px)' : 'translateX(-60px)';
-    items[next].style.opacity = '0';
-
-    requestAnimationFrame(() => {
-      requestAnimationFrame(() => {
-        items[next].style.transition = '';
-        items[next].style.transform = '';
-        items[next].style.opacity = '';
-        items[next].classList.remove(enterClass);
-        items[next].classList.add('is-active');
-
-        if (currentLabel) currentLabel.textContent = String(next + 1);
-        current = next;
-
-        setTimeout(() => {
-          items.forEach(item => item.classList.remove('is-exit-left', 'is-exit-right'));
-          animating = false;
-        }, 350);
-      });
-    });
-  }
-
-  document.getElementById('slider-prev')?.addEventListener('click', () => goTo(current - 1, 'prev'));
-  document.getElementById('slider-next')?.addEventListener('click', () => goTo(current + 1, 'next'));
-
   // Form
   const form = document.getElementById('restaurant-cta-form') as HTMLFormElement;
   const emailInput = document.getElementById('restaurant-cta-email') as HTMLInputElement;
