@@ -61,14 +61,12 @@ import PageHero from '../../components/PageHero.astro';
         </div>
         <h3>Stel je eigen menu samen</h3>
         <p class="pricing-description">Kies zelf welke opties je aan jouw restaurantprofiel toevoegt. Betaal alleen voor wat bij jou past.</p>
-        <ul>
-          <li>App-plaatsing</li>
-          <li>Restaurantprofiel in huisstijl</li>
-          <li>Kies en combineer extra opties naar wens</li>
-        </ul>
       </div>
       <div class="pricing-card pricing-card--featured reveal">
         <div class="pricing-badge">Aanbevolen</div>
+        <div class="pricing-card-image">
+          <img src={`${import.meta.env.BASE_URL}menukaart-stel-je-eigen-menu-samen.png`} alt="Chefs Choice — menukaart" />
+        </div>
         <h3>Chefs Choice</h3>
         <p class="pricing-description">Een compleet pakket — alle functies uit de menukaart zijn inbegrepen.</p>
       </div>
@@ -224,13 +222,10 @@ import PageHero from '../../components/PageHero.astro';
     margin: -2.5rem -2.5rem 1.75rem;
     border-radius: 20px 20px 0 0;
     overflow: hidden;
-    aspect-ratio: 16 / 9;
   }
 
   .pricing-card-image img {
     width: 100%;
-    height: 100%;
-    object-fit: cover;
     display: block;
   }
 
