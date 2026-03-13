@@ -481,16 +481,28 @@ import PageHero from '../../components/PageHero.astro';
     font-weight: 600;
     color: var(--white);
     opacity: 0;
-    transform: translateY(10px);
-    transition: opacity 0.35s ease, transform 0.35s ease;
+    transform: translateX(60px);
+    transition: opacity 0.3s ease, transform 0.3s ease;
     pointer-events: none;
     white-space: nowrap;
   }
 
   .slider-item.is-active {
     opacity: 1;
-    transform: translateY(0);
+    transform: translateX(0);
     pointer-events: auto;
+  }
+
+  .slider-item.is-exit-left {
+    opacity: 0;
+    transform: translateX(-60px);
+    transition: opacity 0.3s ease, transform 0.3s ease;
+  }
+
+  .slider-item.is-exit-right {
+    opacity: 0;
+    transform: translateX(60px);
+    transition: opacity 0.3s ease, transform 0.3s ease;
   }
 
   .slider-icon {
@@ -554,16 +566,47 @@ import PageHero from '../../components/PageHero.astro';
   const items = document.querySelectorAll<HTMLElement>('#slider-items .slider-item');
   const currentLabel = document.getElementById('slider-current');
   let current = 0;
+  let animating = false;
 
-  function goTo(index: number) {
+  function goTo(index: number, direction: 'next' | 'prev') {
+    if (animating) return;
+    animating = true;
+
+    const next = (index + items.length) % items.length;
+    const exitClass = direction === 'next' ? 'is-exit-left' : 'is-exit-right';
+    const enterClass = direction === 'next' ? 'is-enter-right' : 'is-enter-left';
+
+    // Exit current
     items[current].classList.remove('is-active');
-    current = (index + items.length) % items.length;
-    items[current].classList.add('is-active');
-    if (currentLabel) currentLabel.textContent = String(current + 1);
+    items[current].classList.add(exitClass);
+
+    // Prepare next (enter from correct side, no transition yet)
+    items[next].style.transition = 'none';
+    items[next].classList.add(enterClass);
+    items[next].style.transform = direction === 'next' ? 'translateX(60px)' : 'translateX(-60px)';
+    items[next].style.opacity = '0';
+
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        items[next].style.transition = '';
+        items[next].style.transform = '';
+        items[next].style.opacity = '';
+        items[next].classList.remove(enterClass);
+        items[next].classList.add('is-active');
+
+        if (currentLabel) currentLabel.textContent = String(next + 1);
+        current = next;
+
+        setTimeout(() => {
+          items.forEach(item => item.classList.remove('is-exit-left', 'is-exit-right'));
+          animating = false;
+        }, 350);
+      });
+    });
   }
 
-  document.getElementById('slider-prev')?.addEventListener('click', () => goTo(current - 1));
-  document.getElementById('slider-next')?.addEventListener('click', () => goTo(current + 1));
+  document.getElementById('slider-prev')?.addEventListener('click', () => goTo(current - 1, 'prev'));
+  document.getElementById('slider-next')?.addEventListener('click', () => goTo(current + 1, 'next'));
 
   // Form
   const form = document.getElementById('restaurant-cta-form') as HTMLFormElement;
