@@ -13,7 +13,7 @@ import Icon from '../../components/Icon.astro';
     description="Ontdek het restaurant dat perfect bij jouw smaak, stemming, budget en gezelschap past. Restaurants presenteren zich op de best mogelijke manier om jou te inspireren."
   />
 
-  <section>
+  <section class="steps-section">
     <div class="reveal">
       <div class="section-tag">Hoe het werkt</div>
       <h2 class="section-title">In drie stappen naar de perfecte <em>restaurantervaring</em></h2>
@@ -108,21 +108,47 @@ import Icon from '../../components/Icon.astro';
         De Tastory app komt binnenkort beschikbaar op iOS en Android. Meld je aan voor de
         nieuwsbrief en wees de eerste die het hoort!
       </p>
-      <a href="/#download" class="btn-primary">Aanmelden voor updates</a>
+      <form class="email-form" id="gebruiker-cta-form">
+        <input
+          type="email"
+          id="gebruiker-cta-email"
+          placeholder="Jouw e-mailadres"
+          required
+          aria-label="E-mailadres"
+        />
+        <button type="submit">Aanmelden</button>
+      </form>
+      <div class="form-feedback" id="gebruiker-cta-feedback"></div>
+      <div class="cta-note">Geen spam. Altijd opzegbaar.</div>
     </div>
   </section>
 </BaseLayout>
 
 <style>
+  .steps-section {
+    background: var(--beige);
+    padding: 6rem 3rem;
+    max-width: 100%;
+  }
+
+  .steps-section > .reveal {
+    max-width: 1400px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
   .steps-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     gap: 2rem;
     margin-top: 3rem;
+    max-width: 1400px;
+    margin-left: auto;
+    margin-right: auto;
   }
 
   .step-card {
-    background: var(--beige);
+    background: var(--white);
     border: 1px solid rgba(136, 101, 69, 0.06);
     border-radius: 20px;
     padding: 2.5rem;
@@ -220,19 +246,99 @@ import Icon from '../../components/Icon.astro';
   .cta-users {
     text-align: center;
     padding: 6rem 3rem;
-    max-width: 1400px;
+    max-width: 100%;
+    background: var(--beige);
+    position: relative;
+  }
+
+  .cta-users::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 600px;
+    height: 600px;
+    background: radial-gradient(circle, rgba(255, 142, 62, 0.06) 0%, transparent 60%);
+    pointer-events: none;
   }
 
   .cta-users-inner {
-    max-width: 600px;
+    position: relative;
+    max-width: 620px;
     margin: 0 auto;
   }
 
-  .cta-users p {
+  .cta-users-inner > p {
     font-size: 1.05rem;
     line-height: 1.7;
     color: var(--text-muted);
-    margin-bottom: 2rem;
+    margin-bottom: 2.5rem;
+  }
+
+  .email-form {
+    display: flex;
+    max-width: 520px;
+    margin: 0 auto;
+    background: var(--white);
+    border-radius: 100px;
+    border: 1px solid rgba(136, 101, 69, 0.1);
+    overflow: hidden;
+    box-shadow: 0 4px 20px rgba(136, 101, 69, 0.06);
+  }
+
+  .email-form input {
+    flex: 1;
+    padding: 1rem 1.8rem;
+    background: transparent;
+    border: none;
+    font-family: var(--sans);
+    font-size: var(--text-base);
+    color: var(--text);
+    outline: none;
+  }
+
+  .email-form input::placeholder {
+    color: var(--text-muted);
+    opacity: 0.6;
+  }
+
+  .email-form button {
+    background: var(--orange);
+    color: var(--white);
+    border: none;
+    padding: 1rem 2rem;
+    font-family: var(--sans);
+    font-size: var(--text-base);
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+    border-radius: 0 100px 100px 0;
+  }
+
+  .email-form button:hover {
+    background: var(--brown);
+  }
+
+  .form-feedback {
+    font-size: 1rem;
+    margin-top: 1rem;
+    min-height: 1.5rem;
+  }
+
+  .form-feedback--success {
+    color: #2e7d32;
+  }
+
+  .form-feedback--error {
+    color: #c62828;
+  }
+
+  .cta-note {
+    font-size: 1rem;
+    color: var(--text-muted);
+    opacity: 0.6;
+    margin-top: 1rem;
   }
 
   @media (max-width: 1024px) {
@@ -248,5 +354,62 @@ import Icon from '../../components/Icon.astro';
     .user-features-grid {
       grid-template-columns: 1fr;
     }
+    .email-form {
+      flex-direction: column;
+      border-radius: 16px;
+    }
+    .email-form button {
+      width: 100%;
+      border-radius: 0 0 16px 16px;
+    }
   }
 </style>
+
+<script>
+  const form = document.getElementById('gebruiker-cta-form') as HTMLFormElement;
+  const emailInput = document.getElementById('gebruiker-cta-email') as HTMLInputElement;
+  const feedback = document.getElementById('gebruiker-cta-feedback') as HTMLDivElement;
+  const submitBtn = form.querySelector('button') as HTMLButtonElement;
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const email = emailInput.value.trim();
+    if (!email) return;
+
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Verzenden...';
+
+    try {
+      const res = await fetch('https://formsubmit.co/ajax/Info@tastory.nl', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+        body: JSON.stringify({
+          name: 'Gast aanmelding',
+          email,
+          message: 'Nieuwe gast aangemeld via de gasten oplossingen pagina.',
+          _subject: 'Nieuwe gast aanmelding — Tastory',
+          _captcha: 'false',
+        }),
+      });
+
+      if (res.ok) {
+        feedback.textContent = 'Bedankt voor je aanmelding! We laten het je weten zodra de app beschikbaar is.';
+        feedback.className = 'form-feedback form-feedback--success';
+        emailInput.value = '';
+      } else {
+        throw new Error('Submit failed');
+      }
+    } catch {
+      feedback.textContent = 'Er ging iets mis. Probeer het later opnieuw.';
+      feedback.className = 'form-feedback form-feedback--error';
+    }
+
+    submitBtn.disabled = false;
+    submitBtn.textContent = 'Aanmelden';
+
+    setTimeout(() => {
+      feedback.textContent = '';
+      feedback.className = 'form-feedback';
+    }, 5000);
+  });
+</script>
