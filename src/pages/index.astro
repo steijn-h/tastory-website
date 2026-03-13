@@ -4,17 +4,15 @@ import Hero from '../components/Hero.astro';
 import StatsBar from '../components/StatsBar.astro';
 import ProblemSolution from '../components/ProblemSolution.astro';
 import Features from '../components/Features.astro';
-import AppFunctions from '../components/AppFunctions.astro';
 import Testimonials from '../components/Testimonials.astro';
 import Cta from '../components/Cta.astro';
-import { stats, features, appFunctions, testimonials } from '../data/home';
+import { stats, features, testimonials } from '../data/home';
 ---
 <BaseLayout title="Tastory — Find it. Taste it. Share it.">
   <Hero />
   <StatsBar stats={stats} />
   <ProblemSolution />
   <Features features={features} />
-  <AppFunctions functions={appFunctions} />
   <Testimonials testimonials={testimonials} />
   <Cta />
   <script

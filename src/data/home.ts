@@ -7,7 +7,7 @@ export const stats = [
 export const features = [
   {
     icon: 'video',
-    title: 'Videocontent',
+    title: 'Content',
     description:
       "Geen statische foto's meer. Restaurants presenteren zich via sfeervolle, kwalitatieve video's die de beleving écht overbrengen aan potentiële gasten.",
   },

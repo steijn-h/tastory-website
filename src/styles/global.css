@@ -128,7 +128,7 @@ section {
   letter-spacing: 0.2em;
   text-transform: uppercase;
   color: var(--orange);
-  margin-bottom: 1.2rem;
+  margin-bottom: 0.6rem;
   display: flex;
   align-items: center;
   gap: 0.8rem;
@@ -148,7 +148,7 @@ section {
   color: var(--text);
   font-weight: 600;
   line-height: 1.15;
-  margin-bottom: 1.4rem;
+  margin-bottom: 0.8rem;
 }
 
 .section-title em {

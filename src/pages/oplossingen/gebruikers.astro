@@ -2,6 +2,8 @@
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import PageHero from '../../components/PageHero.astro';
 import Icon from '../../components/Icon.astro';
+import AppFunctions from '../../components/AppFunctions.astro';
+import { appFunctions } from '../../data/home';
 ---
 
 <BaseLayout
@@ -100,6 +102,8 @@ import Icon from '../../components/Icon.astro';
       </div>
     </div>
   </section>
+
+  <AppFunctions functions={appFunctions} />
 
   <section class="cta-users">
     <div class="cta-users-inner reveal">
