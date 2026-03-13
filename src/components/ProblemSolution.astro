@@ -268,6 +268,7 @@ import Icon from './Icon.astro';
 
     .ps-phone {
       order: -1;
+      justify-content: center;
     }
 
     .phone-mockup {
@@ -285,27 +286,43 @@ import Icon from './Icon.astro';
 
   @media (max-width: 640px) {
     .phone-mockup {
-      width: 260px;
-      height: 555px;
-      border-radius: 42px;
+      width: 200px;
+      height: 428px;
+      border-radius: 36px;
     }
 
-    .float-card-1 { right: -45px; }
-    .float-card-2 { right: -40px; }
-    .float-card-3 { right: -42px; }
+    .float-card {
+      padding: 0.3rem 0.55rem;
+    }
 
-    .fc-label { font-size: 0.65rem; }
+    .float-card-1 { right: -80px; }
+    .float-card-2 { right: -70px; }
+    .float-card-3 { right: -75px; }
+
+    .fc-label { font-size: 0.55rem; }
   }
 
-  @media (max-width: 375px) {
+  @media (max-width: 390px) {
     .phone-mockup {
-      width: 230px;
-      height: 490px;
-      border-radius: 38px;
+      width: 190px;
+      height: 405px;
+      border-radius: 34px;
     }
 
-    .float-card-1 { right: -20px; }
-    .float-card-2 { right: -18px; }
-    .float-card-3 { right: -19px; }
+    .float-card-1 { right: -80px; }
+    .float-card-2 { right: -70px; }
+    .float-card-3 { right: -75px; }
+  }
+
+  @media (max-width: 360px) {
+    .phone-mockup {
+      width: 175px;
+      height: 375px;
+      border-radius: 32px;
+    }
+
+    .float-card-1 { right: -65px; }
+    .float-card-2 { right: -55px; }
+    .float-card-3 { right: -60px; }
   }
 </style>
