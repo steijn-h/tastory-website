@@ -20,7 +20,7 @@
       </p>
       <div class="hero-actions">
         <a href={`${import.meta.env.BASE_URL}aanmelden/restaurant`} class="btn-primary">Meld je aan als restaurant</a>
-        <a href={`${import.meta.env.BASE_URL}aanmelden/foodie`} class="btn-secondary">Meld je aan als foodie</a>
+        <a href={`${import.meta.env.BASE_URL}aanmelden/foodie`} class="btn-secondary">Meld je aan als Foodie</a>
       </div>
     </div>
   </div>
@@ -136,6 +136,12 @@
   @media (max-width: 640px) {
     .hero {
       padding: 6rem 1.5rem 3rem;
+    }
+
+    .hero-actions :global(.btn-primary),
+    .hero-actions :global(.btn-secondary) {
+      font-size: 0.875rem;
+      padding: 0.75rem 1.5rem;
     }
   }
 </style>

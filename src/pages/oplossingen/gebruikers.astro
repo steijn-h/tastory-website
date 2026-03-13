@@ -13,44 +13,6 @@ import Icon from '../../components/Icon.astro';
     description="Ontdek het restaurant dat perfect bij jouw smaak, stemming, budget en gezelschap past. Restaurants presenteren zich op de best mogelijke manier om jou te inspireren."
   />
 
-  <section class="app-intro-section">
-    <div class="app-intro-inner">
-      <div class="reveal">
-        <div class="section-tag">De app</div>
-        <h2 class="section-title">Wat doet <em>Tastory</em>?</h2>
-        <p class="app-intro-lead">
-          Tastory is een restaurant-ontdekkingsapp die je via sfeervolle video's laat zien wat je
-          kunt verwachten vóór je de deur uit gaat. Door jouw voorkeuren — smaak, stemming, budget
-          en gezelschap — te matchen met het juiste restaurant, zorgt de app voor een ervaring die
-          aansluit bij jouw verwachtingen.
-        </p>
-      </div>
-      <div class="app-intro-pillars">
-        <div class="app-pillar reveal">
-          <div class="app-pillar-icon"><Icon name="search" size={28} /></div>
-          <div>
-            <strong>Ontdekken</strong>
-            <p>Vind restaurants op basis van jouw smaak, stemming, budget en gezelschap.</p>
-          </div>
-        </div>
-        <div class="app-pillar reveal">
-          <div class="app-pillar-icon"><Icon name="film" size={28} /></div>
-          <div>
-            <strong>Beleven</strong>
-            <p>Bekijk video-profielen en weet precies wat je kunt verwachten voor je gaat.</p>
-          </div>
-        </div>
-        <div class="app-pillar reveal">
-          <div class="app-pillar-icon"><Icon name="map" size={28} /></div>
-          <div>
-            <strong>Delen</strong>
-            <p>Sla je favorieten op in een persoonlijke foodmap en deel ze met vrienden.</p>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
   <section class="steps-section">
     <div class="reveal">
       <div class="section-tag">Hoe het werkt</div>
@@ -163,72 +125,6 @@ import Icon from '../../components/Icon.astro';
 </BaseLayout>
 
 <style>
-  /* App intro */
-  .app-intro-section {
-    background: var(--white);
-    padding: 6rem 3rem;
-    max-width: 100%;
-  }
-
-  .app-intro-inner {
-    max-width: 1400px;
-    margin: 0 auto;
-  }
-
-  .app-intro-lead {
-    font-size: 1.15rem;
-    line-height: 1.8;
-    color: var(--text-muted);
-    max-width: 720px;
-    margin-top: 1.5rem;
-  }
-
-  .app-intro-pillars {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 2rem;
-    margin-top: 3rem;
-  }
-
-  .app-pillar {
-    display: flex;
-    gap: 1rem;
-    align-items: flex-start;
-  }
-
-  .app-pillar-icon {
-    flex-shrink: 0;
-    width: 52px;
-    height: 52px;
-    background: rgba(255, 142, 62, 0.1);
-    border-radius: var(--radius-md);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: var(--orange);
-  }
-
-  .app-pillar strong {
-    display: block;
-    font-family: var(--serif);
-    font-size: var(--text-lg);
-    color: var(--text);
-    margin-bottom: 0.4rem;
-  }
-
-  .app-pillar p {
-    font-size: var(--text-base);
-    line-height: 1.7;
-    color: var(--text-muted);
-    margin: 0;
-  }
-
-  @media (max-width: 1024px) {
-    .app-intro-pillars {
-      grid-template-columns: 1fr;
-    }
-  }
-
   .steps-section {
     background: var(--beige);
     padding: 6rem 3rem;
