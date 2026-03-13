@@ -20,9 +20,9 @@ import PageHero from '../../components/PageHero.astro';
     <div class="goals-grid">
       <div class="goal-card reveal">
         <div class="goal-number">01</div>
-        <h3>Meer zichtbaarheid</h3>
+        <h3>Betere zichtbaarheid</h3>
         <p>
-          Bereik gasten die actief op zoek zijn naar een restaurant zoals het jouwe. Met actuele, professionele content val je op precies op het moment dat het telt.
+          Bereik gasten die actief op zoek zijn naar een restaurant zoals de jouwe. Door een authentiek restaurantprofiel met acutele, professionele content val je op, precies op het moment dat telt.
         </p>
       </div>
       <div class="goal-card reveal">
@@ -36,14 +36,14 @@ import PageHero from '../../components/PageHero.astro';
         <div class="goal-number">03</div>
         <h3>Terugkerende gasten</h3>
         <p>
-          Gasten die precies weten wat ze kunnen verwachten en komen terug. Tastory zorgt dat jouw beleving klopt met de werkelijkheid en dat bouwt loyaliteit.
+          Gasten die precies weten wat ze kunnen verwachten en komen terug. Tastory zorgt voor loyale gasten door de verwachting van een restaurant aan te laten sluiten op realiteit.
         </p>
       </div>
       <div class="goal-card reveal">
         <div class="goal-number">04</div>
         <h3>Betrouwbare reviews</h3>
         <p>
-          Elke review op Tastory wordt gevalideerd. Zo weet jij zeker dat de feedback die je ontvangt echt is en kun je er ook daadwerkelijk iets mee.
+          Elke review op Tastory wordt gevalideerd. Zo weet jij zeker dat de feedback die je ontvangt eerlijk is en kun je er ook daadwerkelijk iets mee.
         </p>
       </div>
     </div>
@@ -56,34 +56,25 @@ import PageHero from '../../components/PageHero.astro';
     </div>
     <div class="pricing-grid">
       <div class="pricing-card reveal">
-        <h3>Chefs Keuze</h3>
-        <ul>
-          <li>Kwalitatieve foto's en video's*</li>
-          <li>Marketingplan</li>
-          <li>Extra zichtbaarheid in de app</li>
-          <li>Alles uit 3-gangen</li>
-        </ul>
-        <p class="footnote">* Kwalitatieve foto's en video worden geschoten door Tastory.</p>
-      </div>
-      <div class="pricing-card pricing-card--featured reveal">
-        <div class="pricing-badge">Populair</div>
-        <h3>3-Gangen Menu</h3>
-        <ul>
-          <li>Kwalitatieve foto's*</li>
-          <li>Reservering klik-inzichten</li>
-          <li>Alles uit Proeverij</li>
-        </ul>
-        <p class="footnote">* Kwalitatieve foto's worden geschoten door Tastory.</p>
-      </div>
-      <div class="pricing-card reveal">
-        <h3>Proeverij</h3>
+        <h3>Stel je eigen menu samen</h3>
+        <p class="pricing-description">Kies zelf welke opties je aan jouw restaurantprofiel toevoegt. Betaal alleen voor wat bij jou past.</p>
         <ul>
           <li>App-plaatsing</li>
-          <li>Coming-soon portaal toegang</li>
           <li>Volledig profielbeheer in huisstijl</li>
-          <li>Zelf content aanleveren*</li>
+          <li>Kies en combineer extra opties naar wens</li>
         </ul>
-        <p class="footnote">* Jij levert jouw unieke foto's en video's aan volgens de richtlijnen en voorwaarden van Tastory. Zo houden wij de app objectief en creëren wij een uniforme standaard.</p>
+      </div>
+      <div class="pricing-card pricing-card--featured reveal">
+        <div class="pricing-badge">Aanbevolen</div>
+        <h3>Chefs Choice</h3>
+        <p class="pricing-description">Een compleet samengesteld pakket met professionele content en alle functies uit de menukaart.</p>
+        <ul>
+          <li>Professionele foto's en video's door Tastory</li>
+          <li>Marketingplan op maat</li>
+          <li>Extra zichtbaarheid in de app</li>
+          <li>Reservering klik-inzichten</li>
+          <li>Alle functies uit de menukaart inbegrepen</li>
+        </ul>
       </div>
     </div>
   </section>
@@ -116,7 +107,7 @@ import PageHero from '../../components/PageHero.astro';
       <div class="step reveal">
         <div class="step-number">02</div>
         <h3>Content creëren</h3>
-        <p>Tastory schiet professionele foto's en video's die het karakter van jouw restaurant laten zien.</p>
+        <p>We gaan met jou in gesprek om jouw restaurant zo persoonlijk en goed mogelijk te kunnen laten zien. Daarna schiet Tastory professionele foto's en video's die het karakter van jouw restaurant laten zien.</p>
       </div>
       <div class="step reveal">
         <div class="step-number">03</div>
@@ -213,10 +204,10 @@ import PageHero from '../../components/PageHero.astro';
 
   .pricing-grid {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(2, 1fr);
     gap: 1.5rem;
     margin-top: 3rem;
-    max-width: 1400px;
+    max-width: 960px;
     margin-left: auto;
     margin-right: auto;
   }
@@ -252,6 +243,13 @@ import PageHero from '../../components/PageHero.astro';
     font-size: 1.4rem;
     color: var(--text);
     margin-bottom: 1rem;
+  }
+
+  .pricing-description {
+    font-size: var(--text-base);
+    color: var(--text-muted);
+    margin-bottom: 1.25rem;
+    line-height: 1.6;
   }
 
   .pricing-card ul {
