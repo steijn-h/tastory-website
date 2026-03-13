@@ -1,0 +1,161 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PageHero from '../../components/PageHero.astro';
+---
+
+<BaseLayout
+  title="Meld je aan als restaurant — Tastory"
+  description="Meld jouw restaurant aan bij Tastory en presenteer jezelf via kwalitatieve videocontent aan de juiste gasten."
+>
+  <PageHero
+    title="Aanmelden als <em>restaurant</em>"
+    description="Presenteer jouw restaurant via kwalitatieve videocontent en bereik gasten die écht bij jou passen. Vul je gegevens in en we nemen zo snel mogelijk contact op."
+  />
+
+  <section class="signup-section">
+    <div class="signup-wrapper reveal">
+      <form class="signup-form" id="signup-form" aria-label="Aanmeldformulier restaurant">
+        <div class="form-group">
+          <label for="name">Naam *</label>
+          <input type="text" id="name" name="name" required />
+        </div>
+        <div class="form-group">
+          <label for="company">Bedrijfsnaam *</label>
+          <input type="text" id="company" name="company" required />
+        </div>
+        <div class="form-group">
+          <label for="email">E-mailadres *</label>
+          <input type="email" id="email" name="email" required />
+        </div>
+        <div class="form-group">
+          <label for="phone">Telefoonnummer <span class="optional">(optioneel)</span></label>
+          <input type="tel" id="phone" name="phone" />
+        </div>
+        <button type="submit" class="btn-primary">Aanmelden als restaurant</button>
+        <div class="signup-feedback" id="signup-feedback" role="status"></div>
+      </form>
+    </div>
+  </section>
+</BaseLayout>
+
+<script>
+  const form = document.getElementById('signup-form') as HTMLFormElement;
+  const feedback = document.getElementById('signup-feedback') as HTMLDivElement;
+  const submitBtn = form.querySelector('button') as HTMLButtonElement;
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const data = new FormData(form);
+
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Aanmelden...';
+
+    try {
+      const res = await fetch('https://formsubmit.co/ajax/Info@tastory.nl', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+        body: JSON.stringify({
+          name: data.get('name'),
+          email: data.get('email'),
+          phone: data.get('phone') || undefined,
+          company: data.get('company'),
+          _subject: 'Nieuwe restaurantaanmelding — Tastory website',
+        }),
+      });
+
+      if (res.ok) {
+        feedback.textContent =
+          'Bedankt voor je aanmelding! We nemen zo snel mogelijk contact met je op.';
+        feedback.className = 'signup-feedback signup-feedback--success';
+        form.reset();
+      } else {
+        throw new Error('Submit failed');
+      }
+    } catch {
+      feedback.textContent = 'Er ging iets mis. Probeer het later opnieuw.';
+      feedback.className = 'signup-feedback signup-feedback--error';
+    }
+
+    submitBtn.disabled = false;
+    submitBtn.textContent = 'Aanmelden als restaurant';
+
+    setTimeout(() => {
+      feedback.textContent = '';
+      feedback.className = 'signup-feedback';
+    }, 5000);
+  });
+</script>
+
+<style>
+  .signup-section {
+    max-width: 600px;
+  }
+
+  .signup-wrapper {
+    background: var(--white);
+    border: 1px solid rgba(136, 101, 69, 0.08);
+    border-radius: var(--radius-lg);
+    padding: 3rem;
+    box-shadow: var(--shadow-md);
+  }
+
+  .signup-form {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-lg);
+  }
+
+  .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+  }
+
+  .form-group label {
+    font-size: var(--text-base);
+    font-weight: 500;
+    color: var(--text);
+  }
+
+  .optional {
+    font-weight: 400;
+    color: var(--text-muted);
+    font-size: 0.9em;
+  }
+
+  .form-group input {
+    font-family: var(--sans);
+    font-size: var(--text-base);
+    padding: 0.9rem 1.2rem;
+    border: 1px solid rgba(136, 101, 69, 0.15);
+    border-radius: var(--radius-sm);
+    background: var(--beige);
+    color: var(--text);
+    outline: none;
+    transition: border-color 0.3s;
+  }
+
+  .form-group input:focus {
+    border-color: var(--orange);
+  }
+
+  .signup-feedback {
+    font-size: var(--text-base);
+    min-height: 1.5rem;
+    transition: all 0.3s;
+  }
+
+  .signup-feedback--success {
+    color: #2e7d32;
+  }
+
+  .signup-feedback--error {
+    color: #c62828;
+  }
+
+  @media (max-width: 640px) {
+    .signup-wrapper {
+      padding: 2rem 1.5rem;
+    }
+  }
+</style>
