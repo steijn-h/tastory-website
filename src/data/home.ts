@@ -48,7 +48,7 @@ export const appFunctions = [
     icon: 'search',
     title: 'Betrouwbare reviews die ertoe doen',
     description:
-      'Elke review op Tastory wordt gevalideerd. Geen beoordelingen waar je vraagtekens bij kunt zetten — alleen eerlijke ervaringen van echte gasten die je kunt vertrouwen.',
+      'Elke review op Tastory wordt gevalideerd. Geen beoordelingen waar je vraagtekens bij kunt zetten alleen eerlijke ervaringen van echte gasten die je kunt vertrouwen.',
   },
   {
     icon: 'film',
@@ -60,23 +60,23 @@ export const appFunctions = [
     icon: 'map',
     title: 'Eerlijk ontdekken, zonder betaalde posities',
     description:
-      'Bij Tastory koop je je plek niet. Restaurants worden zichtbaar op basis van kwaliteit en beleving — zodat jij altijd het beste vindt, niet het hoogst biedende.',
+      'Bij Tastory koop je je plek niet. Restaurants worden zichtbaar op basis van kwaliteit en beleving zodat jij altijd het beste vindt.',
   },
   {
     icon: 'star',
     title: 'Jouw persoonlijke smaakprofiel',
     description:
-      'Bewaar restaurants die bij jóu passen. Geen eindeloze lijsten van anderen, maar jouw eigen culinaire wereld — gebouwd op wat jij écht lekker vindt.',
+      'Bewaar restaurants die bij jóu passen. Geen eindeloze lijsten van anderen, maar jouw eigen culinaire wereld gebouwd op wat jij écht lekker vindt.',
   },
   {
     icon: 'message-circle',
-    title: 'Deel het verhaal, niet de score',
+    title: 'Deel het verhaal en de score',
     description:
-      "Bij Tastory deel je geen cijfer — je deelt een beleving. Een sfeer, een gerecht, een moment. Dat raakt mensen meer dan welke beoordeling dan ook.",
+      "Bij Tastory deel je een cijfer en je deelt een beleving. Een sfeer,",
   },
   {
     icon: 'user',
-    title: 'Vertrouw mensen die je kent',
+    title: 'Spaar punten voor jouw favoriete restaurant',
     description:
       'Een tip van een vriend is meer waard dan duizend reviews van vreemden. Volg mensen die jouw smaak begrijpen en ontdek samen nieuwe favorieten.',
   },

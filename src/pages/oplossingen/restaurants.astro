@@ -67,29 +67,17 @@ import PageHero from '../../components/PageHero.astro';
       <div class="pricing-card pricing-card--featured reveal">
         <div class="pricing-badge">Aanbevolen</div>
         <h3>Chefs Choice</h3>
-        <p class="pricing-description">Een compleet samengesteld pakket met professionele content en alle functies uit de menukaart.</p>
+        <p class="pricing-description">Een compleet pakket — alle functies uit de menukaart zijn inbegrepen.</p>
+        <p class="pricing-menu-label">Alle menukaart-functies inbegrepen:</p>
         <ul>
+          <li>App-plaatsing</li>
+          <li>Volledig profielbeheer in huisstijl</li>
           <li>Professionele foto's en video's door Tastory</li>
           <li>Marketingplan op maat</li>
           <li>Extra zichtbaarheid in de app</li>
           <li>Reservering klik-inzichten</li>
-          <li>Alle functies uit de menukaart inbegrepen</li>
         </ul>
       </div>
-    </div>
-  </section>
-
-  <section class="content-section">
-    <div class="reveal">
-      <div class="section-tag">Professionele content</div>
-      <h2 class="section-title">
-        Short-form video's die jouw restaurant <em>tot leven brengen</em>
-      </h2>
-    </div>
-    <div class="content-info reveal">
-      <p>
-        Tastory heeft als doel om de identiteit van jouw restaurant vast te leggen in professionele short-form content video's van +/- 45 seconden. Deze video's presenteren jouw restaurant op een authentieke en aantrekkelijke manier.
-      </p>
     </div>
   </section>
 
@@ -252,6 +240,15 @@ import PageHero from '../../components/PageHero.astro';
     line-height: 1.6;
   }
 
+  .pricing-menu-label {
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--orange);
+    margin-bottom: 0.75rem;
+  }
+
   .pricing-card ul {
     list-style: none;
     display: flex;
@@ -269,28 +266,6 @@ import PageHero from '../../components/PageHero.astro';
     color: var(--text-muted);
     margin-top: 1rem;
     line-height: 1.4;
-  }
-
-  .content-section {
-    background: var(--beige);
-    max-width: 100%;
-  }
-
-  .content-section > .reveal {
-    max-width: 1400px;
-    margin-left: auto;
-    margin-right: auto;
-  }
-
-  .content-info {
-    max-width: 700px;
-    margin: 2rem auto 0;
-  }
-
-  .content-info p {
-    font-size: 1.05rem;
-    line-height: 1.8;
-    color: var(--text-muted);
   }
 
   /* How it works */
