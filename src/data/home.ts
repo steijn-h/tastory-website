@@ -78,7 +78,7 @@ export const appFunctions = [
     icon: 'user',
     title: 'Spaar punten voor jouw favoriete restaurant',
     description:
-      'Een tip van een vriend is meer waard dan duizend reviews van vreemden. Volg mensen die jouw smaak begrijpen en ontdek samen nieuwe favorieten.',
+      'Spaar punten voor jouw favoriete restaurant. Lever ze in voor leuke beloningen.',
   },
 ];
 
