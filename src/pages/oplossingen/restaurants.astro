@@ -58,17 +58,34 @@ import PageHero from '../../components/PageHero.astro';
       <div class="pricing-card reveal">
         <div class="card-ticker" aria-hidden="true">
           <div class="card-ticker-track">
-            {[...Array(4)].map(() => (
-              <ul class="card-ticker-list">
-                <li><span class="card-ticker-dot">✦</span>Gepersonaliseerd profiel</li>
-                <li><span class="card-ticker-dot">✦</span>Professionele foto's</li>
-                <li><span class="card-ticker-dot">✦</span>Professionele video</li>
-                <li><span class="card-ticker-dot">✦</span>Reserveringsbevestiging</li>
-                <li><span class="card-ticker-dot">✦</span>Webpagina op Google</li>
-                <li><span class="card-ticker-dot">✦</span>Uniek loyaliteitsprogramma</li>
-                <li><span class="card-ticker-dot">✦</span>Inzicht in lokale populariteit</li>
-              </ul>
-            ))}
+            <span class="card-ticker-item">Gepersonaliseerd profiel</span>
+            <span class="card-ticker-sep">·</span>
+            <span class="card-ticker-item">Professionele foto's</span>
+            <span class="card-ticker-sep">·</span>
+            <span class="card-ticker-item">Professionele video</span>
+            <span class="card-ticker-sep">·</span>
+            <span class="card-ticker-item">Reserveringsbevestiging</span>
+            <span class="card-ticker-sep">·</span>
+            <span class="card-ticker-item">Webpagina op Google</span>
+            <span class="card-ticker-sep">·</span>
+            <span class="card-ticker-item">Uniek loyaliteitsprogramma</span>
+            <span class="card-ticker-sep">·</span>
+            <span class="card-ticker-item">Inzicht in lokale populariteit</span>
+            <span class="card-ticker-sep">·</span>
+            <span class="card-ticker-item">Gepersonaliseerd profiel</span>
+            <span class="card-ticker-sep">·</span>
+            <span class="card-ticker-item">Professionele foto's</span>
+            <span class="card-ticker-sep">·</span>
+            <span class="card-ticker-item">Professionele video</span>
+            <span class="card-ticker-sep">·</span>
+            <span class="card-ticker-item">Reserveringsbevestiging</span>
+            <span class="card-ticker-sep">·</span>
+            <span class="card-ticker-item">Webpagina op Google</span>
+            <span class="card-ticker-sep">·</span>
+            <span class="card-ticker-item">Uniek loyaliteitsprogramma</span>
+            <span class="card-ticker-sep">·</span>
+            <span class="card-ticker-item">Inzicht in lokale populariteit</span>
+            <span class="card-ticker-sep">·</span>
           </div>
         </div>
         <h3>Stel je eigen menu samen</h3>
@@ -442,42 +459,38 @@ import PageHero from '../../components/PageHero.astro';
     background: var(--brown);
     border-radius: 16px 16px 0 0;
     margin: -2.5rem -2.5rem 1.75rem;
-    padding: 1.6rem 0;
+    padding: 2.2rem 0;
     white-space: nowrap;
   }
 
   .card-ticker-track {
-    display: inline-flex;
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: center;
     animation: card-ticker-scroll 30s linear infinite;
+    width: max-content;
   }
 
-  .card-ticker-list {
-    display: inline-flex;
-    align-items: center;
-    list-style: none;
-    gap: 0;
-  }
-
-  .card-ticker-list li {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
+  .card-ticker-item {
+    display: inline-block;
     font-family: var(--sans);
-    font-size: 0.95rem;
-    font-weight: 500;
+    font-size: 1.4rem;
+    font-weight: 600;
     color: var(--white);
-    padding: 0 2rem;
+    padding: 0 1.5rem;
+    white-space: nowrap;
   }
 
-  .card-ticker-dot {
+  .card-ticker-sep {
+    display: inline-block;
     color: var(--orange);
-    font-size: 0.5rem;
-    flex-shrink: 0;
+    font-size: 1.2rem;
+    opacity: 0.6;
   }
 
   @keyframes card-ticker-scroll {
     from { transform: translateX(0); }
-    to { transform: translateX(-25%); }
+    to { transform: translateX(-50%); }
   }
 
   @media (max-width: 1024px) {
