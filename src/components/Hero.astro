@@ -19,8 +19,8 @@
         ontdekken die écht bij hen passen.
       </p>
       <div class="hero-actions">
-        <a href={`${import.meta.env.BASE_URL}/aanmelden/restaurant`} class="btn-primary">Meld je aan als restaurant</a>
-        <a href={`${import.meta.env.BASE_URL}/aanmelden/foodie`} class="btn-secondary">Meld je aan als foodie</a>
+        <a href={`${import.meta.env.BASE_URL}aanmelden/restaurant`} class="btn-primary">Meld je aan als restaurant</a>
+        <a href={`${import.meta.env.BASE_URL}aanmelden/foodie`} class="btn-secondary">Meld je aan als foodie</a>
       </div>
     </div>
   </div>
@@ -28,6 +28,13 @@
 <script>
   const video = document.querySelector('.hero-video') as HTMLVideoElement;
   if (video) video.playbackRate = 0.8;
+
+  // Restart video when page is restored from bfcache (back/forward navigation)
+  window.addEventListener('pageshow', (e) => {
+    if (e.persisted && video) {
+      video.play();
+    }
+  });
 </script>
 <style>
   .hero {
