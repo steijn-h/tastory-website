@@ -1,6 +1,7 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import PageHero from '../../components/PageHero.astro';
+import Icon from '../../components/Icon.astro';
 ---
 
 <BaseLayout
@@ -53,14 +54,51 @@ import PageHero from '../../components/PageHero.astro';
     <div class="reveal">
       <div class="section-tag">Gerechten</div>
       <h2 class="section-title">Kies de gerechten die bij jou <em>passen</em></h2>
+      <p class="pricing-intro">Stel je eigen menu samen en betaal alleen voor wat bij jouw restaurant past. Hieronder zie je een selectie van de beschikbare opties.</p>
     </div>
-    <div class="pricing-grid">
-      <div class="pricing-card reveal">
-        <h3>Stel je eigen menu samen</h3>
-        <p class="pricing-description">Kies zelf welke gerechten je aan jouw restaurantprofiel toevoegt. Betaal alleen voor wat bij jou past.</p>
-        <p class="pricing-note">Dit zijn een aantal van de beschikbare opties. Na contact bespreken we alle mogelijkheden die bij jouw restaurant passen.</p>
+    <div class="dishes-grid">
+      <div class="dish-card reveal">
+        <div class="dish-icon"><Icon name="user" size={20} /></div>
+        <h3>Gepersonaliseerd profiel</h3>
+        <p>Een authentiek restaurantprofiel dat jouw concept, sfeer en keuken laat zien op de manier die bij jou past.</p>
+      </div>
+      <div class="dish-card reveal">
+        <div class="dish-icon"><Icon name="video" size={20} /></div>
+        <h3>Professionele video</h3>
+        <p>Kwalitatieve video die de sfeer en het karakter van jouw restaurant tot leven brengt voor potentiële gasten.</p>
+      </div>
+      <div class="dish-card reveal">
+        <div class="dish-icon"><Icon name="camera" size={20} /></div>
+        <h3>Professionele foto's</h3>
+        <p>Stijlvolle foto's van jouw gerechten, interieur en team die bezoekers direct het gevoel geven van jouw restaurant.</p>
+      </div>
+      <div class="dish-card reveal">
+        <div class="dish-icon"><Icon name="calendar" size={20} /></div>
+        <h3>Reserveringsbevestiging</h3>
+        <p>Automatische bevestiging zodat gasten met een goed gevoel de deur uitlopen en weten wat ze kunnen verwachten.</p>
+      </div>
+      <div class="dish-card reveal">
+        <div class="dish-icon"><Icon name="star" size={20} /></div>
+        <h3>Loyaliteitsprogramma</h3>
+        <p>Een uniek programma dat vaste gasten beloont en terugkeer stimuleert op een manier die bij jouw formule past.</p>
+      </div>
+      <div class="dish-card reveal">
+        <div class="dish-icon"><Icon name="globe" size={20} /></div>
+        <h3>Webpagina op Google</h3>
+        <p>Vergroot je vindbaarheid met een eigen webpagina die hoog scoort in Google en nieuwe gasten naar jou toe trekt.</p>
+      </div>
+      <div class="dish-card reveal">
+        <div class="dish-icon"><Icon name="bar-chart" size={20} /></div>
+        <h3>Inzicht in populariteit</h3>
+        <p>Inzicht in hoe jouw restaurant presteert in de buurt, zodat je beter kunt inspelen op de wensen van jouw doelgroep.</p>
+      </div>
+      <div class="dish-card reveal">
+        <div class="dish-icon"><Icon name="link" size={20} /></div>
+        <h3>Links naar website & socials</h3>
+        <p>Directe links vanuit jouw Tastory-profiel naar jouw eigen website en sociale media kanalen voor maximale zichtbaarheid.</p>
       </div>
     </div>
+    <p class="pricing-footer reveal">Dit is een selectie van de beschikbare opties. Na contact bespreken we alle mogelijkheden die bij jouw restaurant passen.</p>
   </section>
 
   <div class="card-ticker" aria-hidden="true">
@@ -200,7 +238,7 @@ import PageHero from '../../components/PageHero.astro';
     color: var(--text-muted);
   }
 
-  /* Pricing */
+  /* Pricing / Gerechten */
   .pricing-section {
     background: var(--beige);
     padding: 6rem 3rem;
@@ -208,106 +246,86 @@ import PageHero from '../../components/PageHero.astro';
   }
 
   .pricing-section > .reveal {
+    max-width: 860px;
+    margin-left: auto;
+    margin-right: auto;
+    text-align: center;
+  }
+
+  .pricing-intro {
+    font-size: 1.05rem;
+    color: var(--text-muted);
+    line-height: 1.7;
+    margin-top: 1rem;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .dishes-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1.25rem;
+    margin-top: 3.5rem;
     max-width: 1400px;
     margin-left: auto;
     margin-right: auto;
   }
 
-  .pricing-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 1.5rem;
-    margin-top: 3rem;
-    max-width: 960px;
-    margin-left: auto;
-    margin-right: auto;
-  }
-
-  .pricing-card {
+  .dish-card {
     background: var(--white);
     border: 1px solid rgba(136, 101, 69, 0.08);
-    border-radius: 20px;
-    padding: 2.5rem;
-    position: relative;
+    border-radius: var(--radius-lg);
+    padding: 1.75rem 1.5rem;
+    transition:
+      transform 0.25s ease,
+      box-shadow 0.25s ease,
+      border-color 0.25s ease;
   }
 
-  .pricing-card--featured {
-    border-color: var(--orange);
-    box-shadow: 0 10px 40px rgba(255, 142, 62, 0.12);
+  .dish-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 40px rgba(136, 101, 69, 0.1);
+    border-color: rgba(255, 142, 62, 0.2);
   }
 
-  .pricing-badge {
-    position: absolute;
-    top: -12px;
-    left: 50%;
-    transform: translateX(-50%);
-    background: var(--orange);
-    color: var(--white);
-    padding: 0.3rem 1.2rem;
-    border-radius: 100px;
-    font-size: var(--text-base);
-    font-weight: 600;
-  }
-
-  .pricing-card-image {
-    margin: -2.5rem -2.5rem 1.75rem;
-    border-radius: 20px 20px 0 0;
-    overflow: hidden;
-  }
-
-  .pricing-card-image img {
-    width: 100%;
-    display: block;
-  }
-
-  .pricing-card h3 {
-    font-family: var(--serif);
-    font-size: 1.4rem;
-    color: var(--text);
+  .dish-icon {
+    width: 42px;
+    height: 42px;
+    background: rgba(255, 142, 62, 0.1);
+    border-radius: var(--radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--orange);
     margin-bottom: 1rem;
   }
 
-  .pricing-description {
-    font-size: var(--text-base);
-    color: var(--text-muted);
-    margin-bottom: 0.75rem;
-    line-height: 1.6;
-  }
-
-  .pricing-note {
-    font-size: 0.85rem;
-    color: var(--text-muted);
-    opacity: 0.7;
-    line-height: 1.5;
-    font-style: italic;
-  }
-
-  .pricing-menu-label {
-    font-size: 0.8rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-    color: var(--orange);
-    margin-bottom: 0.75rem;
-  }
-
-  .pricing-card ul {
-    list-style: none;
-    display: flex;
-    flex-direction: column;
-    gap: 0.6rem;
-  }
-
-  .pricing-card li {
-    font-size: var(--text-base);
+  .dish-card h3 {
+    font-family: var(--serif);
+    font-size: 1.05rem;
     color: var(--text);
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    line-height: 1.35;
   }
 
-  .footnote {
-    font-size: 0.8rem;
+  .dish-card p {
+    font-size: 0.9rem;
     color: var(--text-muted);
-    margin-top: 1rem;
-    line-height: 1.4;
+    line-height: 1.65;
+  }
+
+  .pricing-footer {
+    text-align: center;
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    font-style: italic;
+    margin-top: 2.5rem;
+    max-width: 560px;
+    margin-left: auto;
+    margin-right: auto;
+    opacity: 0.75;
   }
 
   /* How it works */
@@ -501,11 +519,14 @@ import PageHero from '../../components/PageHero.astro';
     to { transform: translateX(-50%); }
   }
 
+  @media (max-width: 1200px) {
+    .dishes-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
   @media (max-width: 1024px) {
     .goals-grid {
-      grid-template-columns: 1fr;
-    }
-    .pricing-grid {
       grid-template-columns: 1fr;
     }
     .steps-grid {
@@ -516,6 +537,12 @@ import PageHero from '../../components/PageHero.astro';
   @media (max-width: 640px) {
     .how-it-works {
       padding: 4rem 1.5rem;
+    }
+    .pricing-section {
+      padding: 4rem 1.5rem;
+    }
+    .dishes-grid {
+      grid-template-columns: 1fr;
     }
   }
 
