@@ -1,0 +1,280 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHero from '../components/PageHero.astro';
+---
+
+<BaseLayout
+  title="Download de app — Tastory"
+  description="Tastory komt in 2026! Meld je nu aan als restaurant of als Foodie en wees er als eerste bij."
+>
+  <PageHero
+    title="De app komt in <em>2026</em>"
+    description="Tastory is bijna klaar om gelanceerd te worden. Meld je nu aan en wees er als eerste bij."
+  />
+
+  <section class="signup-section">
+    <div class="signup-grid">
+
+      <div class="signup-card reveal">
+        <div class="card-tag">Voor restaurants</div>
+        <h2>Aanmelden als <em>Restaurant</em></h2>
+        <p>
+          Presenteer jouw restaurant via authentieke videocontent en bereik gasten die écht bij jou passen.
+          Meld je nu aan en wij nemen contact met je op zodra we live gaan.
+        </p>
+        <form class="signup-form" id="restaurant-form">
+          <input
+            type="text"
+            id="restaurant-name"
+            placeholder="Naam restaurant"
+            required
+            aria-label="Naam restaurant"
+          />
+          <input
+            type="email"
+            id="restaurant-email"
+            placeholder="E-mailadres"
+            required
+            aria-label="E-mailadres"
+          />
+          <button type="submit">Aanmelden als restaurant</button>
+        </form>
+        <div class="form-feedback" id="restaurant-feedback"></div>
+        <div class="card-note">Geen spam. We nemen contact met je op bij de lancering.</div>
+      </div>
+
+      <div class="signup-card reveal">
+        <div class="card-tag">Voor Foodies</div>
+        <h2>Aanmelden als <em>Foodie</em></h2>
+        <p>
+          Ontdek restaurants die écht bij jou passen op basis van sfeer, keuken en stijl.
+          Meld je aan en ontvang een melding zodra de app beschikbaar is.
+        </p>
+        <form class="signup-form" id="foodie-form">
+          <input
+            type="text"
+            id="foodie-name"
+            placeholder="Jouw naam"
+            required
+            aria-label="Jouw naam"
+          />
+          <input
+            type="email"
+            id="foodie-email"
+            placeholder="E-mailadres"
+            required
+            aria-label="E-mailadres"
+          />
+          <button type="submit">Aanmelden als Foodie</button>
+        </form>
+        <div class="form-feedback" id="foodie-feedback"></div>
+        <div class="card-note">Geen spam. Altijd opzegbaar. Binnenkort op iOS &amp; Android.</div>
+      </div>
+
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .signup-section {
+    padding: 5rem 3rem 7rem;
+    max-width: 100%;
+  }
+
+  .signup-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 2rem;
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+
+  .signup-card {
+    background: var(--white);
+    border: 1px solid rgba(136, 101, 69, 0.1);
+    border-radius: var(--radius-lg);
+    padding: 3rem;
+    box-shadow: var(--shadow-md);
+  }
+
+  .card-tag {
+    display: inline-block;
+    font-size: var(--text-xs);
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--orange);
+    background: rgba(255, 142, 62, 0.1);
+    padding: 0.35rem 0.9rem;
+    border-radius: 100px;
+    margin-bottom: 1.25rem;
+  }
+
+  .signup-card h2 {
+    font-family: var(--serif);
+    font-size: clamp(1.6rem, 2.5vw, 2.2rem);
+    color: var(--text);
+    font-weight: 600;
+    line-height: 1.2;
+    margin-bottom: 1rem;
+  }
+
+  .signup-card h2 em {
+    color: var(--orange);
+    font-style: normal;
+  }
+
+  .signup-card > p {
+    font-size: 1rem;
+    color: var(--text-muted);
+    line-height: 1.75;
+    margin-bottom: 2rem;
+  }
+
+  .signup-form {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .signup-form input {
+    padding: 0.9rem 1.2rem;
+    border: 1px solid rgba(136, 101, 69, 0.2);
+    border-radius: var(--radius-md);
+    background: var(--beige);
+    color: var(--text);
+    font-family: var(--sans);
+    font-size: 1rem;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  .signup-form input:focus {
+    border-color: var(--orange);
+  }
+
+  .signup-form input::placeholder {
+    color: var(--text-muted);
+    opacity: 0.7;
+  }
+
+  .signup-form button {
+    background: var(--orange);
+    color: var(--white);
+    border: none;
+    padding: 1rem 1.5rem;
+    border-radius: var(--radius-md);
+    font-family: var(--sans);
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.3s, transform 0.2s, box-shadow 0.3s;
+    margin-top: 0.25rem;
+  }
+
+  .signup-form button:hover {
+    background: var(--brown);
+    transform: translateY(-1px);
+    box-shadow: 0 8px 28px rgba(255, 142, 62, 0.3);
+  }
+
+  .form-feedback {
+    font-size: 0.95rem;
+    margin-top: 0.75rem;
+    min-height: 1.4rem;
+  }
+
+  .form-feedback--success {
+    color: #2e7d32;
+  }
+
+  .form-feedback--error {
+    color: #c62828;
+  }
+
+  .card-note {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    opacity: 0.6;
+    margin-top: 0.75rem;
+  }
+
+  @media (max-width: 768px) {
+    .signup-section {
+      padding: 4rem 1.5rem 5rem;
+    }
+
+    .signup-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .signup-card {
+      padding: 2rem;
+    }
+  }
+</style>
+
+<script>
+  async function submitForm(
+    formId: string,
+    nameInputId: string,
+    emailInputId: string,
+    feedbackId: string,
+    type: string,
+  ) {
+    const form = document.getElementById(formId) as HTMLFormElement;
+    const nameInput = document.getElementById(nameInputId) as HTMLInputElement;
+    const emailInput = document.getElementById(emailInputId) as HTMLInputElement;
+    const feedback = document.getElementById(feedbackId) as HTMLDivElement;
+    const submitBtn = form.querySelector('button') as HTMLButtonElement;
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const name = nameInput.value.trim();
+      const email = emailInput.value.trim();
+      if (!name || !email) return;
+
+      submitBtn.disabled = true;
+      const originalText = submitBtn.textContent ?? 'Aanmelden';
+      submitBtn.textContent = 'Verzenden...';
+
+      try {
+        const res = await fetch('https://formsubmit.co/ajax/Info@tastory.nl', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+          body: JSON.stringify({
+            name,
+            email,
+            message: `Nieuwe aanmelding via de download pagina als ${type}.`,
+            _subject: `Nieuwe aanmelding als ${type} — Tastory`,
+            _captcha: 'false',
+            _template: 'table',
+          }),
+        });
+
+        if (res.ok) {
+          feedback.textContent = 'Bedankt voor je aanmelding! We nemen contact met je op bij de lancering.';
+          feedback.className = 'form-feedback form-feedback--success';
+          nameInput.value = '';
+          emailInput.value = '';
+        } else {
+          throw new Error('Submit failed');
+        }
+      } catch {
+        feedback.textContent = 'Er ging iets mis. Probeer het later opnieuw.';
+        feedback.className = 'form-feedback form-feedback--error';
+      }
+
+      submitBtn.disabled = false;
+      submitBtn.textContent = originalText;
+
+      setTimeout(() => {
+        feedback.textContent = '';
+        feedback.className = 'form-feedback';
+      }, 6000);
+    });
+  }
+
+  submitForm('restaurant-form', 'restaurant-name', 'restaurant-email', 'restaurant-feedback', 'Restaurant');
+  submitForm('foodie-form', 'foodie-name', 'foodie-email', 'foodie-feedback', 'Foodie');
+</script>
