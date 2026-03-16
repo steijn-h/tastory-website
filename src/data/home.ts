@@ -27,7 +27,7 @@ export const features = [
     icon: 'repeat',
     title: 'Terugkerende gasten',
     description:
-      'Gasten komen niet alleen langs, maar ze komen ook terug. Tastory helpt restaurants met zichtbaarheid, imago en het vergroten van een loyale gastenkring.',
+      'Gasten komen niet alleen langs, maar ze komen ook terug. Tastory helpt restaurants met zichtbaarheid, imago en het vergroten van een loyale gastenkring. Jouw doelgroep is al gebruiker.',
   },
   {
     icon: 'share',
@@ -37,9 +37,9 @@ export const features = [
   },
   {
     icon: 'tag',
-    title: 'Doelgroep',
+    title: 'Restaurantverhaal',
     description:
-      'Gun jouw verhaal een podium. Jouw doelgroep is al gebruiker.',
+      'Vertel jouw restaurantverhaal om gasten te inspireren.',
   },
 ];
 
