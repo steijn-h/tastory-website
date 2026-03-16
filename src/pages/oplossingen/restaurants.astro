@@ -56,91 +56,66 @@ import Icon from '../../components/Icon.astro';
       <h2 class="section-title">Kies de gerechten die bij jou <em>passen</em></h2>
       <p class="pricing-intro">Stel je eigen menu samen en betaal alleen voor wat bij jouw restaurant past. Hieronder zie je een selectie van de beschikbare opties.</p>
     </div>
-    <div class="dishes-grid">
-      <div class="dish-card reveal">
+    <div class="dishes-list">
+      <div class="dish-row reveal">
         <div class="dish-icon"><Icon name="user" size={20} /></div>
-        <h3>Gepersonaliseerd profiel</h3>
-        <p>Een authentiek restaurantprofiel dat jouw concept, sfeer en keuken laat zien op de manier die bij jou past.</p>
+        <div class="dish-content">
+          <h3>Gepersonaliseerd profiel</h3>
+          <p>Een authentiek restaurantprofiel dat jouw concept, sfeer en keuken laat zien op de manier die bij jou past.</p>
+        </div>
       </div>
-      <div class="dish-card reveal">
+      <div class="dish-row reveal">
         <div class="dish-icon"><Icon name="video" size={20} /></div>
-        <h3>Professionele video</h3>
-        <p>Kwalitatieve video die de sfeer en het karakter van jouw restaurant tot leven brengt voor potentiële gasten.</p>
+        <div class="dish-content">
+          <h3>Professionele video</h3>
+          <p>Kwalitatieve video die de sfeer en het karakter van jouw restaurant tot leven brengt voor potentiële gasten.</p>
+        </div>
       </div>
-      <div class="dish-card reveal">
+      <div class="dish-row reveal">
         <div class="dish-icon"><Icon name="camera" size={20} /></div>
-        <h3>Professionele foto's</h3>
-        <p>Stijlvolle foto's van jouw gerechten, interieur en team die bezoekers direct het gevoel geven van jouw restaurant.</p>
+        <div class="dish-content">
+          <h3>Professionele foto's</h3>
+          <p>Stijlvolle foto's van jouw gerechten, interieur en team die bezoekers direct het gevoel geven van jouw restaurant.</p>
+        </div>
       </div>
-      <div class="dish-card reveal">
+      <div class="dish-row reveal">
         <div class="dish-icon"><Icon name="calendar" size={20} /></div>
-        <h3>Reserveringsbevestiging</h3>
-        <p>Automatische bevestiging zodat gasten met een goed gevoel de deur uitlopen en weten wat ze kunnen verwachten.</p>
+        <div class="dish-content">
+          <h3>Reserveringsbevestiging</h3>
+          <p>Automatische bevestiging zodat gasten met een goed gevoel de deur uitlopen en weten wat ze kunnen verwachten.</p>
+        </div>
       </div>
-      <div class="dish-card reveal">
+      <div class="dish-row reveal">
         <div class="dish-icon"><Icon name="star" size={20} /></div>
-        <h3>Loyaliteitsprogramma</h3>
-        <p>Een uniek programma dat vaste gasten beloont en terugkeer stimuleert op een manier die bij jouw formule past.</p>
+        <div class="dish-content">
+          <h3>Loyaliteitsprogramma</h3>
+          <p>Een uniek programma dat vaste gasten beloont en terugkeer stimuleert op een manier die bij jouw formule past.</p>
+        </div>
       </div>
-      <div class="dish-card reveal">
+      <div class="dish-row reveal">
         <div class="dish-icon"><Icon name="globe" size={20} /></div>
-        <h3>Webpagina op Google</h3>
-        <p>Vergroot je vindbaarheid met een eigen webpagina die hoog scoort in Google en nieuwe gasten naar jou toe trekt.</p>
+        <div class="dish-content">
+          <h3>Webpagina op Google</h3>
+          <p>Vergroot je vindbaarheid met een eigen webpagina die hoog scoort in Google en nieuwe gasten naar jou toe trekt.</p>
+        </div>
       </div>
-      <div class="dish-card reveal">
+      <div class="dish-row reveal">
         <div class="dish-icon"><Icon name="bar-chart" size={20} /></div>
-        <h3>Inzicht in populariteit</h3>
-        <p>Inzicht in hoe jouw restaurant presteert in de buurt, zodat je beter kunt inspelen op de wensen van jouw doelgroep.</p>
+        <div class="dish-content">
+          <h3>Inzicht in populariteit</h3>
+          <p>Inzicht in hoe jouw restaurant presteert in de buurt, zodat je beter kunt inspelen op de wensen van jouw doelgroep.</p>
+        </div>
       </div>
-      <div class="dish-card reveal">
+      <div class="dish-row reveal">
         <div class="dish-icon"><Icon name="link" size={20} /></div>
-        <h3>Links naar website & socials</h3>
-        <p>Directe links vanuit jouw Tastory-profiel naar jouw eigen website en sociale media kanalen voor maximale zichtbaarheid.</p>
+        <div class="dish-content">
+          <h3>Links naar website & socials</h3>
+          <p>Directe links vanuit jouw Tastory-profiel naar jouw eigen website en sociale media kanalen voor maximale zichtbaarheid.</p>
+        </div>
       </div>
     </div>
     <p class="pricing-footer reveal">Dit is een selectie van de beschikbare opties. Na contact bespreken we alle mogelijkheden die bij jouw restaurant passen.</p>
   </section>
-
-  <div class="card-ticker" aria-hidden="true">
-    <div class="card-ticker-track">
-      <span class="card-ticker-item">Gepersonaliseerd profiel</span>
-      <span class="card-ticker-sep">·</span>
-      <span class="card-ticker-item">Professionele foto's</span>
-      <span class="card-ticker-sep">·</span>
-      <span class="card-ticker-item">Professionele video</span>
-      <span class="card-ticker-sep">·</span>
-      <span class="card-ticker-item">Reserveringsbevestiging</span>
-      <span class="card-ticker-sep">·</span>
-      <span class="card-ticker-item">Webpagina op Google</span>
-      <span class="card-ticker-sep">·</span>
-      <span class="card-ticker-item">Uniek loyaliteitsprogramma</span>
-      <span class="card-ticker-sep">·</span>
-      <span class="card-ticker-item">Inzicht in lokale populariteit</span>
-      <span class="card-ticker-sep">·</span>
-      <span class="card-ticker-item">Link naar website</span>
-      <span class="card-ticker-sep">·</span>
-      <span class="card-ticker-item">Link naar socials</span>
-      <span class="card-ticker-sep">·</span>
-      <span class="card-ticker-item">Gepersonaliseerd profiel</span>
-      <span class="card-ticker-sep">·</span>
-      <span class="card-ticker-item">Professionele foto's</span>
-      <span class="card-ticker-sep">·</span>
-      <span class="card-ticker-item">Professionele video</span>
-      <span class="card-ticker-sep">·</span>
-      <span class="card-ticker-item">Reserveringsbevestiging</span>
-      <span class="card-ticker-sep">·</span>
-      <span class="card-ticker-item">Webpagina op Google</span>
-      <span class="card-ticker-sep">·</span>
-      <span class="card-ticker-item">Uniek loyaliteitsprogramma</span>
-      <span class="card-ticker-sep">·</span>
-      <span class="card-ticker-item">Inzicht in lokale populariteit</span>
-      <span class="card-ticker-sep">·</span>
-      <span class="card-ticker-item">Link naar website</span>
-      <span class="card-ticker-sep">·</span>
-      <span class="card-ticker-item">Link naar socials</span>
-      <span class="card-ticker-sep">·</span>
-    </div>
-  </div>
 
   <section class="how-it-works">
     <div class="reveal">
@@ -262,56 +237,64 @@ import Icon from '../../components/Icon.astro';
     margin-right: auto;
   }
 
-  .dishes-grid {
+  .dishes-list {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 1.25rem;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0;
     margin-top: 3.5rem;
-    max-width: 1400px;
+    max-width: 1000px;
     margin-left: auto;
     margin-right: auto;
-  }
-
-  .dish-card {
-    background: var(--white);
-    border: 1px solid rgba(136, 101, 69, 0.08);
+    border: 1px solid rgba(136, 101, 69, 0.1);
     border-radius: var(--radius-lg);
-    padding: 1.75rem 1.5rem;
-    transition:
-      transform 0.25s ease,
-      box-shadow 0.25s ease,
-      border-color 0.25s ease;
+    overflow: hidden;
   }
 
-  .dish-card:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 12px 40px rgba(136, 101, 69, 0.1);
-    border-color: rgba(255, 142, 62, 0.2);
+  .dish-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 1.25rem;
+    padding: 1.5rem 2rem;
+    border-bottom: 1px solid rgba(136, 101, 69, 0.08);
+    transition: background 0.2s ease;
+  }
+
+  .dish-row:nth-child(odd) {
+    border-right: 1px solid rgba(136, 101, 69, 0.08);
+  }
+
+  .dish-row:nth-last-child(-n+2) {
+    border-bottom: none;
+  }
+
+  .dish-row:hover {
+    background: rgba(255, 255, 255, 0.7);
   }
 
   .dish-icon {
-    width: 42px;
-    height: 42px;
+    flex-shrink: 0;
+    width: 38px;
+    height: 38px;
     background: rgba(255, 142, 62, 0.1);
     border-radius: var(--radius-md);
     display: flex;
     align-items: center;
     justify-content: center;
     color: var(--orange);
-    margin-bottom: 1rem;
+    margin-top: 0.1rem;
   }
 
-  .dish-card h3 {
+  .dish-content h3 {
     font-family: var(--serif);
-    font-size: 1.05rem;
+    font-size: 1rem;
     color: var(--text);
     font-weight: 600;
-    margin-bottom: 0.5rem;
+    margin-bottom: 0.3rem;
     line-height: 1.35;
   }
 
-  .dish-card p {
-    font-size: 0.9rem;
+  .dish-content p {
+    font-size: 0.875rem;
     color: var(--text-muted);
     line-height: 1.65;
   }
@@ -480,51 +463,6 @@ import Icon from '../../components/Icon.astro';
     margin-top: 1rem;
   }
 
-  /* Card ticker */
-  .card-ticker {
-    overflow: hidden;
-    background: var(--brown);
-    padding: 2.2rem 0;
-    white-space: nowrap;
-    width: 100%;
-  }
-
-  .card-ticker-track {
-    display: flex;
-    flex-wrap: nowrap;
-    align-items: center;
-    animation: card-ticker-scroll 30s linear infinite;
-    width: max-content;
-  }
-
-  .card-ticker-item {
-    display: inline-block;
-    font-family: var(--sans);
-    font-size: 1.4rem;
-    font-weight: 600;
-    color: var(--white);
-    padding: 0 1.5rem;
-    white-space: nowrap;
-  }
-
-  .card-ticker-sep {
-    display: inline-block;
-    color: var(--orange);
-    font-size: 1.2rem;
-    opacity: 0.6;
-  }
-
-  @keyframes card-ticker-scroll {
-    from { transform: translateX(0); }
-    to { transform: translateX(-50%); }
-  }
-
-  @media (max-width: 1200px) {
-    .dishes-grid {
-      grid-template-columns: repeat(2, 1fr);
-    }
-  }
-
   @media (max-width: 1024px) {
     .goals-grid {
       grid-template-columns: 1fr;
@@ -541,8 +479,17 @@ import Icon from '../../components/Icon.astro';
     .pricing-section {
       padding: 4rem 1.5rem;
     }
-    .dishes-grid {
+    .dishes-list {
       grid-template-columns: 1fr;
+    }
+    .dish-row:nth-child(odd) {
+      border-right: none;
+    }
+    .dish-row:nth-last-child(-n+2) {
+      border-bottom: 1px solid rgba(136, 101, 69, 0.08);
+    }
+    .dish-row:last-child {
+      border-bottom: none;
     }
   }
 
