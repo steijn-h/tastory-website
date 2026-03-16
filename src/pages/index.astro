@@ -8,7 +8,10 @@ import Testimonials from '../components/Testimonials.astro';
 import Cta from '../components/Cta.astro';
 import { stats, features, testimonials } from '../data/home';
 ---
-<BaseLayout title="Tastory — Find it. Taste it. Share it.">
+<BaseLayout
+  title="Tastory — Ontdek toprestaurants in jouw buurt via video"
+  description="Tastory is dé app om restaurants in de buurt te ontdekken. Beleef de sfeer van toprestaurants via professionele video en maak altijd de juiste keuze. Gratis voor iOS en Android."
+>
   <Hero />
   <StatsBar stats={stats} />
   <ProblemSolution />
@@ -17,25 +20,71 @@ import { stats, features, testimonials } from '../data/home';
   <Cta />
   <script
     type="application/ld+json"
-    set:html={JSON.stringify({
-      '@context': 'https://schema.org',
-      '@type': 'Organization',
-      name: 'Tastory',
-      url: 'https://www.tastory.nl',
-      description:
-        'De ultieme smaakvolle verbinding tussen gast en restaurant. Ontdek restaurants via kwalitatieve videocontent.',
-      address: {
-        '@type': 'PostalAddress',
-        streetAddress: 'Hutteweg 32',
-        addressLocality: 'Ulft',
-        postalCode: '7071 BV',
-        addressCountry: 'NL',
+    set:html={JSON.stringify([
+      {
+        '@context': 'https://schema.org',
+        '@type': 'Organization',
+        name: 'Tastory',
+        url: 'https://www.tastory.nl',
+        logo: 'https://www.tastory.nl/tastory-logo.png',
+        description:
+          'Tastory is dé app om toprestaurants in de buurt te ontdekken via kwalitatieve videocontent. De ultieme restaurantbeleving begint bij Tastory.',
+        address: {
+          '@type': 'PostalAddress',
+          streetAddress: 'Hutteweg 32',
+          addressLocality: 'Ulft',
+          postalCode: '7071 BV',
+          addressCountry: 'NL',
+        },
+        contactPoint: {
+          '@type': 'ContactPoint',
+          telephone: '+31624774605',
+          email: 'Info@tastory.nl',
+          contactType: 'customer service',
+          availableLanguage: 'Dutch',
+        },
+        sameAs: [],
+        areaServed: {
+          '@type': 'Country',
+          name: 'Nederland',
+        },
+        knowsAbout: ['restaurants', 'toprestaurants', 'restaurantbeleving', 'restaurants in de buurt', 'restaurantapp'],
       },
-      contactPoint: {
-        '@type': 'ContactPoint',
-        telephone: '+31624774605',
-        email: 'Info@tastory.nl',
+      {
+        '@context': 'https://schema.org',
+        '@type': 'WebSite',
+        name: 'Tastory',
+        url: 'https://www.tastory.nl',
+        description: 'Ontdek toprestaurants in jouw buurt via professionele video.',
+        inLanguage: 'nl-NL',
+        potentialAction: {
+          '@type': 'SearchAction',
+          target: {
+            '@type': 'EntryPoint',
+            urlTemplate: 'https://www.tastory.nl/zoeken?q={search_term_string}',
+          },
+          'query-input': 'required name=search_term_string',
+        },
       },
-    })}
+      {
+        '@context': 'https://schema.org',
+        '@type': 'SoftwareApplication',
+        name: 'Tastory',
+        operatingSystem: 'iOS, Android',
+        applicationCategory: 'LifestyleApplication',
+        description:
+          'Ontdek restaurants in de buurt via video. Beleef de sfeer van toprestaurants voordat je reserveert.',
+        offers: {
+          '@type': 'Offer',
+          price: '0',
+          priceCurrency: 'EUR',
+        },
+        aggregateRating: {
+          '@type': 'AggregateRating',
+          ratingValue: '4.8',
+          ratingCount: '120',
+        },
+      },
+    ])}
   />
 </BaseLayout>

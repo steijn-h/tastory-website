@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://falko100.github.io/tastory-website/sitemap-index.xml
+Sitemap: https://www.tastory.nl/sitemap-index.xml

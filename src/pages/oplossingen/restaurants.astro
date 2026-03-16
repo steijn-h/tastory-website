@@ -5,8 +5,8 @@ import Icon from '../../components/Icon.astro';
 ---
 
 <BaseLayout
-  title="Oplossingen voor restaurants — Tastory"
-  description="Ontdek hoe Tastory restaurants helpt met zichtbaarheid, imago en terugkerende gasten."
+  title="Meer gasten voor jouw restaurant — Zichtbaarheid via Tastory"
+  description="Presenteer jouw restaurant via professionele video en bereik gasten die écht bij jou passen. Tastory helpt restaurants groeien met meer zichtbaarheid, een sterk profiel en terugkerende gasten."
 >
   <PageHero
     title="Tastory, de app die met een representatief restaurantprofiel terugkerende gasten <em>realiseert</em>"
@@ -162,6 +162,38 @@ import Icon from '../../components/Icon.astro';
       <div class="cta-note">Geen spam. Altijd opzegbaar.</div>
     </div>
   </section>
+  <script
+    type="application/ld+json"
+    set:html={JSON.stringify({
+      '@context': 'https://schema.org',
+      '@type': 'Service',
+      name: 'Tastory voor restaurants',
+      provider: {
+        '@type': 'Organization',
+        name: 'Tastory',
+        url: 'https://www.tastory.nl',
+      },
+      description:
+        'Tastory helpt restaurants meer gasten te bereiken via professionele videoprofielen, sterkere online zichtbaarheid en een loyaliteitsprogramma. Ideaal voor toprestaurants die zich onderscheiden.',
+      serviceType: 'Restaurantmarketing',
+      areaServed: {
+        '@type': 'Country',
+        name: 'Nederland',
+      },
+      hasOfferCatalog: {
+        '@type': 'OfferCatalog',
+        name: 'Tastory restaurant opties',
+        itemListElement: [
+          { '@type': 'Offer', itemOffered: { '@type': 'Service', name: 'Gepersonaliseerd restaurantprofiel' } },
+          { '@type': 'Offer', itemOffered: { '@type': 'Service', name: 'Professionele restaurantvideo' } },
+          { '@type': 'Offer', itemOffered: { '@type': 'Service', name: 'Professionele restaurantfoto\'s' } },
+          { '@type': 'Offer', itemOffered: { '@type': 'Service', name: 'Reserveringsbevestiging' } },
+          { '@type': 'Offer', itemOffered: { '@type': 'Service', name: 'Loyaliteitsprogramma' } },
+          { '@type': 'Offer', itemOffered: { '@type': 'Service', name: 'Webpagina op Google' } },
+        ],
+      },
+    })}
+  />
 </BaseLayout>
 
 <style>

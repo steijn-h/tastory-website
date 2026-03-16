@@ -4,8 +4,8 @@ import PageHero from '../components/PageHero.astro';
 ---
 
 <BaseLayout
-  title="Veelgestelde vragen — Tastory"
-  description="Antwoorden op de meest gestelde vragen over Tastory, voor gasten en restaurants."
+  title="Veelgestelde vragen — Tastory | Restaurants & Gasten"
+  description="Antwoorden op de meest gestelde vragen over Tastory. Hoe werkt de restaurantapp? Hoe meld ik mijn restaurant aan? Hoe vind ik restaurants in de buurt? Alles op een rij."
 >
   <PageHero
     title="Veelgestelde <em>vragen</em>"
@@ -63,6 +63,71 @@ import PageHero from '../components/PageHero.astro';
 
     </div>
   </section>
+  <script
+    type="application/ld+json"
+    set:html={JSON.stringify({
+      '@context': 'https://schema.org',
+      '@type': 'FAQPage',
+      mainEntity: [
+        {
+          '@type': 'Question',
+          name: 'Wat is Tastory?',
+          acceptedAnswer: {
+            '@type': 'Answer',
+            text: 'Tastory is een Nederlandse restaurantontdek-app die restaurants presenteert via kwalitatieve videocontent. Zo zie je vooraf hoe een restaurant er écht uitziet, wat de sfeer is en wat er op het menu staat.',
+          },
+        },
+        {
+          '@type': 'Question',
+          name: 'Is Tastory gratis te gebruiken?',
+          acceptedAnswer: {
+            '@type': 'Answer',
+            text: 'Ja, Tastory is gratis te downloaden en te gebruiken voor gasten.',
+          },
+        },
+        {
+          '@type': 'Question',
+          name: 'Op welke apparaten is Tastory beschikbaar?',
+          acceptedAnswer: {
+            '@type': 'Answer',
+            text: 'Tastory is beschikbaar voor iOS en Android. Download de app via de App Store of Google Play.',
+          },
+        },
+        {
+          '@type': 'Question',
+          name: 'Hoe vind ik restaurants bij mij in de buurt?',
+          acceptedAnswer: {
+            '@type': 'Answer',
+            text: 'Open de app en gebruik de zoekfunctie of de kaartweergave om restaurants in jouw omgeving te ontdekken. Je kunt filteren op keuken, sfeer en afstand.',
+          },
+        },
+        {
+          '@type': 'Question',
+          name: 'Hoe kan ik mijn restaurant aanmelden bij Tastory?',
+          acceptedAnswer: {
+            '@type': 'Answer',
+            text: 'Neem contact met ons op via de contactpagina of stuur een e-mail naar Info@tastory.nl. We bespreken dan samen de mogelijkheden.',
+          },
+        },
+        {
+          '@type': 'Question',
+          name: 'Wie maakt de video\'s voor mijn restaurant?',
+          acceptedAnswer: {
+            '@type': 'Answer',
+            text: 'Afhankelijk van het gekozen pakket schiet Tastory zelf professionele video\'s, of lever jij eigen content aan volgens onze richtlijnen.',
+          },
+        },
+        {
+          '@type': 'Question',
+          name: 'Wat kost deelname aan Tastory?',
+          acceptedAnswer: {
+            '@type': 'Answer',
+            text: 'We bieden verschillende pakketten aan. Neem contact op voor een offerte op maat, afgestemd op de grootte en behoeften van jouw restaurant.',
+          },
+        },
+      ],
+    })}
+  />
 </BaseLayout>
 
 <style>
