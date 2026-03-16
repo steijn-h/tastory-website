@@ -14,6 +14,10 @@ const { stats } = Astro.props;
         <line x1="0" y1="10" x2="68" y2="10" stroke="currentColor" stroke-width="1.5"/>
         <polyline points="58,2 70,10 58,18" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"/>
       </svg>
+      <svg class="stats-intro-arrow-mobile" viewBox="0 0 24 40" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <line x1="12" y1="0" x2="12" y2="31" stroke="currentColor" stroke-width="1.5"/>
+        <polyline points="4,24 12,33 20,24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"/>
+      </svg>
     </div>
     <div class="stats-inner">
       {
@@ -35,6 +39,10 @@ const { stats } = Astro.props;
       <svg class="stats-intro-arrow" viewBox="0 0 80 20" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
         <line x1="0" y1="10" x2="68" y2="10" stroke="currentColor" stroke-width="1.5"/>
         <polyline points="58,2 70,10 58,18" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"/>
+      </svg>
+      <svg class="stats-intro-arrow-mobile" viewBox="0 0 24 40" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <line x1="12" y1="0" x2="12" y2="31" stroke="currentColor" stroke-width="1.5"/>
+        <polyline points="4,24 12,33 20,24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"/>
       </svg>
     </div>
     <div class="stats-inner solution-inner">
@@ -103,6 +111,10 @@ const { stats } = Astro.props;
     color: var(--orange);
     flex-shrink: 0;
     opacity: 0.75;
+  }
+
+  .stats-intro-arrow-mobile {
+    display: none;
   }
 
   .stats-inner {
@@ -196,11 +208,17 @@ const { stats } = Astro.props;
     }
 
     .stats-intro-arrow {
+      display: none;
+    }
+
+    .stats-intro-arrow-mobile {
       display: block;
       order: -1;
-      width: 50px;
-      height: 14px;
-      transform: rotate(90deg);
+      width: 24px;
+      height: 40px;
+      color: var(--orange);
+      opacity: 0.75;
+      flex-shrink: 0;
     }
 
     .stats-intro-text::after {
