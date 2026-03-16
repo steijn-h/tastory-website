@@ -245,9 +245,11 @@ import Icon from '../../components/Icon.astro';
     max-width: 1000px;
     margin-left: auto;
     margin-right: auto;
-    border: 1px solid rgba(136, 101, 69, 0.1);
+    border: 1px solid rgba(136, 101, 69, 0.15);
     border-radius: var(--radius-lg);
     overflow: hidden;
+    background: var(--white);
+    box-shadow: var(--shadow-md);
   }
 
   .dish-row {
@@ -255,7 +257,8 @@ import Icon from '../../components/Icon.astro';
     align-items: flex-start;
     gap: 1.25rem;
     padding: 1.5rem 2rem;
-    border-bottom: 1px solid rgba(136, 101, 69, 0.08);
+    background: var(--white);
+    border-bottom: 1px solid rgba(136, 101, 69, 0.1);
     transition: background 0.2s ease;
   }
 
