@@ -13,7 +13,7 @@ Sinds februari zijn wij aangesloten bij de **SmartHub Incubator Industry (SHII)*
 
 Een paar weken geleden vond er een terugkerend evenement van de SHII plaats: de **pitchavond**. Deze avond staat in het teken van hulpvragen die nieuwe energie en inzichten brengen. Elke editie pitchen drie organisaties waarbij ze actuele ontwikkelingen uitlichten met bijbehorende hulpvraag.
 
-Deze editie begon met **Streamrebelz** die een nieuwe klantgroep wil bedienen en eindigde met **De Netwerkplaats** die een 'schuur' ontwikkelt waar basisschoolkinderen met de handen kunnen leren.
+Deze editie begon met **Streamrebelz** die een nieuwe klantgroep wil bedienen en eindigde met **De Netwerkplaats** die een 'keet' ontwikkelt waar basisschoolkinderen met de handen kunnen leren.
 
 ## Onze pitch
 
