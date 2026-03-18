@@ -16,7 +16,7 @@ type Props = { post: CollectionEntry<'blog'> };
 const { post } = Astro.props;
 const { Content } = await post.render();
 ---
-<BaseLayout title={`${post.data.title} — Tastory Blog`} description={post.data.description}>
+<BaseLayout title={`${post.data.title} — Tastory Blog`} description={post.data.description} keywords={post.data.tags}>
   <PageHero
     title={`<em>${post.data.title}</em>`}
     description={formatDate(post.data.date)}
