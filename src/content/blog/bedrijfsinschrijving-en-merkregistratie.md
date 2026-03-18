@@ -2,7 +2,7 @@
 title: "Bedrijfsinschrijving en merkregistratie"
 description: "Tastory is op 10 oktober ingeschreven in het handelsregister en heeft de merkregistratie bij het BOIP afgerond. We zijn officieel eigenaar van het woordmerk!"
 date: 2025-12-23
-tags: ["bedrijf", "merkregistratie", "milestone"]
+tags: ["merkregistratie BOIP", "horeca startup", "restaurant app lancering", "Tastory", "woordmerk", "horecaapp Nederland", "restaurantplatform", "horecabranche"]
 ---
 
 Een belangrijke mijlpaal voor Tastory: wij zijn officieel eigenaar van het woordmerk **Tastory**! Na de inschrijving in het handelsregister op 10 oktober 2025 hebben we ook de merkregistratie bij het Benelux-Bureau voor de Intellectuele Eigendom (BOIP) succesvol afgerond.

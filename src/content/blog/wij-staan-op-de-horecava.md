@@ -2,7 +2,7 @@
 title: "Wij staan op de Horecava in januari!"
 description: "In de week van 12 tot en met 15 januari vindt de jaarlijkse Horecava beurs plaats. Tastory is aanwezig met een eigen stand en zal zelfs pitchen!"
 date: 2026-01-02
-tags: ["evenement", "horecava", "pitch"]
+tags: ["Horecava 2026", "horeca beurs", "horeca innovatie", "restaurant technologie", "horecabranche", "restaurant app Nederland", "restaurantmarketing", "hospitality evenement"]
 ---
 
 In de week van 12 tot en met 15 januari vindt de jaarlijkse **Horecava** beurs plaats. Dit is dé plek om de nieuwste trends, producten en oplossingen voor de horeca te ontdekken. Met zo'n 60.000 horecaprofessionals die jaarlijks het evenement bezoeken, is het een unieke kans om onze propositie te valideren.
