@@ -1,0 +1,200 @@
+---
+interface Props {
+  theme?: 'dark' | 'light';
+  size?: 'sm' | 'md' | 'lg';
+  showLabel?: boolean;
+}
+
+const { theme = 'dark', size = 'md', showLabel = true } = Astro.props;
+---
+
+<div class={`app-badges app-badges--${theme} app-badges--${size}`}>
+  {showLabel && <p class="badges-label">Binnenkort beschikbaar op</p>}
+  <div class="badges-row">
+    <div class="badge-wrapper">
+      <a
+        href={`${import.meta.env.BASE_URL}download`}
+        class="store-badge store-badge--apple"
+        aria-label="Download in de App Store (binnenkort beschikbaar)"
+        title="Binnenkort beschikbaar in de App Store"
+      >
+        <svg class="badge-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+          <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z" />
+        </svg>
+        <div class="badge-text">
+          <span class="badge-sub">Download in de</span>
+          <span class="badge-main">App Store</span>
+        </div>
+        <div class="badge-coming-soon">2026</div>
+      </a>
+    </div>
+
+    <div class="badge-wrapper">
+      <a
+        href={`${import.meta.env.BASE_URL}download`}
+        class="store-badge store-badge--google"
+        aria-label="Downloaden via Google Play (binnenkort beschikbaar)"
+        title="Binnenkort beschikbaar op Google Play"
+      >
+        <svg class="badge-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+          <path d="M3.18 23.76c.3.16.64.22.99.16l13.12-7.59L14 13l-10.82 10.76zM.88 1.56C.34 1.97 0 2.64 0 3.46v17.08c0 .82.34 1.49.88 1.9L1 22.55 12.44 11.1v-.2L1 .45.88 1.56zM22.15 10.28l-2.83-1.63L15.9 12l3.42 3.35 2.84-1.63c.81-.47.81-1.97-.01-2.44zM4.17.24L17.32 7.83 14 11.1 3.18.34C3.5.18 3.88.13 4.17.24z" />
+        </svg>
+        <div class="badge-text">
+          <span class="badge-sub">Downloaden via</span>
+          <span class="badge-main">Google Play</span>
+        </div>
+        <div class="badge-coming-soon">2026</div>
+      </a>
+    </div>
+  </div>
+</div>
+
+<style>
+  .app-badges {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+  }
+
+  .badges-label {
+    font-size: var(--text-xs);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    font-weight: 500;
+    opacity: 0.6;
+  }
+
+  .app-badges--dark .badges-label {
+    color: rgba(245, 235, 221, 0.7);
+  }
+
+  .app-badges--light .badges-label {
+    color: var(--text-muted);
+  }
+
+  .badges-row {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+  }
+
+  .badge-wrapper {
+    position: relative;
+  }
+
+  .store-badge {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    text-decoration: none;
+    border-radius: 12px;
+    padding: 0.6rem 1.1rem;
+    transition: transform 0.2s, box-shadow 0.2s, opacity 0.2s;
+    position: relative;
+    overflow: hidden;
+    cursor: pointer;
+  }
+
+  .app-badges--md .store-badge {
+    padding: 0.65rem 1.2rem;
+  }
+
+  .app-badges--lg .store-badge {
+    padding: 0.8rem 1.5rem;
+  }
+
+  .app-badges--sm .store-badge {
+    padding: 0.45rem 0.9rem;
+    border-radius: 10px;
+  }
+
+  .store-badge--apple,
+  .store-badge--google {
+    background: rgba(10, 10, 10, 0.9);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+  }
+
+  .app-badges--light .store-badge--apple,
+  .app-badges--light .store-badge--google {
+    background: #111;
+  }
+
+  .store-badge:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+    opacity: 0.9;
+  }
+
+  .badge-icon {
+    color: #fff;
+    flex-shrink: 0;
+  }
+
+  .app-badges--md .badge-icon {
+    width: 22px;
+    height: 22px;
+  }
+
+  .app-badges--lg .badge-icon {
+    width: 26px;
+    height: 26px;
+  }
+
+  .app-badges--sm .badge-icon {
+    width: 18px;
+    height: 18px;
+  }
+
+  .badge-text {
+    display: flex;
+    flex-direction: column;
+    gap: 0.1rem;
+  }
+
+  .badge-sub {
+    font-size: 0.65rem;
+    color: rgba(255, 255, 255, 0.7);
+    letter-spacing: 0.03em;
+    line-height: 1;
+  }
+
+  .badge-main {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #fff;
+    line-height: 1;
+    letter-spacing: 0.01em;
+  }
+
+  .app-badges--sm .badge-sub {
+    font-size: 0.58rem;
+  }
+
+  .app-badges--sm .badge-main {
+    font-size: 0.82rem;
+  }
+
+  .app-badges--lg .badge-sub {
+    font-size: 0.7rem;
+  }
+
+  .app-badges--lg .badge-main {
+    font-size: 1.05rem;
+  }
+
+  .badge-coming-soon {
+    position: absolute;
+    top: -1px;
+    right: -1px;
+    background: var(--orange);
+    color: #fff;
+    font-size: 0.55rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    padding: 0.15rem 0.4rem;
+    border-radius: 0 10px 0 8px;
+    line-height: 1.4;
+    text-transform: uppercase;
+  }
+</style>

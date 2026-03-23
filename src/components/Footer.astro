@@ -1,4 +1,5 @@
 ---
+import AppStoreBadges from './AppStoreBadges.astro';
 ---
 <footer id="contact">
   <div class="footer-inner">
@@ -28,6 +29,10 @@
         <a href="#">Ma&ndash;Vr: 8:00 &ndash; 18:00</a>
         <a href="#">Za: 10:00 &ndash; 14:00</a>
         <a href="/faq">FAQ</a>
+      </div>
+      <div class="footer-col footer-col--stores">
+        <h4>Download</h4>
+        <AppStoreBadges theme="dark" size="sm" showLabel={false} />
       </div>
     </div>
     <div class="footer-legal">
