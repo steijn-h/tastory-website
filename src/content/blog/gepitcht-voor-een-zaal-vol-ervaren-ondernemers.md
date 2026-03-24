@@ -1,8 +1,18 @@
 ---
-title: "Gepitcht voor een zaal vol ervaren ondernemers!"
-description: "Tastory pitchte op de pitchavond van de SmartHub Incubator Industry (SHII). Lees hoe wij onze horecaapp presenteerden en welke hulpvraag wij hebben rondom app-ontwikkeling."
+title: 'Gepitcht voor een zaal vol ervaren ondernemers!'
+description: 'Tastory pitchte op de pitchavond van de SmartHub Incubator Industry (SHII). Lees hoe wij onze horecaapp presenteerden en welke hulpvraag wij hebben rondom app-ontwikkeling.'
 date: 2026-03-18
-tags: ["horeca startup pitch", "restaurant app ontwikkeling", "horecabranche", "incubator Nederland", "horeca ondernemen", "restaurantapp lancering", "startup pitchen", "SHII incubator"]
+tags:
+  [
+    'horeca startup pitch',
+    'restaurant app ontwikkeling',
+    'horecabranche',
+    'incubator Nederland',
+    'horeca ondernemen',
+    'restaurantapp lancering',
+    'startup pitchen',
+    'SHII incubator',
+  ]
 ---
 
 Wij hebben gepitcht voor een zaal vol ervaren ondernemers!

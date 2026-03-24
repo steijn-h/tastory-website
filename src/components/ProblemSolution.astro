@@ -15,17 +15,22 @@ import Icon from './Icon.astro';
         <div class="problem-bg-icon"><Icon name="alert-circle" size={120} /></div>
         <h3>Het probleem</h3>
         <p>
-          Door <strong>verouderde foto's</strong>, <strong>onbetrouwbare reviews</strong> en <strong>onoverzichtelijke platforms</strong> krijgen gebruikers vaak geen realistisch beeld van restaurants. Dit maakt het lastig om het juiste restaurant te kiezen en zorgt er tegelijkertijd voor dat restaurants gasten <strong>mislopen</strong>.
+          Door <strong>verouderde foto's</strong>, <strong>onbetrouwbare reviews</strong> en <strong
+            >onoverzichtelijke platforms</strong
+          > krijgen gebruikers vaak geen realistisch beeld van restaurants. Dit maakt het lastig om het
+          juiste restaurant te kiezen en zorgt er tegelijkertijd voor dat restaurants gasten <strong
+            >mislopen</strong
+          >.
         </p>
       </div>
       <div class="problem-card solution reveal-left">
         <div class="problem-bg-icon"><Icon name="sparkles" size={120} /></div>
         <h3>Tastory biedt de oplossing</h3>
         <p>
-          Via Tastory kunnen restaurants zich <span class="hl">beter en eerlijker presenteren</span>,
-          terwijl gasten snel en eenvoudig restaurants ontdekken die écht bij hen passen.
-          Kwalitatieve restaurantprofielen laat zien waar een restaurant echt voor staat — <span class="hl"
-            >authentiek, representatief en inspirerend.</span
+          Via Tastory kunnen restaurants zich <span class="hl">beter en eerlijker presenteren</span
+          >, terwijl gasten snel en eenvoudig restaurants ontdekken die écht bij hen passen.
+          Kwalitatieve restaurantprofielen laat zien waar een restaurant echt voor staat — <span
+            class="hl">authentiek, representatief en inspirerend.</span
           >
         </p>
       </div>
@@ -47,7 +52,7 @@ import Icon from './Icon.astro';
           </div>
         </div>
         <div class="float-card float-card-1">
-          <div class="fc-label">Reviews met hoge<br>betrouwbaarheid</div>
+          <div class="fc-label">Reviews met hoge<br />betrouwbaarheid</div>
         </div>
         <div class="float-card float-card-2">
           <div class="fc-label">Jouw verhaal</div>
@@ -205,8 +210,14 @@ import Icon from './Icon.astro';
   }
 
   @keyframes scroll-app {
-    0%, 15% { transform: translateY(0); }
-    85%, 100% { transform: translateY(var(--screenshot-scroll)); }
+    0%,
+    15% {
+      transform: translateY(0);
+    }
+    85%,
+    100% {
+      transform: translateY(var(--screenshot-scroll));
+    }
   }
 
   @media (prefers-reduced-motion: reduce) {
@@ -257,9 +268,15 @@ import Icon from './Icon.astro';
   }
 
   @media (max-width: 1200px) {
-    .float-card-1 { right: -80px; }
-    .float-card-2 { right: -70px; }
-    .float-card-3 { right: -75px; }
+    .float-card-1 {
+      right: -80px;
+    }
+    .float-card-2 {
+      right: -70px;
+    }
+    .float-card-3 {
+      right: -75px;
+    }
   }
 
   @media (max-width: 1024px) {
@@ -284,11 +301,19 @@ import Icon from './Icon.astro';
       border-radius: 35px;
     }
 
-    .float-card-1 { right: -60px; }
-    .float-card-2 { right: -55px; }
-    .float-card-3 { right: -55px; }
+    .float-card-1 {
+      right: -60px;
+    }
+    .float-card-2 {
+      right: -55px;
+    }
+    .float-card-3 {
+      right: -55px;
+    }
 
-    .fc-label { font-size: 0.65rem; }
+    .fc-label {
+      font-size: 0.65rem;
+    }
   }
 
   @media (max-width: 640px) {
@@ -307,11 +332,19 @@ import Icon from './Icon.astro';
       padding: 0.3rem 0.55rem;
     }
 
-    .float-card-1 { right: -80px; }
-    .float-card-2 { right: -70px; }
-    .float-card-3 { right: -75px; }
+    .float-card-1 {
+      right: -80px;
+    }
+    .float-card-2 {
+      right: -70px;
+    }
+    .float-card-3 {
+      right: -75px;
+    }
 
-    .fc-label { font-size: 0.55rem; }
+    .fc-label {
+      font-size: 0.55rem;
+    }
   }
 
   @media (max-width: 390px) {
@@ -321,9 +354,15 @@ import Icon from './Icon.astro';
       border-radius: 34px;
     }
 
-    .float-card-1 { right: -80px; }
-    .float-card-2 { right: -70px; }
-    .float-card-3 { right: -75px; }
+    .float-card-1 {
+      right: -80px;
+    }
+    .float-card-2 {
+      right: -70px;
+    }
+    .float-card-3 {
+      right: -75px;
+    }
   }
 
   @media (max-width: 360px) {
@@ -333,8 +372,14 @@ import Icon from './Icon.astro';
       border-radius: 32px;
     }
 
-    .float-card-1 { right: -65px; }
-    .float-card-2 { right: -55px; }
-    .float-card-3 { right: -60px; }
+    .float-card-1 {
+      right: -65px;
+    }
+    .float-card-2 {
+      right: -55px;
+    }
+    .float-card-3 {
+      right: -60px;
+    }
   }
 </style>

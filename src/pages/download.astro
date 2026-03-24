@@ -14,13 +14,12 @@ import PageHero from '../components/PageHero.astro';
 
   <section class="signup-section">
     <div class="signup-grid">
-
       <div class="signup-card reveal">
         <div class="card-tag">Voor restaurants</div>
         <h2>Aanmelden als <em>Restaurant</em></h2>
         <p>
-          Presenteer jouw restaurant via authentieke videocontent en bereik gasten die écht bij jou passen.
-          Meld je nu aan en wij nemen contact met je op zodra we live gaan.
+          Presenteer jouw restaurant via authentieke videocontent en bereik gasten die écht bij jou
+          passen. Meld je nu aan en wij nemen contact met je op zodra we live gaan.
         </p>
         <form class="signup-form" id="restaurant-form">
           <input
@@ -47,8 +46,8 @@ import PageHero from '../components/PageHero.astro';
         <div class="card-tag">Voor Foodies</div>
         <h2>Aanmelden als <em>Foodie</em></h2>
         <p>
-          Ontdek restaurants die écht bij jou passen op basis van sfeer, keuken en stijl.
-          Meld je aan en ontvang een melding zodra de app beschikbaar is.
+          Ontdek restaurants die écht bij jou passen op basis van sfeer, keuken en stijl. Meld je
+          aan en ontvang een melding zodra de app beschikbaar is.
         </p>
         <form class="signup-form" id="foodie-form">
           <input
@@ -70,7 +69,6 @@ import PageHero from '../components/PageHero.astro';
         <div class="form-feedback" id="foodie-feedback"></div>
         <div class="card-note">Geen spam. Altijd opzegbaar. Binnenkort op iOS &amp; Android.</div>
       </div>
-
     </div>
   </section>
 </BaseLayout>
@@ -168,7 +166,10 @@ import PageHero from '../components/PageHero.astro';
     font-size: 1rem;
     font-weight: 600;
     cursor: pointer;
-    transition: background 0.3s, transform 0.2s, box-shadow 0.3s;
+    transition:
+      background 0.3s,
+      transform 0.2s,
+      box-shadow 0.3s;
     margin-top: 0.25rem;
   }
 
@@ -253,7 +254,8 @@ import PageHero from '../components/PageHero.astro';
         });
 
         if (res.ok) {
-          feedback.textContent = 'Bedankt voor je aanmelding! We nemen contact met je op bij de lancering.';
+          feedback.textContent =
+            'Bedankt voor je aanmelding! We nemen contact met je op bij de lancering.';
           feedback.className = 'form-feedback form-feedback--success';
           nameInput.value = '';
           emailInput.value = '';
@@ -275,6 +277,12 @@ import PageHero from '../components/PageHero.astro';
     });
   }
 
-  submitForm('restaurant-form', 'restaurant-name', 'restaurant-email', 'restaurant-feedback', 'Restaurant');
+  submitForm(
+    'restaurant-form',
+    'restaurant-name',
+    'restaurant-email',
+    'restaurant-feedback',
+    'Restaurant',
+  );
   submitForm('foodie-form', 'foodie-name', 'foodie-email', 'foodie-feedback', 'Foodie');
 </script>

@@ -33,8 +33,7 @@ import { appFunctions } from '../../data/home';
         <h3>Taste it</h3>
         <p>
           Ga langs en proef de beste gerechten bij jouw gekozen restaurant. Geniet van een ervaring
-          die aansluit bij wat je had verwacht, dankzij de eerlijke en representatieve
-          profielen.
+          die aansluit bij wat je had verwacht, dankzij de eerlijke en representatieve profielen.
         </p>
       </div>
       <div class="step-card reveal">
@@ -272,7 +271,8 @@ import { appFunctions } from '../../data/home';
       });
 
       if (res.ok) {
-        feedback.textContent = 'Bedankt voor je aanmelding! We laten het je weten zodra de app beschikbaar is.';
+        feedback.textContent =
+          'Bedankt voor je aanmelding! We laten het je weten zodra de app beschikbaar is.';
         feedback.className = 'form-feedback form-feedback--success';
         emailInput.value = '';
       } else {

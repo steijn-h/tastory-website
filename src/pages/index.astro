@@ -8,6 +8,7 @@ import Testimonials from '../components/Testimonials.astro';
 import Cta from '../components/Cta.astro';
 import { stats, features, testimonials } from '../data/home';
 ---
+
 <BaseLayout
   title="Tastory — Ontdek restaurants in de buurt die écht bij jou passen."
   description="Tastory is dé app om restaurants in de buurt te ontdekken. Beleef de sfeer via professionele content en maak de juiste keuze die bij jou past. Gratis voor iOS en Android."
@@ -48,7 +49,13 @@ import { stats, features, testimonials } from '../data/home';
           '@type': 'Country',
           name: 'Nederland',
         },
-        knowsAbout: ['restaurants', 'toprestaurants', 'restaurantbeleving', 'restaurants in de buurt', 'restaurantapp'],
+        knowsAbout: [
+          'restaurants',
+          'toprestaurants',
+          'restaurantbeleving',
+          'restaurants in de buurt',
+          'restaurantapp',
+        ],
       },
       {
         '@context': 'https://schema.org',

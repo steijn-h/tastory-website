@@ -1,5 +1,8 @@
 export const stats = [
-  { number: '58%', label: "van de gasten het eten fotografeert, maar de foto's niet delen of gebruiken" },
+  {
+    number: '58%',
+    label: "van de gasten het eten fotografeert, maar de foto's niet delen of gebruiken",
+  },
   { number: '69%', label: 'kiest op basis van reviews van anderen' },
   { number: '75%', label: 'het restaurant kiest op basis van content' },
 ];
@@ -71,14 +74,12 @@ export const appFunctions = [
   {
     icon: 'map',
     title: 'Persoonlijke foodmap',
-    description:
-      'Maak je eigen foodmap met alle bezochte restaurants en deel deze met vrienden.',
+    description: 'Maak je eigen foodmap met alle bezochte restaurants en deel deze met vrienden.',
   },
   {
     icon: 'user',
     title: 'Spaar punten voor jouw favoriete restaurant',
-    description:
-      'Spaar punten voor jouw favoriete restaurant. Lever ze in voor leuke beloningen.',
+    description: 'Spaar punten voor jouw favoriete restaurant. Lever ze in voor leuke beloningen.',
   },
 ];
 

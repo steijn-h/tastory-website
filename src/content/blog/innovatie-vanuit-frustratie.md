@@ -1,8 +1,18 @@
 ---
-title: "Innovatie vanuit frustratie"
-description: "Na het KLM Open toernooi bleek het kiezen van een restaurant verrassend lastig. Die frustratie werd de aanleiding voor Tastory."
+title: 'Innovatie vanuit frustratie'
+description: 'Na het KLM Open toernooi bleek het kiezen van een restaurant verrassend lastig. Die frustratie werd de aanleiding voor Tastory.'
 date: 2025-06-09
-tags: ["restaurant app", "horeca app", "restaurant ontdekken", "restaurants vinden", "restauranttips", "horeca innovatie", "startup verhaal", "restaurantbeleving"]
+tags:
+  [
+    'restaurant app',
+    'horeca app',
+    'restaurant ontdekken',
+    'restaurants vinden',
+    'restauranttips',
+    'horeca innovatie',
+    'startup verhaal',
+    'restaurantbeleving',
+  ]
 ---
 
 Het verhaal van Tastory begint met een frustrerende ervaring. Na afloop van het **KLM Open** tennistoernooi stonden we voor een ogenschijnlijk eenvoudige vraag: waar gaan we eten? Ondanks het raadplegen van meerdere apps bleek het kiezen van een geschikt restaurant verrassend lastig.
@@ -28,7 +38,7 @@ Deze frustratie leidde tot twee fundamentele vragen die de basis vormen voor de 
 - **Wordt deze frustratie breed gedeeld** door andere restaurantgasten?
 - **Is een dedicated app** de juiste oplossing hiervoor?
 
-Het antwoord op beide vragen bleek een overtuigend *ja*. Uit gesprekken met tientallen restaurantgasten en -eigenaren bleek dat de behoefte aan een eerlijke, visuele en complete restaurantapp groot is.
+Het antwoord op beide vragen bleek een overtuigend _ja_. Uit gesprekken met tientallen restaurantgasten en -eigenaren bleek dat de behoefte aan een eerlijke, visuele en complete restaurantapp groot is.
 
 ## Van frustratie naar innovatie
 

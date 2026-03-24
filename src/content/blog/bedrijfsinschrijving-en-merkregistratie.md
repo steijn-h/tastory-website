@@ -1,8 +1,18 @@
 ---
-title: "Bedrijfsinschrijving en merkregistratie"
-description: "Tastory is op 10 oktober ingeschreven in het handelsregister en heeft de merkregistratie bij het BOIP afgerond. We zijn officieel eigenaar van het woordmerk!"
+title: 'Bedrijfsinschrijving en merkregistratie'
+description: 'Tastory is op 10 oktober ingeschreven in het handelsregister en heeft de merkregistratie bij het BOIP afgerond. We zijn officieel eigenaar van het woordmerk!'
 date: 2025-12-23
-tags: ["merkregistratie BOIP", "horeca startup", "restaurant app lancering", "Tastory", "woordmerk", "horecaapp Nederland", "restaurantplatform", "horecabranche"]
+tags:
+  [
+    'merkregistratie BOIP',
+    'horeca startup',
+    'restaurant app lancering',
+    'Tastory',
+    'woordmerk',
+    'horecaapp Nederland',
+    'restaurantplatform',
+    'horecabranche',
+  ]
 ---
 
 Een belangrijke mijlpaal voor Tastory: wij zijn officieel eigenaar van het woordmerk **Tastory**! Na de inschrijving in het handelsregister op 10 oktober 2025 hebben we ook de merkregistratie bij het Benelux-Bureau voor de Intellectuele Eigendom (BOIP) succesvol afgerond.
@@ -19,7 +29,7 @@ De weg naar onze officiële merkregistratie:
 
 Het bezitten van het woordmerk Tastory is een belangrijk en memorabel ingrediënt in onze culinaire reis. We zijn nu officieel eigenaar van een merk dat voor vele verhalen bij restaurants en met gasten zal zorgen.
 
-De naam Tastory — een samenvoegsel van *taste* en *story* — vat perfect samen waar wij voor staan: het delen van smaakverhalen. Elke restaurantervaring is een verhaal waard, en wij zorgen ervoor dat die verhalen gedeeld worden.
+De naam Tastory — een samenvoegsel van _taste_ en _story_ — vat perfect samen waar wij voor staan: het delen van smaakverhalen. Elke restaurantervaring is een verhaal waard, en wij zorgen ervoor dat die verhalen gedeeld worden.
 
 ## Vooruit kijken
 
