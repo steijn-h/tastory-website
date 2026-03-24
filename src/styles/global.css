@@ -78,7 +78,6 @@ h4 {
   font-weight: 600;
 }
 
-
 /* Subtle grain overlay */
 body::after {
   content: '';
