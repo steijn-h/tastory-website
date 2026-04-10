@@ -34,6 +34,7 @@
       <p>KVK: 98537733</p>
       <p>BTW: NL868537883B01</p>
       <p>&copy; 2026 Tastory. Alle rechten voorbehouden.</p>
+      <a href="/privacy" class="footer-legal-link">Privacy & Gebruikersvoorwaarden</a>
     </div>
   </div>
 </footer>
@@ -107,6 +108,16 @@
   .footer-legal p {
     font-size: var(--text-xs);
     color: rgba(245, 235, 221, 0.35);
+  }
+  .footer-legal-link {
+    font-size: var(--text-xs);
+    color: rgba(245, 235, 221, 0.45);
+    text-decoration: none;
+    transition: color 0.3s;
+    margin-top: 0.2rem;
+  }
+  .footer-legal-link:hover {
+    color: var(--orange);
   }
   @media (max-width: 768px) {
     footer {
