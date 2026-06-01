@@ -1,0 +1,14 @@
+{
+  "applinks": {
+    "apps": [],
+    "details": [
+      {
+        "appID": "KDMY947UH6.nl.tastory.app",
+        "paths": [
+          "/restaurant/*",
+          "/join"
+        ]
+      }
+    ]
+  }
+}
