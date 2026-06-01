@@ -39,6 +39,8 @@ import PageHero from '../../components/PageHero.astro';
 </BaseLayout>
 
 <script>
+  import { submitForm } from '../../utils/submitForm';
+
   const form = document.getElementById('signup-form') as HTMLFormElement;
   const feedback = document.getElementById('signup-feedback') as HTMLDivElement;
   const submitBtn = form.querySelector('button') as HTMLButtonElement;
@@ -51,26 +53,18 @@ import PageHero from '../../components/PageHero.astro';
     submitBtn.textContent = 'Aanmelden...';
 
     try {
-      const res = await fetch('https://formsubmit.co/ajax/Info@tastory.nl', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
-        body: JSON.stringify({
-          name: data.get('name'),
-          email: data.get('email'),
-          phone: data.get('phone') || undefined,
-          company: data.get('company'),
-          _subject: 'Nieuwe restaurantaanmelding — Tastory website',
-        }),
+      await submitForm({
+        name: data.get('name') as string,
+        email: data.get('email') as string,
+        phone: (data.get('phone') as string) || undefined,
+        company: data.get('company') as string,
+        _subject: 'Nieuwe restaurantaanmelding — Tastory website',
       });
 
-      if (res.ok) {
-        feedback.textContent =
-          'Bedankt voor je aanmelding! We nemen zo snel mogelijk contact met je op.';
-        feedback.className = 'signup-feedback signup-feedback--success';
-        form.reset();
-      } else {
-        throw new Error('Submit failed');
-      }
+      feedback.textContent =
+        'Bedankt voor je aanmelding! We nemen zo snel mogelijk contact met je op.';
+      feedback.className = 'signup-feedback signup-feedback--success';
+      form.reset();
     } catch {
       feedback.textContent = 'Er ging iets mis. Probeer het later opnieuw.';
       feedback.className = 'signup-feedback signup-feedback--error';
