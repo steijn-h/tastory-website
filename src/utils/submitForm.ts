@@ -1,15 +1,17 @@
-const ENDPOINT = 'https://formsubmit.co/ajax/info@tastory.nl';
+const ENDPOINT = 'https://formsubmit.co/ajax/Info@tastory.nl';
 
 export async function submitForm(payload: Record<string, string | undefined>): Promise<void> {
-  const body: Record<string, string> = { _captcha: 'false' };
+  const formData = new FormData();
+  formData.append('_captcha', 'false');
+
   for (const [key, value] of Object.entries(payload)) {
-    if (value !== undefined && value !== '') body[key] = value;
+    if (value !== undefined && value !== '') formData.append(key, value);
   }
 
   const res = await fetch(ENDPOINT, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
-    body: JSON.stringify(body),
+    headers: { Accept: 'application/json' },
+    body: formData,
   });
 
   const json = await res.json().catch(() => ({}));
