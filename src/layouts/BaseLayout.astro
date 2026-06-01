@@ -5,6 +5,7 @@ import Footer from '../components/Footer.astro';
 import '../styles/global.css';
 
 interface Props {
+  ogImage?: string;
   title: string;
   description?: string;
   keywords?: string[];
@@ -16,7 +17,8 @@ const {
   keywords,
 } = Astro.props;
 const canonicalURL = new URL(Astro.url.pathname, Astro.site);
-const ogImage = new URL(`${import.meta.env.BASE_URL}/tastory-logo.png`, Astro.site);
+const defaultOgImage = new URL(`${import.meta.env.BASE_URL}/tastory-logo.png`, Astro.site);
+const ogImage = customOgImage ?? defaultOgImage.toString();
 ---
 
 <!doctype html>

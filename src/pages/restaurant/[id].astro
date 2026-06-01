@@ -32,7 +32,7 @@ const deepLinkUrl = `tastory://restaurant/${id}`;
 const universalLinkUrl = `https://tastory.nl/restaurant/${id}`;
 ---
 
-<BaseLayout title={title} description={description}>
+<BaseLayout ogImage={restaurant?.photo_url || undefined} title={title} description={description}>
   <div class="restaurant-page">
     {restaurant?.photo_url && (
       <div class="hero-image">
