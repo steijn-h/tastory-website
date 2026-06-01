@@ -1,7 +1,6 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 
-const { ref } = Astro.url.searchParams ? Object.fromEntries(Astro.url.searchParams) : {};
 const appStoreUrl = 'https://apps.apple.com/nl/app/tastory/id6744042066';
 ---
 
@@ -13,7 +12,7 @@ const appStoreUrl = 'https://apps.apple.com/nl/app/tastory/id6744042066';
     <div class="content">
       <div class="card reveal">
         <div class="logo">
-          <img src="/images/tastory-logo.png" alt="Tastory" width="120" />
+          <img src="/tastory-logo.png" alt="Tastory" />
         </div>
 
         <div class="card-tag">Uitnodiging</div>
@@ -35,15 +34,12 @@ const appStoreUrl = 'https://apps.apple.com/nl/app/tastory/id6744042066';
 
         <div class="features">
           <div class="feature">
-            <span class="feature-icon">🍽️</span>
             <span>Ontdek restaurants die bij jou passen</span>
           </div>
           <div class="feature">
-            <span class="feature-icon">👥</span>
             <span>Zie wat vrienden lekker vinden</span>
           </div>
           <div class="feature">
-            <span class="feature-icon">📸</span>
             <span>Deel je culinaire avonturen</span>
           </div>
         </div>
@@ -170,10 +166,12 @@ const appStoreUrl = 'https://apps.apple.com/nl/app/tastory/id6744042066';
     gap: 0.75rem;
     font-size: 0.9rem;
     color: var(--text-muted);
+    padding-left: 0.5rem;
   }
 
-  .feature-icon {
-    font-size: 1.2rem;
+  .feature::before {
+    content: '—';
+    color: var(--orange);
     flex-shrink: 0;
   }
 </style>
