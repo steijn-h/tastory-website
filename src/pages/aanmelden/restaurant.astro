@@ -58,7 +58,7 @@ import PageHero from '../../components/PageHero.astro';
         email: data.get('email') as string,
         phone: (data.get('phone') as string) || undefined,
         company: data.get('company') as string,
-        _subject: 'Nieuwe restaurantaanmelding — Tastory website',
+        subject: 'Nieuwe restaurantaanmelding — Tastory website',
       });
 
       feedback.textContent =
