@@ -4,10 +4,10 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 
 const { id } = Astro.params;
 
-let story: { id: string; user_name: string; restaurant_name: string; restaurant_id: string; photo_url: string | null } | null = null;
+let story: { id: string; user_name: string; restaurant_name: string; restaurant_id: string; photo_url: string | null; caption: string | null } | null = null;
 try {
   const res = await fetch(
-    `https://vyqpdtjpocndgdqylzeo.supabase.co/rest/v1/stories?id=eq.${id}&select=id,user_name,restaurant_name,restaurant_id,photo_url`,
+    `https://vyqpdtjpocndgdqylzeo.supabase.co/rest/v1/stories?id=eq.${id}&select=id,user_name,restaurant_name,restaurant_id,photo_url,caption`,
     {
       headers: {
         apikey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ5cXBkdGpwb2NuZGdkcXlsemVvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzgwNjM2MTksImV4cCI6MjA1MzYzOTYxOX0.y7HGiROl1FH6vYBWD2MlFWOqEj_x5UIBgMBm7NBXH5Q',
@@ -34,28 +34,29 @@ const deepLinkUrl = `tastory://story/${id}`;
 
 <BaseLayout ogImage={ogImage} title={title} description={description}>
   <div class="story-page">
-    {story?.photo_url && (
-      <div class="hero-image">
-        <img src={story.photo_url} alt={`Taste Story bij ${story.restaurant_name}`} />
-        <div class="hero-overlay" />
-      </div>
-    )}
-
     <div class="content">
       <div class="card reveal">
         <div class="card-tag">Taste Story op Tastory</div>
 
         {story ? (
           <>
-            <h1>{story.restaurant_name}</h1>
+            {story.photo_url && (
+              <div class="story-photo-wrap">
+                <img src={story.photo_url} alt={story.restaurant_name} class="story-photo" />
+                <div class="story-photo-overlay">
+                  <span class="story-restaurant">{story.restaurant_name}</span>
+                </div>
+              </div>
+            )}
             <p class="user">Door {story.user_name}</p>
+            {story.caption && <p class="caption">"{story.caption}"</p>}
           </>
         ) : (
           <h1>Taste Story bekijken</h1>
         )}
 
         <p class="cta-text">
-          Open deze Taste Story in de Tastory app om hem volledig te bekijken.
+          Open deze Taste Story in de Tastory app om hem volledig te bekijken, te liken en te reageren.
         </p>
 
         <a href={deepLinkUrl} class="btn-primary" id="open-app-btn">
@@ -87,43 +88,20 @@ const deepLinkUrl = `tastory://story/${id}`;
     align-items: center;
     justify-content: center;
     padding: 2rem 1.5rem 5rem;
-    position: relative;
-  }
-
-  .hero-image {
-    position: fixed;
-    inset: 0;
-    z-index: 0;
-  }
-
-  .hero-image img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    filter: blur(8px) brightness(0.4);
-    transform: scale(1.05);
-  }
-
-  .hero-overlay {
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(to bottom, rgba(0,0,0,0.3), rgba(0,0,0,0.7));
+    background-color: #F5EBDD;
   }
 
   .content {
-    position: relative;
-    z-index: 1;
     width: 100%;
     max-width: 420px;
     margin: 0 auto;
-    padding-top: 4rem;
   }
 
   .card {
-    background: var(--white);
+    background: #ffffff;
     border: 1px solid rgba(136, 101, 69, 0.1);
     border-radius: var(--radius-lg);
-    padding: 2.5rem 2rem;
+    padding: 1.5rem;
     box-shadow: var(--shadow-md);
     text-align: center;
   }
@@ -138,39 +116,69 @@ const deepLinkUrl = `tastory://story/${id}`;
     background: rgba(255, 142, 62, 0.1);
     padding: 0.35rem 0.9rem;
     border-radius: 100px;
-    margin-bottom: 1.25rem;
+    margin-bottom: 1rem;
   }
 
-  .card h1 {
+  .story-photo-wrap {
+    position: relative;
+    width: 100%;
+    border-radius: 12px;
+    overflow: hidden;
+    margin-bottom: 1rem;
+    aspect-ratio: 1;
+  }
+
+  .story-photo {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  .story-photo-overlay {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 1rem;
+    background: linear-gradient(transparent, rgba(0,0,0,0.7));
+  }
+
+  .story-restaurant {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: #ffffff;
     font-family: var(--serif);
-    font-size: clamp(1.6rem, 4vw, 2.2rem);
-    color: var(--text);
-    font-weight: 600;
-    line-height: 1.2;
-    margin-bottom: 0.5rem;
   }
 
   .user {
     color: var(--orange);
     font-weight: 600;
-    font-size: 1rem;
-    margin-bottom: 1.5rem;
+    font-size: 0.95rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .caption {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    font-style: italic;
+    margin-bottom: 1rem;
+    line-height: 1.5;
   }
 
   .cta-text {
     color: var(--text-muted);
-    font-size: 0.95rem;
+    font-size: 0.9rem;
     line-height: 1.6;
-    margin-bottom: 1.75rem;
+    margin-bottom: 1.5rem;
   }
 
   .btn-primary {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 0.5rem;
     background: var(--orange);
-    color: var(--white);
+    color: #ffffff;
     border: none;
     padding: 1rem 1.5rem;
     border-radius: var(--radius-md);
@@ -179,7 +187,7 @@ const deepLinkUrl = `tastory://story/${id}`;
     font-weight: 600;
     cursor: pointer;
     text-decoration: none;
-    transition: background 0.3s, transform 0.2s, box-shadow 0.3s;
+    transition: background 0.3s, transform 0.2s;
     width: 100%;
     margin-bottom: 1.25rem;
   }
@@ -187,7 +195,6 @@ const deepLinkUrl = `tastory://story/${id}`;
   .btn-primary:hover {
     background: var(--brown);
     transform: translateY(-1px);
-    box-shadow: 0 8px 28px rgba(255, 142, 62, 0.3);
   }
 
   .divider {
@@ -212,7 +219,7 @@ const deepLinkUrl = `tastory://story/${id}`;
     align-items: center;
     justify-content: center;
     gap: 0.5rem;
-    background: var(--beige);
+    background: #F5EBDD;
     color: var(--text);
     border: 1px solid rgba(136, 101, 69, 0.2);
     padding: 1rem 1.5rem;
