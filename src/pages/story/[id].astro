@@ -42,7 +42,7 @@ const deepLinkUrl = `tastory://story/${id}`;
           <>
             {story.photo_url && (
               <div class="story-photo-wrap">
-                <img src={story.photo_url} alt={story.restaurant_name} class="story-photo" />
+                <img src={story.photo_url} alt={story.restaurant_name} class="story-photo" crossorigin="anonymous" />
                 <div class="story-photo-overlay">
                   <span class="story-restaurant">{story.restaurant_name}</span>
                 </div>
