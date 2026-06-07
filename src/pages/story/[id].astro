@@ -8,25 +8,23 @@ const ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsI
 
 let story: { id: string; user_name: string; restaurant_name: string; restaurant_id: string; photo_url: string | null; caption: string | null } | null = null;
 
-if (id) {
-  try {
-    const url = `https://vyqpdtjpocndgdqylzeo.supabase.co/rest/v1/stories?id=eq.${encodeURIComponent(id)}&visibility=eq.public&select=id,user_name,restaurant_name,restaurant_id,photo_url,caption`;
-    const res = await fetch(url, {
-      method: 'GET',
-      headers: {
-        'apikey': ANON_KEY,
-        'Authorization': `Bearer ${ANON_KEY}`,
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-      },
-    });
-    if (res.ok) {
-      const data = await res.json();
-      story = Array.isArray(data) && data.length > 0 ? data[0] : null;
-    }
-  } catch {
-    story = null;
+try {
+  const url = `https://vyqpdtjpocndgdqylzeo.supabase.co/rest/v1/stories?id=eq.${id}&visibility=eq.public&select=id,user_name,restaurant_name,restaurant_id,photo_url,caption`;
+  const res = await fetch(url, {
+    method: 'GET',
+    headers: {
+      'apikey': ANON_KEY,
+      'Authorization': `Bearer ${ANON_KEY}`,
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+    },
+  });
+  if (res.ok) {
+    const data = await res.json();
+    story = Array.isArray(data) && data.length > 0 ? data[0] : null;
   }
+} catch {
+  story = null;
 }
 
 const title = story
@@ -121,7 +119,7 @@ const deepLinkUrl = `tastory://story/${id}`;
     letter-spacing: 0.12em;
     text-transform: uppercase;
     color: var(--orange);
-    background: rgba(255, 142, 6, 0.1);
+    background: rgba(255, 142, 62, 0.1);
     padding: 0.35rem 0.9rem;
     border-radius: 100px;
     margin-bottom: 1rem;
