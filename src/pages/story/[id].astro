@@ -8,7 +8,7 @@ let story: { id: string; user_name: string; restaurant_name: string; restaurant_
 
 if (id) {
   try {
-    const url = `https://vyqpdtjpocndgdqylzeo.supabase.co/rest/v1/stories?id=eq.${id}&select=id,user_name,restaurant_name,restaurant_id,photo_url,caption&visibility=eq.public`;
+    const url = `https://vyqpdtjpocndgdqylzeo.supabase.co/rest/v1/stories?id=eq.${id}&visibility=eq.public&select=id,user_name,restaurant_name,restaurant_id,photo_url,caption`;
     const res = await fetch(url, {
       headers: {
         'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ5cXBkdGpwb2NuZGdkcXlsemVvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzgwNjM2MTksImV4cCI6MjA1MzYzOTYxOX0.y7HGiROl1FH6vYBWD2MlFWOqEj_x5UIBgMBm7NBXH5Q',
@@ -46,7 +46,7 @@ const deepLinkUrl = `tastory://story/${id}`;
           <>
             {story.photo_url && (
               <div class="story-photo-wrap">
-                <img src={story.photo_url} alt={story.restaurant_name} class="story-photo" crossorigin="anonymous" />
+                <img src={story.photo_url} alt={story.restaurant_name} class="story-photo" />
                 <div class="story-photo-overlay">
                   <span class="story-restaurant">{story.restaurant_name}</span>
                 </div>
