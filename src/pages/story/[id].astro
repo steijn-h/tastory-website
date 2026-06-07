@@ -4,15 +4,16 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 
 const { id } = Astro.params;
 
+const ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ5cXBkdGpwb2NuZGdkcXlsemVvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzgwNjM2MTksImV4cCI6MjA1MzYzOTYxOX0.y7HGiROl1FH6vYBWD2MlFWOqEj_x5UIBgMBm7NBXH5Q';
+
 let story: { id: string; user_name: string; restaurant_name: string; restaurant_id: string; photo_url: string | null; caption: string | null } | null = null;
 
 if (id) {
   try {
-    const url = `https://vyqpdtjpocndgdqylzeo.supabase.co/rest/v1/stories?id=eq.${id}&visibility=eq.public&select=id,user_name,restaurant_name,restaurant_id,photo_url,caption`;
+    const url = `https://vyqpdtjpocndgdqylzeo.supabase.co/rest/v1/stories?id=eq.${id}&visibility=eq.public&select=id,user_name,restaurant_name,restaurant_id,photo_url,caption&apikey=${ANON_KEY}`;
     const res = await fetch(url, {
       headers: {
-        'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ5cXBkdGpwb2NuZGdkcXlsemVvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzgwNjM2MTksImV4cCI6MjA1MzYzOTYxOX0.y7HGiROl1FH6vYBWD2MlFWOqEj_x5UIBgMBm7NBXH5Q',
-        'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ5cXBkdGpwb2NuZGdkcXlsemVvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzgwNjM2MTksImV4cCI6MjA1MzYzOTYxOX0.y7HGiROl1FH6vYBWD2MlFWOqEj_x5UIBgMBm7NBXH5Q',
+        'Authorization': `Bearer ${ANON_KEY}`,
         'Content-Type': 'application/json',
       },
     });
