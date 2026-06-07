@@ -4,24 +4,13 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 
 const { id } = Astro.params;
 
-const ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ5cXBkdGpwb2NuZGdkcXlsemVvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzgwNjM2MTksImV4cCI6MjA1MzYzOTYxOX0.y7HGiROl1FH6vYBWD2MlFWOqEj_x5UIBgMBm7NBXH5Q';
-
 let story: { id: string; user_name: string; restaurant_name: string; restaurant_id: string; photo_url: string | null; caption: string | null } | null = null;
 
 try {
-  const url = `https://vyqpdtjpocndgdqylzeo.supabase.co/rest/v1/stories?id=eq.${id}&visibility=eq.public&select=id,user_name,restaurant_name,restaurant_id,photo_url,caption`;
-  const res = await fetch(url, {
-    method: 'GET',
-    headers: {
-      'apikey': ANON_KEY,
-      'Authorization': `Bearer ${ANON_KEY}`,
-      'Content-Type': 'application/json',
-      'Accept': 'application/json',
-    },
-  });
+  const res = await fetch(`https://vyqpdtjpocndgdqylzeo.supabase.co/functions/v1/Foto-bij-delen?id=${id}`);
   if (res.ok) {
     const data = await res.json();
-    story = Array.isArray(data) && data.length > 0 ? data[0] : null;
+    story = data ?? null;
   }
 } catch {
   story = null;
