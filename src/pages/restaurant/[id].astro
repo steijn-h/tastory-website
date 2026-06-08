@@ -1,4 +1,4 @@
----
+ ---
 export const prerender = false;
 import BaseLayout from '../../layouts/BaseLayout.astro';
 
@@ -30,13 +30,14 @@ try {
 }
 
 const priceLabel = (level: number | null) => '€'.repeat(Math.max(1, Math.min(level ?? 1, 4)));
+const firstPhoto = restaurant?.photo_url?.split(',')[0]?.trim() ?? null;
 
 const title = restaurant
   ? `${restaurant.name} in ${restaurant.city} — Tastory`
   : 'Restaurant — Tastory';
 const description = restaurant?.description
   ?? (restaurant ? `Bekijk ${restaurant.name} op Tastory.` : 'Bekijk dit restaurant op Tastory.');
-const ogImage = restaurant?.photo_url ?? 'https://tastory.nl/og-image.png';
+const ogImage = firstPhoto ?? 'https://tastory.nl/og-image.png';
 const appStoreUrl = 'https://apps.apple.com/nl/app/tastory/id6744042066';
 const deepLinkUrl = `tastory://restaurant/${id}`;
 ---
@@ -47,9 +48,9 @@ const deepLinkUrl = `tastory://restaurant/${id}`;
       <div class="card reveal">
         {restaurant ? (
           <>
-            {restaurant.photo_url && (
+            {firstPhoto && (
               <div class="photo-wrap">
-                <img src={restaurant.photo_url} alt={restaurant.name} class="photo" />
+                <img src={firstPhoto} alt={restaurant.name} class="photo" />
               </div>
             )}
             <div class="info">
