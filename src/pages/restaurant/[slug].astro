@@ -110,26 +110,29 @@ const isPremium = restaurant?.is_premium === true;
             </section>
           )}
 
+          {restaurant!.opening_hours && (
+            <section class="section reveal mobile-only">
+              <h2 class="section-title">Openingstijden</h2>
+              <p class="hours-text">{restaurant!.opening_hours}</p>
+            </section>
+          )}
+
           <!-- CTA blok (desktop, direct onder beschrijving) -->
           <div class="cta-card reveal">
-            <p class="cta-eyebrow">Meer zien?</p>
-            <p class="cta-title">Bekijk video's, reviews<br/>en reserveer via Tastory</p>
             <a href={deepLinkUrl} class="btn-primary" id="open-app-btn">
               Open in Tastory
             </a>
-            <div class="divider"><span>Nog geen Tastory?</span></div>
             <a href={appStoreUrl} class="btn-secondary" target="_blank" rel="noopener noreferrer">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/>
               </svg>
               Download Tastory — gratis
             </a>
-            <p class="store-note">Beschikbaar op iOS · Binnenkort op Android</p>
           </div>
 
         </div>
 
-        <!-- Rechter kolom: foto's + openingstijden -->
+        <!-- Rechter kolom: foto's (desktop) + openingstijden (desktop) -->
         <div class="col-media">
           {allPhotos.length > 0 && (
             <section class="section reveal">
@@ -145,7 +148,7 @@ const isPremium = restaurant?.is_premium === true;
           )}
 
           {restaurant!.opening_hours && (
-            <section class="section reveal">
+            <section class="section reveal desktop-only">
               <h2 class="section-title">Openingstijden</h2>
               <p class="hours-text">{restaurant!.opening_hours}</p>
             </section>
@@ -403,28 +406,9 @@ const isPremium = restaurant?.is_premium === true;
 
   /* CTA kaart */
   .cta-card {
-    background: #fff;
-    border-radius: var(--radius-lg);
-    padding: var(--space-xl);
-    box-shadow: var(--shadow-lg);
-    text-align: center;
-  }
-
-  .cta-eyebrow {
-    font-size: var(--text-xs);
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    color: var(--orange);
-    margin-bottom: var(--space-xs);
-  }
-
-  .cta-title {
-    font-family: var(--serif);
-    font-size: var(--text-xl);
-    color: var(--text);
-    line-height: 1.3;
-    margin-bottom: var(--space-lg);
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
   }
 
   /* Fotogalerij (rechter kolom) */
@@ -435,14 +419,14 @@ const isPremium = restaurant?.is_premium === true;
   }
 
   .gallery-item {
-    aspect-ratio: 4/3;
+    aspect-ratio: 3/2;
     overflow: hidden;
     border-radius: var(--radius-sm);
   }
 
   .gallery-item:first-child {
     grid-column: 1 / -1;
-    aspect-ratio: 16/9;
+    aspect-ratio: 21/9;
   }
 
   .gallery-item img {
@@ -457,6 +441,10 @@ const isPremium = restaurant?.is_premium === true;
     transform: scale(1.04);
   }
 
+  /* Desktop/mobiel zichtbaarheid */
+  .mobile-only { display: none; }
+  .desktop-only { display: block; }
+
   /* Mobiele sticky CTA */
   .mobile-cta {
     display: none;
@@ -464,11 +452,9 @@ const isPremium = restaurant?.is_premium === true;
     bottom: 0;
     left: 0;
     right: 0;
-    padding: 0.75rem 1rem;
-    background: #fff;
-    border-top: 1px solid rgba(136, 101, 69, 0.12);
-    box-shadow: 0 -4px 20px rgba(136, 101, 69, 0.1);
-    gap: 0.75rem;
+    padding: 0.75rem 1rem 1rem;
+    background: transparent;
+    gap: 0.6rem;
     z-index: 100;
     align-items: center;
   }
@@ -487,6 +473,7 @@ const isPremium = restaurant?.is_premium === true;
     border-radius: var(--radius-md);
     text-decoration: none;
     transition: background 0.2s;
+    box-shadow: 0 4px 16px rgba(255, 142, 62, 0.4);
   }
 
   .mobile-cta-btn:hover { background: var(--brown); }
@@ -495,20 +482,22 @@ const isPremium = restaurant?.is_premium === true;
     display: flex;
     align-items: center;
     justify-content: center;
-    background: var(--beige);
+    background: rgba(255, 255, 255, 0.92);
+    backdrop-filter: blur(8px);
     color: var(--text);
     font-family: var(--sans);
     font-size: 0.9rem;
     font-weight: 600;
-    padding: 0.85rem 1.25rem;
+    padding: 0.85rem 1.1rem;
     border-radius: var(--radius-md);
-    border: 1px solid rgba(136, 101, 69, 0.2);
+    border: 1px solid rgba(136, 101, 69, 0.15);
     text-decoration: none;
     white-space: nowrap;
     transition: background 0.2s;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
   }
 
-  .mobile-cta-download:hover { background: rgba(136, 101, 69, 0.1); }
+  .mobile-cta-download:hover { background: #fff; }
 
   /* ── RESPONSIVE ───────────────────────────────────────── */
 
@@ -537,26 +526,39 @@ const isPremium = restaurant?.is_premium === true;
       order: 1;
     }
 
+    /* Mobiele galerij: foto's als swipeable rij met peek van volgende */
     .gallery {
-      grid-template-columns: 1fr 1fr;
-      overflow-x: auto;
       display: flex;
       flex-wrap: nowrap;
-      gap: 0.5rem;
-      padding-bottom: 0.5rem;
+      gap: 0.75rem;
+      overflow-x: auto;
       scroll-snap-type: x mandatory;
       -webkit-overflow-scrolling: touch;
+      padding: 0 var(--space-md) var(--space-sm);
+      margin: 0 calc(-1 * var(--space-md));
+      scrollbar-width: none;
     }
 
+    .gallery::-webkit-scrollbar { display: none; }
+
     .gallery-item {
-      flex: 0 0 75vw;
+      flex: 0 0 80vw;
       scroll-snap-align: start;
       aspect-ratio: 4/3;
+      border-radius: var(--radius-md);
     }
 
     .gallery-item:first-child {
-      flex: 0 0 85vw;
+      flex: 0 0 80vw;
       aspect-ratio: 4/3;
+    }
+
+    /* Beschrijving en openingstijden onder de foto's op mobiel */
+    .col-info .section:first-child { order: 1; }
+
+    /* Openingstijden verplaatsen naar onder beschrijving op mobiel */
+    .col-media .section:last-child {
+      order: 3;
     }
 
     .mobile-cta {
@@ -566,6 +568,9 @@ const isPremium = restaurant?.is_premium === true;
     .cta-card {
       display: none;
     }
+
+    .mobile-only { display: block; }
+    .desktop-only { display: none; }
 
     .premium-page {
       padding-bottom: 5rem;
