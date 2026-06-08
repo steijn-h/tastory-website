@@ -241,18 +241,21 @@ const isPremium = restaurant?.is_premium === true;
 </BaseLayout>
 
 <style is:global>
-  .restaurant-premium-page footer {
+  body.page-restaurant footer {
     background: var(--beige-dark) !important;
-    color: var(--text-muted);
+    color: var(--text-muted) !important;
   }
 
-  .restaurant-premium-page footer a,
-  .restaurant-premium-page footer h4 {
+  body.page-restaurant footer a,
+  body.page-restaurant footer h4,
+  body.page-restaurant footer .footer-brand {
     color: var(--text) !important;
+    opacity: 1 !important;
   }
 
-  .restaurant-premium-page footer .footer-brand {
-    color: var(--text) !important;
+  body.page-restaurant footer .footer-brand-sub {
+    color: var(--text-muted) !important;
+    opacity: 1 !important;
   }
 </style>
 
@@ -816,6 +819,9 @@ const isPremium = restaurant?.is_premium === true;
 </style>
 
 <script>
+  // Zet body class voor footer styling
+  document.body.classList.add('page-restaurant');
+
   // Deep link handlers
   document.getElementById('open-app-btn')?.addEventListener('click', (e) => {
     e.preventDefault();
