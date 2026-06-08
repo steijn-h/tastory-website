@@ -8,7 +8,6 @@ let restaurant: {
   id: string;
   name: string;
   photo_url: string | null;
-  photos: string[] | null;
   background_url: string | null;
   city: string | null;
   cuisine: string | null;
@@ -21,6 +20,7 @@ let restaurant: {
   slug: string | null;
   opening_hours: string | null;
   is_premium: boolean;
+  video_url: string | null;
 } | null = null;
 
 try {
@@ -34,13 +34,12 @@ try {
 }
 
 const priceLabel = (level: number | null) => '€'.repeat(Math.max(1, Math.min(level ?? 1, 4)));
-const allPhotos: string[] = restaurant?.photos?.length
-  ? restaurant.photos
-  : restaurant?.photo_url
-    ? restaurant.photo_url.split(',').map(s => s.trim()).filter(Boolean)
-    : [];
+const allPhotos: string[] = restaurant?.photo_url
+  ? restaurant.photo_url.split(',').map(s => s.trim()).filter(Boolean)
+  : [];
 const heroPhoto = allPhotos[0] ?? null;
 const galleryPhotos = allPhotos.slice(1, 5);
+const videoUrl = restaurant?.video_url ?? null;
 
 
 const appStoreUrl = 'https://apps.apple.com/nl/app/tastory/id6744042066';
@@ -67,7 +66,10 @@ const isPremium = restaurant?.is_premium === true;
 
       <!-- Hero -->
       <div class="hero">
-        {heroPhoto
+        {videoUrl
+          ? (
+            <video src={videoUrl} class="hero-img" autoplay muted loop playsinline />
+          ) : heroPhoto
           ? <img src={heroPhoto} alt={`${restaurant!.name} — sfeerbeeld`} class="hero-img" />
           : <div class="hero-placeholder" />
         }
