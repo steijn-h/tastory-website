@@ -81,7 +81,6 @@ const isPremium = restaurant?.is_premium === true;
         )}
         <div class="hero-overlay" />
         <div class="hero-content">
-          <span class="badge">Partner restaurant</span>
           <h1 class="hero-name">{restaurant!.name}</h1>
           <p class="hero-city">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
@@ -283,20 +282,7 @@ const isPremium = restaurant?.is_premium === true;
     color: #fff;
   }
 
-  .badge {
-    display: inline-block;
-    font-size: var(--text-xs);
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    background: var(--orange);
-    color: #fff;
-    padding: 0.3rem 0.8rem;
-    border-radius: 100px;
-    margin-bottom: var(--space-sm);
-  }
-
-  .hero-name {
+.hero-name {
     font-family: var(--serif);
     font-size: clamp(2.2rem, 6vw, 4rem);
     font-weight: 700;
