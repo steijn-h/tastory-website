@@ -39,17 +39,22 @@ const allPhotos: string[] = restaurant?.photo_url
   : [];
 const videoUrl = restaurant?.video_url ?? null;
 const backgroundUrl = restaurant?.background_url ?? null;
-const heroPhoto = backgroundUrl ?? allPhotos[0] ?? null;
+const heroPhoto = allPhotos[0] ?? null;
+const visiblePhotos = allPhotos.slice(0, 3);
+const extraCount = allPhotos.length - 3;
 
 const appStoreUrl = 'https://apps.apple.com/nl/app/tastory/id6744042066';
 const deepLinkUrl = `tastory://restaurant/${restaurant?.id ?? ''}`;
+const mapsUrl = restaurant?.address
+  ? `https://maps.google.com/?q=${encodeURIComponent(restaurant.address + ' ' + (restaurant.city ?? ''))}`
+  : null;
 
 const title = restaurant
   ? `${restaurant.name} in ${restaurant.city} — Tastory`
   : 'Restaurant — Tastory';
 const description = restaurant?.description
   ?? (restaurant ? `Bekijk ${restaurant.name} op Tastory.` : 'Bekijk dit restaurant op Tastory.');
-const ogImage = allPhotos[0] ?? 'https://tastory.nl/og-image.png';
+const ogImage = heroPhoto ?? 'https://tastory.nl/og-image.png';
 const keywords = restaurant
   ? [restaurant.name!, restaurant.city!, restaurant.cuisine!, restaurant.vibe!, 'restaurant', 'Tastory']
       .filter(Boolean) as string[]
@@ -61,118 +66,145 @@ const isPremium = restaurant?.is_premium === true;
 <BaseLayout ogImage={ogImage} title={title} description={description} keywords={keywords}>
   {isPremium ? (
 
-    <!-- PREMIUM PAGINA -->
-    <div class="premium-page">
+    <div class="premium-page" style={backgroundUrl ? `background-image: url('${backgroundUrl}')` : ''}>
+      <div class="page-inner">
 
-      <!-- Hero: video of eerste foto -->
-      <div class="hero">
-        {videoUrl ? (
-          <>
-            <video id="hero-video" src={videoUrl} class="hero-media" loop playsinline preload="metadata" />
-            <button class="play-btn" id="play-btn" aria-label="Speel video af">
-              <svg viewBox="0 0 24 24" fill="currentColor" width="32" height="32">
-                <path d="M8 5v14l11-7z"/>
-              </svg>
-            </button>
-          </>
-        ) : heroPhoto ? (
-          <img src={heroPhoto} alt={`${restaurant!.name}`} class="hero-media" />
-        ) : (
-          <div class="hero-placeholder" />
+        <!-- Hero: video of eerste foto -->
+        <div class="hero reveal">
+          {videoUrl ? (
+            <>
+              <video id="hero-video" src={videoUrl} class="hero-media" loop playsinline preload="metadata" />
+              <button class="play-btn" id="play-btn" aria-label="Speel video af">
+                <svg viewBox="0 0 24 24" fill="currentColor" width="32" height="32">
+                  <path d="M8 5v14l11-7z"/>
+                </svg>
+              </button>
+            </>
+          ) : heroPhoto ? (
+            <img src={heroPhoto} alt={restaurant!.name} class="hero-media" />
+          ) : (
+            <div class="hero-placeholder" />
+          )}
+          <div class="hero-overlay" />
+          <div class="hero-content">
+            <h1 class="hero-name">{restaurant!.name}</h1>
+            <p class="hero-city">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+              {restaurant!.city}{restaurant!.address && <span class="hero-address"> · {restaurant!.address}</span>}
+            </p>
+            <div class="hero-tags">
+              {restaurant!.cuisine && <span class="hero-tag">{restaurant!.cuisine}</span>}
+              {restaurant!.vibe && <span class="hero-tag">{restaurant!.vibe}</span>}
+              {restaurant!.price_level && <span class="hero-tag">{priceLabel(restaurant!.price_level)}</span>}
+              {restaurant!.weighted_score && (
+                <span class="hero-tag score">★ {Number(restaurant!.weighted_score).toFixed(1)}</span>
+              )}
+            </div>
+          </div>
+        </div>
+
+        <!-- CTA: 4 vakken -->
+        <div class="cta-grid reveal">
+          <a href={deepLinkUrl} class="cta-block cta-primary" id="open-app-btn">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>
+            <span class="cta-block-label">Open in Tastory</span>
+            <span class="cta-block-sub">Bekijk video's & reviews</span>
+          </a>
+          <a href={appStoreUrl} class="cta-block cta-secondary" target="_blank" rel="noopener noreferrer">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>
+            <span class="cta-block-label">Download Tastory</span>
+            <span class="cta-block-sub">Gratis op iOS</span>
+          </a>
+          {mapsUrl ? (
+            <a href={mapsUrl} class="cta-block cta-info" target="_blank" rel="noopener noreferrer">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+              <span class="cta-block-label">{restaurant!.address}</span>
+              <span class="cta-block-sub">Bekijk op kaart</span>
+            </a>
+          ) : (
+            <div class="cta-block cta-info">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+              <span class="cta-block-label">{restaurant!.city}</span>
+              <span class="cta-block-sub">Locatie</span>
+            </div>
+          )}
+          <div class="cta-block cta-info">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M11 9H13V7H11M12 20C7.59 20 4 16.41 4 12S7.59 4 12 4 20 7.59 20 12 16.41 20 12 20M12 2C6.48 2 2 6.48 2 12S6.48 22 12 22 22 17.52 22 12 17.52 2 12 2M11 17H13V11H11V17Z"/></svg>
+            <span class="cta-block-label">
+              {[restaurant!.cuisine, restaurant!.vibe, restaurant!.price_level ? priceLabel(restaurant!.price_level) : null].filter(Boolean).join(' · ')}
+            </span>
+            <span class="cta-block-sub">Sfeer & keuken</span>
+          </div>
+        </div>
+
+        <!-- Beschrijving -->
+        {restaurant!.description && (
+          <section class="content-section reveal">
+            <h2 class="section-title">Over dit restaurant</h2>
+            <p class="description">{restaurant!.description}</p>
+          </section>
         )}
-        <div class="hero-overlay" />
-        <div class="hero-content">
-          <h1 class="hero-name">{restaurant!.name}</h1>
-          <p class="hero-city">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
-            {restaurant!.city}{restaurant!.address && <span class="hero-address"> · {restaurant!.address}</span>}
-          </p>
-          <div class="hero-tags">
-            {restaurant!.cuisine && <span class="hero-tag">{restaurant!.cuisine}</span>}
-            {restaurant!.vibe && <span class="hero-tag">{restaurant!.vibe}</span>}
-            {restaurant!.price_level && <span class="hero-tag">{priceLabel(restaurant!.price_level)}</span>}
-            {restaurant!.weighted_score && (
-              <span class="hero-tag score">★ {Number(restaurant!.weighted_score).toFixed(1)}</span>
-            )}
-          </div>
-        </div>
-      </div>
 
-      <!-- Desktop twee-kolom layout -->
-      <div class="page-body">
-
-        <!-- Linker kolom: beschrijving + CTA -->
-        <div class="col-info">
-
-          {restaurant!.description && (
-            <section class="section reveal">
-              <h2 class="section-title">Over dit restaurant</h2>
-              <p class="description">{restaurant!.description}</p>
-            </section>
-          )}
-
-          {restaurant!.opening_hours && (
-            <section class="section reveal mobile-only">
-              <h2 class="section-title">Openingstijden</h2>
-              <p class="hours-text">{restaurant!.opening_hours}</p>
-            </section>
-          )}
-
-          <!-- CTA blok (desktop, direct onder beschrijving) -->
-          <div class="cta-card reveal">
-            <a href={deepLinkUrl} class="btn-primary" id="open-app-btn">
-              Open in Tastory
-            </a>
-            <a href={appStoreUrl} class="btn-secondary" target="_blank" rel="noopener noreferrer">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/>
-              </svg>
-              Download Tastory — gratis
-            </a>
-          </div>
-
-        </div>
-
-        <!-- Rechter kolom: foto's (desktop) + openingstijden (desktop) -->
-        <div class="col-media">
-          {allPhotos.length > 0 && (
-            <section class="section reveal">
-              <h2 class="section-title">Foto's</h2>
-              <div class="gallery">
-                {allPhotos.map((src, i) => (
+        <!-- Foto's -->
+        {allPhotos.length > 0 && (
+          <section class="content-section reveal">
+            <h2 class="section-title">Foto's</h2>
+            <div class="gallery">
+              {visiblePhotos.map((src, i) => (
+                <div class="gallery-item" data-index={i}>
+                  <img src={src} alt={`${restaurant!.name} foto ${i + 1}`} loading={i === 0 ? 'eager' : 'lazy'} />
+                </div>
+              ))}
+              {extraCount > 0 && (
+                <button class="gallery-more" id="gallery-more-btn">
+                  <span>+{extraCount}</span>
+                  <span class="gallery-more-sub">meer foto's</span>
+                </button>
+              )}
+            </div>
+            <!-- Verborgen extra foto's -->
+            {extraCount > 0 && (
+              <div class="gallery-extra" id="gallery-extra" style="display:none">
+                {allPhotos.slice(3).map((src, i) => (
                   <div class="gallery-item">
-                    <img src={src} alt={`${restaurant!.name} foto ${i + 1}`} loading={i === 0 ? 'eager' : 'lazy'} />
+                    <img src={src} alt={`${restaurant!.name} foto ${i + 4}`} loading="lazy" />
                   </div>
                 ))}
               </div>
-            </section>
-          )}
+            )}
+          </section>
+        )}
 
-          {restaurant!.opening_hours && (
-            <section class="section reveal desktop-only">
-              <h2 class="section-title">Openingstijden</h2>
-              <p class="hours-text">{restaurant!.opening_hours}</p>
-            </section>
-          )}
+        <!-- Lightbox -->
+        <div class="lightbox" id="lightbox" style="display:none">
+          <button class="lightbox-close" id="lightbox-close">✕</button>
+          <button class="lightbox-prev" id="lightbox-prev">‹</button>
+          <button class="lightbox-next" id="lightbox-next">›</button>
+          <img class="lightbox-img" id="lightbox-img" src="" alt="" />
+          <p class="lightbox-counter" id="lightbox-counter"></p>
         </div>
+
+        <!-- Openingstijden -->
+        {restaurant!.opening_hours && (
+          <section class="content-section reveal">
+            <h2 class="section-title">Openingstijden</h2>
+            <p class="hours-text">{restaurant!.opening_hours}</p>
+          </section>
+        )}
 
       </div>
 
       <!-- Mobiele sticky CTA balk -->
-      <div class="mobile-cta" id="mobile-cta">
-        <a href={deepLinkUrl} class="mobile-cta-btn" id="mobile-app-btn">
-          Bekijk in Tastory
-        </a>
-        <a href={appStoreUrl} class="mobile-cta-download" target="_blank" rel="noopener noreferrer">
-          Download
-        </a>
+      <div class="mobile-cta">
+        <a href={deepLinkUrl} class="mobile-cta-btn" id="mobile-app-btn">Open in Tastory</a>
+        <a href={appStoreUrl} class="mobile-cta-download" target="_blank" rel="noopener noreferrer">Download</a>
       </div>
 
     </div>
 
   ) : (
 
-    <!-- STANDAARD PAGINA (niet-premium) -->
+    <!-- STANDAARD PAGINA -->
     <div class="restaurant-page">
       <div class="content">
         <div class="card reveal">
@@ -194,26 +226,17 @@ const isPremium = restaurant?.is_premium === true;
                     <span class="tag score">★ {Number(restaurant.weighted_score).toFixed(1)}</span>
                   )}
                 </div>
-                {restaurant.description && (
-                  <p class="description">{restaurant.description}</p>
-                )}
-                {restaurant.address && (
-                  <p class="address">📍 {restaurant.address}</p>
-                )}
+                {restaurant.description && <p class="description">{restaurant.description}</p>}
+                {restaurant.address && <p class="address">📍 {restaurant.address}</p>}
               </div>
             </>
           ) : (
             <h1>Restaurant bekijken</h1>
           )}
-
-          <a href={deepLinkUrl} class="btn-primary" id="open-app-btn">
-            Open in Tastory
-          </a>
+          <a href={deepLinkUrl} class="btn-primary" id="open-app-btn">Open in Tastory</a>
           <div class="divider"><span>Heb je Tastory nog niet?</span></div>
           <a href={appStoreUrl} class="btn-secondary" target="_blank" rel="noopener noreferrer">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/>
-            </svg>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>
             Download Tastory
           </a>
           <p class="store-note">Beschikbaar op iOS · Binnenkort op Android</p>
@@ -228,18 +251,31 @@ const isPremium = restaurant?.is_premium === true;
   /* ── PREMIUM PAGE ─────────────────────────────────────── */
 
   .premium-page {
-    background: var(--beige);
     min-height: 100vh;
-    padding-bottom: 6rem; /* ruimte voor mobiele sticky balk */
+    background-color: var(--beige);
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+    padding-bottom: 5rem;
+  }
+
+  .page-inner {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 0 var(--space-lg) var(--space-2xl);
   }
 
   /* Hero */
   .hero {
     position: relative;
-    height: 100vh;
-    min-height: 480px;
-    max-height: 700px;
+    width: 100%;
+    height: 70vh;
+    min-height: 400px;
+    max-height: 620px;
     overflow: hidden;
+    border-radius: 0 0 var(--radius-xl) var(--radius-xl);
+    margin-bottom: var(--space-xl);
+    box-shadow: var(--shadow-xl);
   }
 
   .hero-media {
@@ -267,13 +303,13 @@ const isPremium = restaurant?.is_premium === true;
     bottom: 0;
     left: 0;
     right: 0;
-    padding: var(--space-2xl) var(--space-xl);
+    padding: var(--space-2xl);
     color: #fff;
   }
 
-.hero-name {
+  .hero-name {
     font-family: var(--serif);
-    font-size: clamp(2.2rem, 6vw, 4rem);
+    font-size: clamp(2.2rem, 5vw, 3.5rem);
     font-weight: 700;
     line-height: 1.05;
     margin-bottom: 0.5rem;
@@ -288,9 +324,7 @@ const isPremium = restaurant?.is_premium === true;
     margin-bottom: var(--space-md);
   }
 
-  .hero-address {
-    opacity: 0.7;
-  }
+  .hero-address { opacity: 0.7; }
 
   .hero-tags {
     display: flex;
@@ -310,7 +344,7 @@ const isPremium = restaurant?.is_premium === true;
   }
 
   .hero-tag.score {
-    background: rgba(255, 142, 62, 0.7);
+    background: rgba(255,142,62,0.75);
     border-color: transparent;
   }
 
@@ -340,29 +374,69 @@ const isPremium = restaurant?.is_premium === true;
     transform: translate(-50%, -50%) scale(1.05);
   }
 
-  .play-btn.hidden {
-    display: none;
-  }
+  .play-btn.hidden { display: none; }
 
-  /* Twee-kolom body */
-  .page-body {
-    max-width: 1100px;
-    margin: 0 auto;
-    padding: var(--space-2xl) var(--space-xl);
+  /* CTA grid: 4 vakken */
+  .cta-grid {
     display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: var(--space-2xl);
-    align-items: start;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0.75rem;
+    margin-bottom: var(--space-xl);
   }
 
-  .col-info {
-    position: sticky;
-    top: 2rem;
+  .cta-block {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.3rem;
+    padding: var(--space-lg) var(--space-md);
+    border-radius: var(--radius-md);
+    text-decoration: none;
+    text-align: center;
+    transition: transform 0.2s, box-shadow 0.2s;
+    cursor: pointer;
+    border: none;
   }
 
-  /* Sections */
-  .section {
+  .cta-block:hover { transform: translateY(-2px); box-shadow: var(--shadow-lg); }
+
+  .cta-primary {
+    background: var(--orange);
+    color: #fff;
+  }
+
+  .cta-secondary {
+    background: var(--brown);
+    color: #fff;
+  }
+
+  .cta-info {
+    background: rgba(255,255,255,0.85);
+    backdrop-filter: blur(8px);
+    color: var(--text);
+  }
+
+  .cta-block-label {
+    font-family: var(--sans);
+    font-size: var(--text-sm);
+    font-weight: 700;
+    line-height: 1.2;
+  }
+
+  .cta-block-sub {
+    font-size: var(--text-xs);
+    opacity: 0.75;
+  }
+
+  /* Content secties */
+  .content-section {
+    background: rgba(255,255,255,0.85);
+    backdrop-filter: blur(8px);
+    border-radius: var(--radius-lg);
+    padding: var(--space-xl);
     margin-bottom: var(--space-lg);
+    box-shadow: var(--shadow-sm);
   }
 
   .section-title {
@@ -371,7 +445,7 @@ const isPremium = restaurant?.is_premium === true;
     color: var(--text);
     margin-bottom: var(--space-md);
     padding-bottom: var(--space-sm);
-    border-bottom: 1px solid rgba(136, 101, 69, 0.15);
+    border-bottom: 1px solid rgba(136,101,69,0.15);
   }
 
   .description {
@@ -387,47 +461,18 @@ const isPremium = restaurant?.is_premium === true;
     white-space: pre-line;
   }
 
-  .address-link {
-    display: flex;
-    align-items: flex-start;
-    gap: 0.5rem;
-    font-size: var(--text-base);
-    color: var(--orange);
-    text-decoration: none;
-    line-height: 1.6;
-    transition: opacity 0.2s;
-  }
-
-  .address-link:hover { opacity: 0.75; }
-
-  .address-link svg {
-    flex-shrink: 0;
-    margin-top: 0.25rem;
-  }
-
-  /* CTA kaart */
-  .cta-card {
-    display: flex;
-    flex-direction: column;
-    gap: 0.6rem;
-  }
-
-  /* Fotogalerij (rechter kolom) */
+  /* Fotogalerij */
   .gallery {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: repeat(3, 1fr);
     gap: 0.5rem;
   }
 
   .gallery-item {
-    aspect-ratio: 3/2;
+    aspect-ratio: 4/3;
     overflow: hidden;
     border-radius: var(--radius-sm);
-  }
-
-  .gallery-item:first-child {
-    grid-column: 1 / -1;
-    aspect-ratio: 21/9;
+    cursor: pointer;
   }
 
   .gallery-item img {
@@ -438,13 +483,111 @@ const isPremium = restaurant?.is_premium === true;
     display: block;
   }
 
-  .gallery-item img:hover {
-    transform: scale(1.04);
+  .gallery-item:hover img { transform: scale(1.05); }
+
+  .gallery-more {
+    aspect-ratio: 4/3;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: rgba(136,101,69,0.12);
+    border: none;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: background 0.2s;
+    gap: 0.25rem;
   }
 
-  /* Desktop/mobiel zichtbaarheid */
-  .mobile-only { display: none; }
-  .desktop-only { display: block; }
+  .gallery-more:hover { background: rgba(136,101,69,0.2); }
+
+  .gallery-more span:first-child {
+    font-family: var(--serif);
+    font-size: var(--text-2xl);
+    font-weight: 700;
+    color: var(--brown);
+  }
+
+  .gallery-more-sub {
+    font-size: var(--text-xs);
+    color: var(--text-muted);
+  }
+
+  .gallery-extra {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+  }
+
+  /* Lightbox */
+  .lightbox {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.92);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .lightbox-img {
+    max-width: 90vw;
+    max-height: 85vh;
+    object-fit: contain;
+    border-radius: var(--radius-sm);
+  }
+
+  .lightbox-close {
+    position: absolute;
+    top: 1.25rem;
+    right: 1.25rem;
+    background: rgba(255,255,255,0.15);
+    border: none;
+    color: #fff;
+    font-size: 1.25rem;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s;
+  }
+
+  .lightbox-close:hover { background: rgba(255,255,255,0.25); }
+
+  .lightbox-prev, .lightbox-next {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(255,255,255,0.15);
+    border: none;
+    color: #fff;
+    font-size: 2rem;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s;
+  }
+
+  .lightbox-prev { left: 1.25rem; }
+  .lightbox-next { right: 1.25rem; }
+  .lightbox-prev:hover, .lightbox-next:hover { background: rgba(255,255,255,0.25); }
+
+  .lightbox-counter {
+    position: absolute;
+    bottom: 1.25rem;
+    left: 50%;
+    transform: translateX(-50%);
+    color: rgba(255,255,255,0.7);
+    font-size: var(--text-sm);
+  }
 
   /* Mobiele sticky CTA */
   .mobile-cta {
@@ -454,7 +597,6 @@ const isPremium = restaurant?.is_premium === true;
     left: 0;
     right: 0;
     padding: 0.75rem 1rem 1rem;
-    background: transparent;
     gap: 0.6rem;
     z-index: 100;
     align-items: center;
@@ -474,7 +616,7 @@ const isPremium = restaurant?.is_premium === true;
     border-radius: var(--radius-md);
     text-decoration: none;
     transition: background 0.2s;
-    box-shadow: 0 4px 16px rgba(255, 142, 62, 0.4);
+    box-shadow: 0 4px 16px rgba(255,142,62,0.4);
   }
 
   .mobile-cta-btn:hover { background: var(--brown); }
@@ -490,11 +632,10 @@ const isPremium = restaurant?.is_premium === true;
     font-weight: 600;
     padding: 0.85rem 1.1rem;
     border-radius: var(--radius-md);
-    border: none;
     text-decoration: none;
     white-space: nowrap;
+    box-shadow: 0 4px 12px rgba(136,101,69,0.3);
     transition: background 0.2s;
-    box-shadow: 0 4px 12px rgba(136, 101, 69, 0.3);
   }
 
   .mobile-cta-download:hover { background: var(--brown-dark); }
@@ -502,79 +643,41 @@ const isPremium = restaurant?.is_premium === true;
   /* ── RESPONSIVE ───────────────────────────────────────── */
 
   @media (max-width: 768px) {
+    .page-inner {
+      padding: 0 0 var(--space-2xl);
+    }
+
     .hero {
-      height: 65vh;
-      max-height: 520px;
+      border-radius: 0;
+      height: 60vh;
+      max-height: 480px;
+      margin-bottom: var(--space-md);
     }
 
     .hero-content {
       padding: var(--space-lg) var(--space-md);
     }
 
-    .page-body {
-      grid-template-columns: 1fr;
-      padding: var(--space-md) var(--space-md);
-      gap: 0;
+    .cta-grid {
+      grid-template-columns: repeat(2, 1fr);
+      margin: 0 var(--space-md) var(--space-md);
     }
 
-    .col-info {
-      position: static;
-      order: 2;
-    }
-
-    .col-media {
-      order: 1;
-    }
-
-    /* Mobiele galerij: foto's als swipeable rij met peek van volgende */
-    .gallery {
-      display: flex;
-      flex-wrap: nowrap;
-      gap: 0.75rem;
-      overflow-x: auto;
-      scroll-snap-type: x mandatory;
-      -webkit-overflow-scrolling: touch;
-      padding: 0 var(--space-md) var(--space-sm);
-      margin: 0 calc(-1 * var(--space-md));
-      scrollbar-width: none;
-    }
-
-    .gallery::-webkit-scrollbar { display: none; }
-
-    .gallery-item {
-      flex: 0 0 80vw;
-      scroll-snap-align: start;
-      aspect-ratio: 4/3;
+    .content-section {
+      margin: 0 var(--space-md) var(--space-md);
+      padding: var(--space-lg);
       border-radius: var(--radius-md);
     }
 
-    .gallery-item:first-child {
-      flex: 0 0 80vw;
-      aspect-ratio: 4/3;
+    .gallery {
+      grid-template-columns: repeat(2, 1fr);
     }
 
-    /* Beschrijving en openingstijden onder de foto's op mobiel */
-    .col-info .section:first-child { order: 1; }
-
-    /* Openingstijden verplaatsen naar onder beschrijving op mobiel */
-    .col-media .section:last-child {
-      order: 3;
+    .gallery-extra {
+      grid-template-columns: repeat(2, 1fr);
     }
 
-    .mobile-cta {
-      display: flex;
-    }
-
-    .cta-card {
-      display: none;
-    }
-
-    .mobile-only { display: block; }
-    .desktop-only { display: none; }
-
-    .premium-page {
-      padding-bottom: 5rem;
-    }
+    .mobile-cta { display: flex; }
   }
 
   /* ── STANDAARD PAGE ───────────────────────────────────── */
@@ -584,20 +687,18 @@ const isPremium = restaurant?.is_premium === true;
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: flex-start;
     padding: 6rem 1.5rem 4rem;
-    background-color: var(--beige);
+    background: var(--beige);
   }
 
   .content {
     width: 100%;
     max-width: 420px;
-    margin: 0 auto;
   }
 
   .card {
-    background: #ffffff;
-    border: 1px solid rgba(136, 101, 69, 0.1);
+    background: #fff;
+    border: 1px solid rgba(136,101,69,0.1);
     border-radius: var(--radius-lg);
     padding: 1.5rem;
     box-shadow: var(--shadow-md);
@@ -613,13 +714,7 @@ const isPremium = restaurant?.is_premium === true;
     max-height: 280px;
   }
 
-  .photo {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    display: block;
-  }
-
+  .photo { width: 100%; height: 100%; object-fit: cover; display: block; }
   .info { margin-bottom: 1.5rem; }
 
   .name {
@@ -630,11 +725,7 @@ const isPremium = restaurant?.is_premium === true;
     font-family: var(--serif);
   }
 
-  .city {
-    font-size: 0.9rem;
-    color: var(--text-muted);
-    margin-bottom: 0.75rem;
-  }
+  .city { font-size: 0.9rem; color: var(--text-muted); margin-bottom: 0.75rem; }
 
   .meta {
     display: flex;
@@ -648,38 +739,20 @@ const isPremium = restaurant?.is_premium === true;
     font-size: 0.8rem;
     font-weight: 500;
     color: var(--brown);
-    background: rgba(136, 101, 69, 0.1);
+    background: rgba(136,101,69,0.1);
     padding: 0.3rem 0.7rem;
     border-radius: 100px;
   }
 
-  .tag.score {
-    color: var(--orange);
-    background: rgba(255, 142, 62, 0.1);
-    font-weight: 600;
-  }
-
-  .description {
-    font-size: 0.9rem;
-    color: var(--text-muted);
-    line-height: 1.6;
-    margin-bottom: 0.75rem;
-  }
-
-  .address {
-    font-size: 0.85rem;
-    color: var(--text-muted);
-    margin-bottom: 0;
-  }
-
-  /* ── GEDEELDE KNOPPEN ─────────────────────────────────── */
+  .tag.score { color: var(--orange); background: rgba(255,142,62,0.1); font-weight: 600; }
+  .address { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0; }
 
   .btn-primary {
     display: flex;
     align-items: center;
     justify-content: center;
     background: var(--orange);
-    color: #ffffff;
+    color: #fff;
     padding: 1rem 1.5rem;
     border-radius: var(--radius-md);
     font-family: var(--sans);
@@ -691,10 +764,7 @@ const isPremium = restaurant?.is_premium === true;
     margin-bottom: 1.25rem;
   }
 
-  .btn-primary:hover {
-    background: var(--brown);
-    transform: translateY(-1px);
-  }
+  .btn-primary:hover { background: var(--brown); transform: translateY(-1px); }
 
   .divider {
     display: flex;
@@ -705,12 +775,11 @@ const isPremium = restaurant?.is_premium === true;
     font-size: 0.85rem;
   }
 
-  .divider::before,
-  .divider::after {
+  .divider::before, .divider::after {
     content: '';
     flex: 1;
     height: 1px;
-    background: rgba(136, 101, 69, 0.15);
+    background: rgba(136,101,69,0.15);
   }
 
   .btn-secondary {
@@ -732,48 +801,86 @@ const isPremium = restaurant?.is_premium === true;
     margin-bottom: 0.75rem;
   }
 
-  .btn-secondary:hover {
-    background: var(--brown-dark);
-    transform: translateY(-1px);
-  }
+  .btn-secondary:hover { background: var(--brown-dark); transform: translateY(-1px); }
 
-  .store-note {
-    font-size: 0.8rem;
-    color: var(--text-muted);
-    opacity: 0.6;
-  }
+  .store-note { font-size: 0.8rem; color: var(--text-muted); opacity: 0.6; }
 </style>
 
 <script>
-  // Deep link handler
-  const appBtn = document.getElementById('open-app-btn');
-  if (appBtn) {
-    appBtn.addEventListener('click', (e) => {
-      e.preventDefault();
-      const deepLink = appBtn.getAttribute('href');
-      if (deepLink) window.location.href = deepLink;
-    });
-  }
+  // Deep link handlers
+  document.getElementById('open-app-btn')?.addEventListener('click', (e) => {
+    e.preventDefault();
+    const link = (e.currentTarget as HTMLAnchorElement).href;
+    if (link) window.location.href = link;
+  });
 
-  const mobileBtn = document.getElementById('mobile-app-btn');
-  if (mobileBtn) {
-    mobileBtn.addEventListener('click', (e) => {
-      e.preventDefault();
-      const deepLink = mobileBtn.getAttribute('href');
-      if (deepLink) window.location.href = deepLink;
-    });
-  }
+  document.getElementById('mobile-app-btn')?.addEventListener('click', (e) => {
+    e.preventDefault();
+    const link = (e.currentTarget as HTMLAnchorElement).href;
+    if (link) window.location.href = link;
+  });
 
   // Video play knop
   const video = document.getElementById('hero-video') as HTMLVideoElement | null;
   const playBtn = document.getElementById('play-btn');
   if (video && playBtn) {
-    playBtn.addEventListener('click', () => {
-      video.play();
-      playBtn.classList.add('hidden');
-    });
-    video.addEventListener('pause', () => {
-      playBtn.classList.remove('hidden');
+    playBtn.addEventListener('click', () => { video.play(); playBtn.classList.add('hidden'); });
+    video.addEventListener('pause', () => playBtn.classList.remove('hidden'));
+  }
+
+  // Foto's uitklappen
+  const moreBtn = document.getElementById('gallery-more-btn');
+  const extraGallery = document.getElementById('gallery-extra');
+  if (moreBtn && extraGallery) {
+    moreBtn.addEventListener('click', () => {
+      extraGallery.style.display = 'grid';
+      moreBtn.style.display = 'none';
     });
   }
+
+  // Lightbox
+  const allImgs: string[] = Array.from(document.querySelectorAll('.gallery-item img'))
+    .map(img => (img as HTMLImageElement).src);
+  let current = 0;
+
+  const lightbox = document.getElementById('lightbox') as HTMLElement;
+  const lbImg = document.getElementById('lightbox-img') as HTMLImageElement;
+  const lbCounter = document.getElementById('lightbox-counter');
+
+  function openLightbox(index: number) {
+    current = index;
+    lbImg.src = allImgs[current];
+    if (lbCounter) lbCounter.textContent = `${current + 1} / ${allImgs.length}`;
+    lightbox.style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeLightbox() {
+    lightbox.style.display = 'none';
+    document.body.style.overflow = '';
+  }
+
+  document.querySelectorAll('.gallery-item').forEach((item, i) => {
+    item.addEventListener('click', () => openLightbox(i));
+  });
+
+  document.getElementById('lightbox-close')?.addEventListener('click', closeLightbox);
+  document.getElementById('lightbox-prev')?.addEventListener('click', () => {
+    openLightbox((current - 1 + allImgs.length) % allImgs.length);
+  });
+  document.getElementById('lightbox-next')?.addEventListener('click', () => {
+    openLightbox((current + 1) % allImgs.length);
+  });
+
+  lightbox?.addEventListener('click', (e) => {
+    if (e.target === lightbox) closeLightbox();
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if (lightbox.style.display === 'flex') {
+      if (e.key === 'Escape') closeLightbox();
+      if (e.key === 'ArrowLeft') openLightbox((current - 1 + allImgs.length) % allImgs.length);
+      if (e.key === 'ArrowRight') openLightbox((current + 1) % allImgs.length);
+    }
+  });
 </script>
