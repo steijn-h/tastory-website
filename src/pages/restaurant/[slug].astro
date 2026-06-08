@@ -66,7 +66,7 @@ const isPremium = restaurant?.is_premium === true;
 <BaseLayout ogImage={ogImage} title={title} description={description} keywords={keywords}>
   {isPremium ? (
 
-    <div class="premium-page" style={backgroundUrl ? `background-image: url('${backgroundUrl}')` : ''}>
+    <div class="premium-page restaurant-premium-page" style={backgroundUrl ? `background-image: url('${backgroundUrl}')` : ''}>
       <div class="page-inner">
 
         <!-- Hero: video of eerste foto -->
@@ -239,6 +239,22 @@ const isPremium = restaurant?.is_premium === true;
 
   )}
 </BaseLayout>
+
+<style is:global>
+  .restaurant-premium-page footer {
+    background: var(--beige-dark) !important;
+    color: var(--text-muted);
+  }
+
+  .restaurant-premium-page footer a,
+  .restaurant-premium-page footer h4 {
+    color: var(--text) !important;
+  }
+
+  .restaurant-premium-page footer .footer-brand {
+    color: var(--text) !important;
+  }
+</style>
 
 <style>
   /* ── PREMIUM PAGE ─────────────────────────────────────── */
