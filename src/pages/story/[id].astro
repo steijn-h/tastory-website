@@ -48,16 +48,12 @@ const deepLinkUrl = `tastory://story/${id}`;
           <h1>Taste Story bekijken</h1>
         )}
 
-        <p class="cta-text">
-          Open deze Taste Story in de Tastory app om hem volledig te bekijken, te liken en te reageren.
-        </p>
-
         <a href={deepLinkUrl} class="btn-primary" id="open-app-btn">
           Open in Tastory
         </a>
 
         <div class="divider">
-          <span>Tastory nog niet?</span>
+          <span>Heb je Tastory nog niet?</span>
         </div>
 
         <a href={appStoreUrl} class="btn-secondary" target="_blank" rel="noopener noreferrer">
@@ -145,13 +141,6 @@ const deepLinkUrl = `tastory://story/${id}`;
     font-style: italic;
     margin-bottom: 1rem;
     line-height: 1.5;
-  }
-
-  .cta-text {
-    color: var(--text-muted);
-    font-size: 0.9rem;
-    line-height: 1.6;
-    margin-bottom: 1.5rem;
   }
 
   .btn-primary {
