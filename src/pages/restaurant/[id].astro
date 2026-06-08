@@ -1,70 +1,86 @@
-export const prerender = false;
 ---
+export const prerender = false;
 import BaseLayout from '../../layouts/BaseLayout.astro';
 
 const { id } = Astro.params;
 
-// Fetch restaurant data from Supabase
-let restaurant: { name: string; cuisine: string; city: string; photo_url: string } | null = null;
+let restaurant: {
+  id: string;
+  name: string;
+  photo_url: string | null;
+  background_url: string | null;
+  city: string | null;
+  cuisine: string | null;
+  vibe: string | null;
+  price_level: number | null;
+  weighted_score: number | null;
+  description: string | null;
+  website: string | null;
+  address: string | null;
+} | null = null;
+
 try {
-  const res = await fetch(
-    `https://vyqpdtjpocndgdqylzeo.supabase.co/rest/v1/restaurants?id=eq.${id}&select=name,cuisine,city,photo_url`,
-    {
-      headers: {
-        apikey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ5cXBkdGpwb2NuZGdkcXlsemVvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzgwNjM2MTksImV4cCI6MjA1MzYzOTYxOX0.y7HGiROl1FH6vYBWD2MlFWOqEj_x5UIBgMBm7NBXH5Q',
-        'Content-Type': 'application/json',
-      },
-    }
-  );
-  const data = await res.json();
-  restaurant = data?.[0] ?? null;
+  const res = await fetch(`https://vyqpdtjpocndgdqylzeo.supabase.co/functions/v1/Restaurant-pagina?id=${id}`);
+  if (res.ok) {
+    const data = await res.json();
+    restaurant = data ?? null;
+  }
 } catch {
   restaurant = null;
 }
 
-const title = restaurant ? `${restaurant.name} — Tastory` : 'Restaurant — Tastory';
-const description = restaurant
-  ? `Bekijk ${restaurant.name} op Tastory. ${restaurant.cuisine ?? ''} restaurant in ${restaurant.city ?? ''}.`
-  : 'Bekijk dit restaurant op Tastory.';
-const image = restaurant?.photo_url ?? 'https://tastory.nl/og-image.png';
+const priceLabel = (level: number | null) => '€'.repeat(Math.max(1, Math.min(level ?? 1, 4)));
+
+const title = restaurant
+  ? `${restaurant.name} in ${restaurant.city} — Tastory`
+  : 'Restaurant — Tastory';
+const description = restaurant?.description
+  ?? (restaurant ? `Bekijk ${restaurant.name} op Tastory.` : 'Bekijk dit restaurant op Tastory.');
+const ogImage = restaurant?.photo_url ?? 'https://tastory.nl/og-image.png';
 const appStoreUrl = 'https://apps.apple.com/nl/app/tastory/id6744042066';
 const deepLinkUrl = `tastory://restaurant/${id}`;
-const universalLinkUrl = `https://tastory.nl/restaurant/${id}`;
 ---
 
-<BaseLayout ogImage={restaurant?.photo_url || undefined} title={title} description={description}>
+<BaseLayout ogImage={ogImage} title={title} description={description}>
   <div class="restaurant-page">
-    {restaurant?.photo_url && (
-      <div class="hero-image">
-        <img src={restaurant.photo_url} alt={restaurant.name} />
-        <div class="hero-overlay" />
-      </div>
-    )}
-
     <div class="content">
       <div class="card reveal">
-        <div class="card-tag">Restaurant op Tastory</div>
-
         {restaurant ? (
           <>
-            <h1>{restaurant.name}</h1>
-            {restaurant.cuisine && <p class="cuisine">{restaurant.cuisine}</p>}
-            {restaurant.city && <p class="city">📍 {restaurant.city}</p>}
+            {restaurant.photo_url && (
+              <div class="photo-wrap">
+                <img src={restaurant.photo_url} alt={restaurant.name} class="photo" />
+              </div>
+            )}
+            <div class="info">
+              <h1 class="name">{restaurant.name}</h1>
+              <p class="city">{restaurant.city}</p>
+              <div class="meta">
+                {restaurant.cuisine && <span class="tag">{restaurant.cuisine}</span>}
+                {restaurant.vibe && <span class="tag">{restaurant.vibe}</span>}
+                {restaurant.price_level && <span class="tag">{priceLabel(restaurant.price_level)}</span>}
+                {restaurant.weighted_score && (
+                  <span class="tag score">★ {Number(restaurant.weighted_score).toFixed(1)}</span>
+                )}
+              </div>
+              {restaurant.description && (
+                <p class="description">{restaurant.description}</p>
+              )}
+              {restaurant.address && (
+                <p class="address">📍 {restaurant.address}</p>
+              )}
+            </div>
           </>
         ) : (
           <h1>Restaurant bekijken</h1>
         )}
-
-        <p class="cta-text">
-          Open dit restaurant in de Tastory app om meer te ontdekken — foto's, reviews, sfeer en meer.
-        </p>
 
         <a href={deepLinkUrl} class="btn-primary" id="open-app-btn">
           Open in Tastory
         </a>
 
         <div class="divider">
-          <span>Tastory nog niet?</span>
+          <span>Heb je Tastory nog niet?</span>
         </div>
 
         <a href={appStoreUrl} class="btn-secondary" target="_blank" rel="noopener noreferrer">
@@ -86,98 +102,104 @@ const universalLinkUrl = `https://tastory.nl/restaurant/${id}`;
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
-    padding: 2rem 1.5rem 5rem;
-    position: relative;
-  }
-
-  .hero-image {
-    position: fixed;
-    inset: 0;
-    z-index: 0;
-  }
-
-  .hero-image img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    filter: blur(8px) brightness(0.4);
-    transform: scale(1.05);
-  }
-
-  .hero-overlay {
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(to bottom, rgba(0,0,0,0.3), rgba(0,0,0,0.7));
+    justify-content: flex-start;
+    padding: 6rem 1.5rem 4rem;
+    background-color: #F5EBDD;
   }
 
   .content {
-    position: relative;
-    z-index: 1;
     width: 100%;
     max-width: 420px;
     margin: 0 auto;
-    padding-top: 4rem;
   }
 
   .card {
-    background: var(--white);
+    background: #ffffff;
     border: 1px solid rgba(136, 101, 69, 0.1);
     border-radius: var(--radius-lg);
-    padding: 2.5rem 2rem;
+    padding: 1.5rem;
     box-shadow: var(--shadow-md);
     text-align: center;
   }
 
-  .card-tag {
-    display: inline-block;
-    font-size: var(--text-xs);
-    font-weight: 600;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    color: var(--orange);
-    background: rgba(255, 142, 62, 0.1);
-    padding: 0.35rem 0.9rem;
-    border-radius: 100px;
+  .photo-wrap {
+    position: relative;
+    width: 100%;
+    border-radius: 12px;
+    overflow: hidden;
     margin-bottom: 1.25rem;
+    aspect-ratio: 4/3;
+    max-height: 280px;
   }
 
-  .card h1 {
-    font-family: var(--serif);
-    font-size: clamp(1.6rem, 4vw, 2.2rem);
-    color: var(--text);
-    font-weight: 600;
-    line-height: 1.2;
-    margin-bottom: 0.5rem;
+  .photo {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
   }
 
-  .cuisine {
-    color: var(--orange);
-    font-weight: 600;
-    font-size: 1rem;
-    margin-bottom: 0.25rem;
-  }
-
-  .city {
-    color: var(--text-muted);
-    font-size: 0.95rem;
+  .info {
     margin-bottom: 1.5rem;
   }
 
-  .cta-text {
+  .name {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 0.25rem;
+    font-family: var(--serif);
+  }
+
+  .city {
+    font-size: 0.9rem;
     color: var(--text-muted);
-    font-size: 0.95rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    justify-content: center;
+    margin-bottom: 1rem;
+  }
+
+  .tag {
+    display: inline-block;
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: var(--brown);
+    background: rgba(136, 101, 69, 0.1);
+    padding: 0.3rem 0.7rem;
+    border-radius: 100px;
+  }
+
+  .tag.score {
+    color: var(--orange);
+    background: rgba(255, 142, 62, 0.1);
+    font-weight: 600;
+  }
+
+  .description {
+    font-size: 0.9rem;
+    color: var(--text-muted);
     line-height: 1.6;
-    margin-bottom: 1.75rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .address {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    margin-bottom: 0;
   }
 
   .btn-primary {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 0.5rem;
     background: var(--orange);
-    color: var(--white);
+    color: #ffffff;
     border: none;
     padding: 1rem 1.5rem;
     border-radius: var(--radius-md);
@@ -186,7 +208,7 @@ const universalLinkUrl = `https://tastory.nl/restaurant/${id}`;
     font-weight: 600;
     cursor: pointer;
     text-decoration: none;
-    transition: background 0.3s, transform 0.2s, box-shadow 0.3s;
+    transition: background 0.3s, transform 0.2s;
     width: 100%;
     margin-bottom: 1.25rem;
   }
@@ -194,7 +216,6 @@ const universalLinkUrl = `https://tastory.nl/restaurant/${id}`;
   .btn-primary:hover {
     background: var(--brown);
     transform: translateY(-1px);
-    box-shadow: 0 8px 28px rgba(255, 142, 62, 0.3);
   }
 
   .divider {
@@ -219,7 +240,7 @@ const universalLinkUrl = `https://tastory.nl/restaurant/${id}`;
     align-items: center;
     justify-content: center;
     gap: 0.5rem;
-    background: var(--beige);
+    background: #F5EBDD;
     color: var(--text);
     border: 1px solid rgba(136, 101, 69, 0.2);
     padding: 1rem 1.5rem;
@@ -247,18 +268,13 @@ const universalLinkUrl = `https://tastory.nl/restaurant/${id}`;
 </style>
 
 <script>
-  // Try to open the app via deep link, fall back gracefully
   const appBtn = document.getElementById('open-app-btn');
   if (appBtn) {
     appBtn.addEventListener('click', (e) => {
       e.preventDefault();
       const deepLink = appBtn.getAttribute('href');
       if (!deepLink) return;
-      
-      // Try to open the app
       window.location.href = deepLink;
-      
-      // If app doesn't open within 2s, do nothing (user stays on page)
     });
   }
 </script>
