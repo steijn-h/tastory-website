@@ -1,8 +1,8 @@
- ---
+---
 export const prerender = false;
 import BaseLayout from '../../layouts/BaseLayout.astro';
 
-const { id } = Astro.params;
+const { slug } = Astro.params;
 
 let restaurant: {
   id: string;
@@ -17,10 +17,11 @@ let restaurant: {
   description: string | null;
   website: string | null;
   address: string | null;
+  slug: string | null;
 } | null = null;
 
 try {
-  const res = await fetch(`https://vyqpdtjpocndgdqylzeo.supabase.co/functions/v1/Restaurant-pagina?id=${id}`);
+  const res = await fetch(`https://vyqpdtjpocndgdqylzeo.supabase.co/functions/v1/Restaurant-pagina?slug=${slug}`);
   if (res.ok) {
     const data = await res.json();
     restaurant = data ?? null;
@@ -39,7 +40,7 @@ const description = restaurant?.description
   ?? (restaurant ? `Bekijk ${restaurant.name} op Tastory.` : 'Bekijk dit restaurant op Tastory.');
 const ogImage = firstPhoto ?? 'https://tastory.nl/og-image.png';
 const appStoreUrl = 'https://apps.apple.com/nl/app/tastory/id6744042066';
-const deepLinkUrl = `tastory://restaurant/${id}`;
+const deepLinkUrl = `tastory://restaurant/${restaurant?.id ?? ''}`;
 ---
 
 <BaseLayout ogImage={ogImage} title={title} description={description}>
