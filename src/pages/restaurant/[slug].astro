@@ -361,7 +361,7 @@ const isPremium = restaurant?.is_premium === true;
 
   /* Sections */
   .section {
-    margin-bottom: var(--space-2xl);
+    margin-bottom: var(--space-lg);
   }
 
   .section-title {
@@ -482,22 +482,21 @@ const isPremium = restaurant?.is_premium === true;
     display: flex;
     align-items: center;
     justify-content: center;
-    background: rgba(255, 255, 255, 0.92);
-    backdrop-filter: blur(8px);
-    color: var(--text);
+    background: var(--brown);
+    color: #fff;
     font-family: var(--sans);
     font-size: 0.9rem;
     font-weight: 600;
     padding: 0.85rem 1.1rem;
     border-radius: var(--radius-md);
-    border: 1px solid rgba(136, 101, 69, 0.15);
+    border: none;
     text-decoration: none;
     white-space: nowrap;
     transition: background 0.2s;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    box-shadow: 0 4px 12px rgba(136, 101, 69, 0.3);
   }
 
-  .mobile-cta-download:hover { background: #fff; }
+  .mobile-cta-download:hover { background: var(--brown-dark); }
 
   /* ── RESPONSIVE ───────────────────────────────────────── */
 
@@ -513,7 +512,7 @@ const isPremium = restaurant?.is_premium === true;
 
     .page-body {
       grid-template-columns: 1fr;
-      padding: var(--space-lg) var(--space-md);
+      padding: var(--space-md) var(--space-md);
       gap: 0;
     }
 
@@ -718,9 +717,9 @@ const isPremium = restaurant?.is_premium === true;
     align-items: center;
     justify-content: center;
     gap: 0.5rem;
-    background: var(--beige);
-    color: var(--text);
-    border: 1px solid rgba(136, 101, 69, 0.2);
+    background: var(--brown);
+    color: #fff;
+    border: none;
     padding: 1rem 1.5rem;
     border-radius: var(--radius-md);
     font-family: var(--sans);
@@ -733,7 +732,7 @@ const isPremium = restaurant?.is_premium === true;
   }
 
   .btn-secondary:hover {
-    background: rgba(136, 101, 69, 0.1);
+    background: var(--brown-dark);
     transform: translateY(-1px);
   }
 
