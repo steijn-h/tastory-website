@@ -4,8 +4,6 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 
 const { slug } = Astro.params;
 
-type OpeningHours = Record<string, string>;
-
 let restaurant: {
   id: string;
   name: string;
@@ -21,7 +19,7 @@ let restaurant: {
   website: string | null;
   address: string | null;
   slug: string | null;
-  opening_hours: OpeningHours | null;
+  opening_hours: string | null;
   is_premium: boolean;
 } | null = null;
 
@@ -44,11 +42,6 @@ const allPhotos: string[] = restaurant?.photos?.length
 const heroPhoto = allPhotos[0] ?? null;
 const galleryPhotos = allPhotos.slice(1, 5);
 
-const dagNamen: Record<string, string> = {
-  monday: 'Maandag', tuesday: 'Dinsdag', wednesday: 'Woensdag',
-  thursday: 'Donderdag', friday: 'Vrijdag', saturday: 'Zaterdag', sunday: 'Zondag',
-};
-const dagVolgorde = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
 
 const appStoreUrl = 'https://apps.apple.com/nl/app/tastory/id6744042066';
 const deepLinkUrl = `tastory://restaurant/${restaurant?.id ?? ''}`;
@@ -124,21 +117,10 @@ const isPremium = restaurant?.is_premium === true;
         )}
 
         <!-- Openingstijden -->
-        {restaurant!.opening_hours && Object.keys(restaurant!.opening_hours).length > 0 && (
+        {restaurant!.opening_hours && (
           <section class="section reveal">
             <h2 class="section-title">Openingstijden</h2>
-            <ul class="hours-list">
-              {dagVolgorde.map(dag => {
-                const waarde = restaurant!.opening_hours![dag];
-                if (!waarde) return null;
-                return (
-                  <li class="hours-row">
-                    <span class="hours-day">{dagNamen[dag]}</span>
-                    <span class="hours-time">{waarde}</span>
-                  </li>
-                );
-              })}
-            </ul>
+            <p class="hours-text">{restaurant!.opening_hours}</p>
           </section>
         )}
 
@@ -390,32 +372,11 @@ const isPremium = restaurant?.is_premium === true;
   }
 
   /* Openingstijden */
-  .hours-list {
-    list-style: none;
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-  }
-
-  .hours-row {
-    display: flex;
-    justify-content: space-between;
-    font-size: var(--text-sm);
-    padding: 0.6rem 0;
-    border-bottom: 1px solid rgba(136, 101, 69, 0.08);
-  }
-
-  .hours-row:last-child {
-    border-bottom: none;
-  }
-
-  .hours-day {
-    font-weight: 600;
-    color: var(--text);
-  }
-
-  .hours-time {
+  .hours-text {
+    font-size: var(--text-base);
     color: var(--text-muted);
+    line-height: 1.75;
+    white-space: pre-line;
   }
 
   /* Adres */
