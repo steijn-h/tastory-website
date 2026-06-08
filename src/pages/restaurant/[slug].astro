@@ -103,18 +103,8 @@ const isPremium = restaurant?.is_premium === true;
           </div>
         </div>
 
-        <!-- CTA: 4 vakken -->
+        <!-- CTA: 3 vakken (desktop), verborgen op mobiel -->
         <div class="cta-grid reveal">
-          <a href={deepLinkUrl} class="cta-block cta-primary" id="open-app-btn">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>
-            <span class="cta-block-label">Open in Tastory</span>
-            <span class="cta-block-sub">Bekijk video's & reviews</span>
-          </a>
-          <a href={appStoreUrl} class="cta-block cta-secondary" target="_blank" rel="noopener noreferrer">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>
-            <span class="cta-block-label">Download Tastory</span>
-            <span class="cta-block-sub">Gratis op iOS</span>
-          </a>
           {mapsUrl ? (
             <a href={mapsUrl} class="cta-block cta-info" target="_blank" rel="noopener noreferrer">
               <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
@@ -128,13 +118,16 @@ const isPremium = restaurant?.is_premium === true;
               <span class="cta-block-sub">Locatie</span>
             </div>
           )}
-          <div class="cta-block cta-info">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M11 9H13V7H11M12 20C7.59 20 4 16.41 4 12S7.59 4 12 4 20 7.59 20 12 16.41 20 12 20M12 2C6.48 2 2 6.48 2 12S6.48 22 12 22 22 17.52 22 12 17.52 2 12 2M11 17H13V11H11V17Z"/></svg>
-            <span class="cta-block-label">
-              {[restaurant!.cuisine, restaurant!.vibe, restaurant!.price_level ? priceLabel(restaurant!.price_level) : null].filter(Boolean).join(' · ')}
-            </span>
-            <span class="cta-block-sub">Sfeer & keuken</span>
-          </div>
+          <a href={appStoreUrl} class="cta-block cta-secondary" target="_blank" rel="noopener noreferrer">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>
+            <span class="cta-block-label">Download Tastory</span>
+            <span class="cta-block-sub">Gratis op iOS</span>
+          </a>
+          <a href={deepLinkUrl} class="cta-block cta-primary" id="open-app-btn">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>
+            <span class="cta-block-label">Open in Tastory</span>
+            <span class="cta-block-sub">Bekijk video's & reviews</span>
+          </a>
         </div>
 
         <!-- Beschrijving -->
@@ -376,12 +369,13 @@ const isPremium = restaurant?.is_premium === true;
 
   .play-btn.hidden { display: none; }
 
-  /* CTA grid: 4 vakken */
+  /* CTA grid: 3 vakken gecentreerd */
   .cta-grid {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(3, minmax(0, 260px));
     gap: 0.75rem;
     margin-bottom: var(--space-xl);
+    justify-content: center;
   }
 
   .cta-block {
@@ -659,8 +653,7 @@ const isPremium = restaurant?.is_premium === true;
     }
 
     .cta-grid {
-      grid-template-columns: repeat(2, 1fr);
-      margin: 0 var(--space-md) var(--space-md);
+      display: none;
     }
 
     .content-section {
