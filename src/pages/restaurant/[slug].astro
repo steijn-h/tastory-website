@@ -38,7 +38,8 @@ const allPhotos: string[] = restaurant?.photo_url
   ? restaurant.photo_url.split(',').map(s => s.trim()).filter(Boolean)
   : [];
 const videoUrl = restaurant?.video_url ?? null;
-const heroMedia = videoUrl ?? allPhotos[0] ?? null;
+const backgroundUrl = restaurant?.background_url ?? null;
+const heroPhoto = backgroundUrl ?? allPhotos[0] ?? null;
 
 const appStoreUrl = 'https://apps.apple.com/nl/app/tastory/id6744042066';
 const deepLinkUrl = `tastory://restaurant/${restaurant?.id ?? ''}`;
@@ -74,8 +75,8 @@ const isPremium = restaurant?.is_premium === true;
               </svg>
             </button>
           </>
-        ) : allPhotos[0] ? (
-          <img src={allPhotos[0]} alt={`${restaurant!.name}`} class="hero-media" />
+        ) : heroPhoto ? (
+          <img src={heroPhoto} alt={`${restaurant!.name}`} class="hero-media" />
         ) : (
           <div class="hero-placeholder" />
         )}
