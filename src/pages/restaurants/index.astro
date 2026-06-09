@@ -44,7 +44,19 @@ if (supabaseAnonKey) {
   }
 }
 
-const cities = [...new Set(restaurants.map((r) => r.city).filter(Boolean))].sort() as string[];
+const cityAliases: Record<string, string> = {
+  'oud ootmarsum': 'Ootmarsum',
+};
+
+function normalizeCity(city: string): string {
+  const lower = city.toLowerCase().trim();
+  if (cityAliases[lower]) return cityAliases[lower];
+  return city.trim().replace(/\b\w/g, (c) => c.toUpperCase());
+}
+
+const cities = [
+  ...new Set(restaurants.map((r) => r.city).filter(Boolean).map((c) => normalizeCity(c!))),
+].sort() as string[];
 const cuisines = [...new Set(restaurants.map((r) => r.cuisine).filter(Boolean))].sort() as string[];
 
 const priceLabel = (level: number | null) => '€'.repeat(Math.max(1, Math.min(level ?? 1, 4)));
@@ -126,7 +138,7 @@ const priceLabel = (level: number | null) => '€'.repeat(Math.max(1, Math.min(l
               <article
                 class="card reveal"
                 data-name={r.name.toLowerCase()}
-                data-city={(r.city ?? '').toLowerCase()}
+                data-city={r.city ? normalizeCity(r.city).toLowerCase() : ''}
                 data-cuisine={(r.cuisine ?? '').toLowerCase()}
               >
                 <div class="card-photo-wrap">
@@ -139,7 +151,7 @@ const priceLabel = (level: number | null) => '€'.repeat(Math.max(1, Math.min(l
                 </div>
                 <div class="card-body">
                   <h2 class="card-name">{r.name}</h2>
-                  {r.city && <p class="card-city">{r.city}</p>}
+                  {r.city && <p class="card-city">{normalizeCity(r.city)}</p>}
                   <div class="card-tags">
                     {r.cuisine && <span class="tag">{r.cuisine}</span>}
                     {r.vibe && <span class="tag">{r.vibe}</span>}
