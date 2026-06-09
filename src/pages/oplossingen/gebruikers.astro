@@ -14,6 +14,43 @@ import { appFunctions } from '../../data/home';
     description="Ontdek het restaurant dat perfect bij jouw smaak, stemming, budget en gezelschap past. Restaurants presenteren zich op de best mogelijke manier om jou te inspireren."
   />
 
+  <script
+    type="application/ld+json"
+    set:html={JSON.stringify({
+      '@context': 'https://schema.org',
+      '@type': ['WebPage', 'Service'],
+      name: 'Oplossingen voor gasten — Tastory',
+      url: 'https://www.tastory.nl/oplossingen/gebruikers',
+      description:
+        'Ontdek restaurants die écht bij jou passen. Download de Tastory app, proef en deel jouw ervaringen.',
+      inLanguage: 'nl-NL',
+      serviceType: 'Restaurantontdekking voor gasten',
+      provider: {
+        '@type': 'Organization',
+        name: 'Tastory',
+        url: 'https://www.tastory.nl',
+      },
+      areaServed: { '@type': 'Country', name: 'Nederland' },
+      breadcrumb: {
+        '@type': 'BreadcrumbList',
+        itemListElement: [
+          { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://www.tastory.nl' },
+          {
+            '@type': 'ListItem',
+            position: 2,
+            name: 'Oplossingen',
+            item: 'https://www.tastory.nl/oplossingen',
+          },
+          {
+            '@type': 'ListItem',
+            position: 3,
+            name: 'Voor gasten',
+            item: 'https://www.tastory.nl/oplossingen/gebruikers',
+          },
+        ],
+      },
+    })}
+  />
   <section class="steps-section">
     <div class="reveal">
       <div class="section-tag">Hoe het werkt</div>

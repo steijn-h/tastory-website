@@ -64,6 +64,10 @@ import { stats, features, testimonials } from '../data/home';
         url: 'https://www.tastory.nl',
         description: 'Ontdek restaurants in de buurt die écht bij jou passen.',
         inLanguage: 'nl-NL',
+        speakable: {
+          '@type': 'SpeakableSpecification',
+          cssSelector: ['.hero h1', '.hero-desc'],
+        },
         potentialAction: {
           '@type': 'SearchAction',
           target: {

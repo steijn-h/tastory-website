@@ -23,6 +23,47 @@ const { Content } = await post.render();
   description={post.data.description}
   keywords={post.data.tags}
 >
+  <script
+    type="application/ld+json"
+    set:html={JSON.stringify({
+      '@context': 'https://schema.org',
+      '@type': 'BlogPosting',
+      headline: post.data.title,
+      description: post.data.description,
+      datePublished: post.data.date.toISOString(),
+      dateModified: post.data.date.toISOString(),
+      url: `https://www.tastory.nl/blog/${post.slug}`,
+      inLanguage: 'nl-NL',
+      author: post.data.author
+        ? {
+            '@type': 'Person',
+            name: post.data.author,
+          }
+        : {
+            '@type': 'Organization',
+            name: 'Tastory',
+            url: 'https://www.tastory.nl',
+          },
+      publisher: {
+        '@type': 'Organization',
+        name: 'Tastory',
+        url: 'https://www.tastory.nl',
+        logo: {
+          '@type': 'ImageObject',
+          url: 'https://www.tastory.nl/tastory-logo.png',
+        },
+      },
+      keywords: post.data.tags?.join(', '),
+      mainEntityOfPage: {
+        '@type': 'WebPage',
+        '@id': `https://www.tastory.nl/blog/${post.slug}`,
+      },
+      speakable: {
+        '@type': 'SpeakableSpecification',
+        cssSelector: ['.blog-content p:first-of-type'],
+      },
+    })}
+  />
   <PageHero title={`<em>${post.data.title}</em>`} description={formatDate(post.data.date)} />
   <article class="blog-article">
     <div class="blog-article-inner reveal">
@@ -39,7 +80,7 @@ const { Content } = await post.render();
         <Content />
       </div>
       <div class="blog-back">
-        <a href="/blog" class="btn-secondary-light">&larr; Terug naar alle artikelen</a>
+        <a href={`${import.meta.env.BASE_URL}blog`} class="btn-secondary-light">&larr; Terug naar alle artikelen</a>
       </div>
     </div>
   </article>

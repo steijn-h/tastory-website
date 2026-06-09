@@ -28,6 +28,22 @@ const deepLinkUrl = `tastory://story/${id}`;
 ---
 
 <BaseLayout ogImage={ogImage} title={title} description={description}>
+  {story && (
+    <script
+      type="application/ld+json"
+      set:html={JSON.stringify({
+        '@context': 'https://schema.org',
+        '@type': 'SocialMediaPosting',
+        headline: title,
+        description: description,
+        url: `https://www.tastory.nl/story/${id}`,
+        image: story.photo_url ?? undefined,
+        inLanguage: 'nl-NL',
+        author: { '@type': 'Person', name: story.user_name },
+        locationCreated: { '@type': 'Place', name: story.restaurant_name },
+      })}
+    />
+  )}
   <div class="story-page">
     <div class="content">
       <div class="card reveal">

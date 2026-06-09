@@ -12,6 +12,30 @@ import PageHero from '../../components/PageHero.astro';
     description="Presenteer jouw restaurant met een representatief gepersonaliseerd restaurantprofiel en bereik gasten die écht bij jouw restaurant passen. Vul je gegevens in en we nemen zo snel mogelijk contact op over de mogelijkheden."
   />
 
+  <script
+    type="application/ld+json"
+    set:html={JSON.stringify({
+      '@context': 'https://schema.org',
+      '@type': 'WebPage',
+      name: 'Meld je aan als restaurant — Tastory',
+      url: 'https://www.tastory.nl/aanmelden/restaurant',
+      description:
+        'Meld jouw restaurant aan bij Tastory en presenteer jezelf via kwalitatieve videocontent aan de juiste gasten.',
+      inLanguage: 'nl-NL',
+      breadcrumb: {
+        '@type': 'BreadcrumbList',
+        itemListElement: [
+          { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://www.tastory.nl' },
+          {
+            '@type': 'ListItem',
+            position: 2,
+            name: 'Aanmelden als restaurant',
+            item: 'https://www.tastory.nl/aanmelden/restaurant',
+          },
+        ],
+      },
+    })}
+  />
   <section class="signup-section">
     <div class="signup-wrapper reveal">
       <form class="signup-form" id="signup-form" aria-label="Aanmeldformulier restaurant">

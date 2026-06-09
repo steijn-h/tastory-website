@@ -12,6 +12,36 @@ import PageHero from '../components/PageHero.astro';
     description="Kwalitatieve content die restaurants het beste laat zien. Hieronder vind je een voorbeeldvideo die wat langer duurt om de verschillende mogelijkheden te laten zien."
   />
 
+  <script
+    type="application/ld+json"
+    set:html={JSON.stringify({
+      '@context': 'https://schema.org',
+      '@type': 'CollectionPage',
+      name: 'Portfolio — Tastory',
+      url: 'https://www.tastory.nl/portfolio',
+      description:
+        'Bekijk ons werk: professionele foto\'s en video\'s die Tastory voor restaurants heeft gemaakt. Kwalitatieve content die restaurants het beste laat zien.',
+      inLanguage: 'nl-NL',
+      breadcrumb: {
+        '@type': 'BreadcrumbList',
+        itemListElement: [
+          { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://www.tastory.nl' },
+          {
+            '@type': 'ListItem',
+            position: 2,
+            name: 'Portfolio',
+            item: 'https://www.tastory.nl/portfolio',
+          },
+        ],
+      },
+      publisher: {
+        '@type': 'Organization',
+        name: 'Tastory',
+        url: 'https://www.tastory.nl',
+        logo: 'https://www.tastory.nl/tastory-logo.png',
+      },
+    })}
+  />
   <section class="portfolio-section">
     <div class="container">
       <div class="section-label reveal">Video</div>

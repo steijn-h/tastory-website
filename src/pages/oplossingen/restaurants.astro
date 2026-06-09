@@ -192,6 +192,25 @@ import Icon from '../../components/Icon.astro';
       '@context': 'https://schema.org',
       '@type': 'Service',
       name: 'Tastory voor restaurants',
+      url: 'https://www.tastory.nl/oplossingen/restaurants',
+      breadcrumb: {
+        '@type': 'BreadcrumbList',
+        itemListElement: [
+          { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://www.tastory.nl' },
+          {
+            '@type': 'ListItem',
+            position: 2,
+            name: 'Oplossingen',
+            item: 'https://www.tastory.nl/oplossingen',
+          },
+          {
+            '@type': 'ListItem',
+            position: 3,
+            name: 'Voor restaurants',
+            item: 'https://www.tastory.nl/oplossingen/restaurants',
+          },
+        ],
+      },
       provider: {
         '@type': 'Organization',
         name: 'Tastory',
