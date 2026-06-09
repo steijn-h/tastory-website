@@ -1,0 +1,471 @@
+---
+export const prerender = false;
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+interface Restaurant {
+  id: string;
+  name: string;
+  slug: string | null;
+  photo_url: string | null;
+  city: string | null;
+  cuisine: string | null;
+  vibe: string | null;
+  price_level: number | null;
+  weighted_score: number | null;
+  description: string | null;
+  is_premium: boolean;
+}
+
+let restaurants: Restaurant[] = [];
+let fetchError = false;
+const initialQuery = Astro.url.searchParams.get('q') ?? '';
+
+const supabaseUrl = 'https://vyqpdtjpocndgdqylzeo.supabase.co';
+const supabaseAnonKey = import.meta.env.SUPABASE_ANON_KEY ?? '';
+
+if (supabaseAnonKey) {
+  try {
+    const res = await fetch(
+      `${supabaseUrl}/rest/v1/restaurants?select=id,name,slug,photo_url,city,cuisine,vibe,price_level,weighted_score,description,is_premium&order=weighted_score.desc.nullslast&limit=200`,
+      {
+        headers: {
+          apikey: supabaseAnonKey,
+          Authorization: `Bearer ${supabaseAnonKey}`,
+        },
+      },
+    );
+    if (res.ok) {
+      restaurants = await res.json();
+    } else {
+      fetchError = true;
+    }
+  } catch {
+    fetchError = true;
+  }
+}
+
+const cities = [...new Set(restaurants.map((r) => r.city).filter(Boolean))].sort() as string[];
+const cuisines = [...new Set(restaurants.map((r) => r.cuisine).filter(Boolean))].sort() as string[];
+
+const priceLabel = (level: number | null) => '€'.repeat(Math.max(1, Math.min(level ?? 1, 4)));
+---
+
+<BaseLayout
+  title="Restaurants ontdekken — Tastory"
+  description="Ontdek de mooiste restaurants in Nederland op Tastory. Filter op stad, keuken of sfeer en bekijk foto's en video's."
+  keywords={['restaurants', 'restaurant ontdekken', 'beste restaurants Nederland', 'Tastory', 'restaurant app', 'restaurant zoeken']}
+>
+  <script
+    type="application/ld+json"
+    set:html={JSON.stringify({
+      '@context': 'https://schema.org',
+      '@type': 'CollectionPage',
+      name: 'Restaurants — Tastory',
+      description: 'Ontdek de mooiste restaurants in Nederland op Tastory.',
+      url: 'https://www.tastory.nl/restaurants',
+      inLanguage: 'nl-NL',
+      potentialAction: {
+        '@type': 'SearchAction',
+        target: {
+          '@type': 'EntryPoint',
+          urlTemplate: 'https://www.tastory.nl/restaurants?q={search_term_string}',
+        },
+        'query-input': 'required name=search_term_string',
+      },
+    })}
+  />
+  <div class="page">
+    <div class="page-header">
+      <h1 class="page-title">Restaurants</h1>
+      <p class="page-sub">Ontdek restaurants bij jou in de buurt</p>
+
+      <div class="search-wrap">
+        <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18">
+          <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+        </svg>
+        <input
+          type="search"
+          id="search-input"
+          placeholder="Zoek op naam, stad of keuken…"
+          class="search-input"
+          autocomplete="off"
+          value={initialQuery}
+        />
+      </div>
+
+      {cities.length > 0 && (
+        <div class="filter-row" id="city-filters">
+          <button class="filter-pill active" data-filter="city" data-value="">Alle steden</button>
+          {cities.map((city) => (
+            <button class="filter-pill" data-filter="city" data-value={city}>{city}</button>
+          ))}
+        </div>
+      )}
+    </div>
+
+    {!supabaseAnonKey ? (
+      <div class="empty-state">
+        <p>Restaurants worden binnenkort zichtbaar.</p>
+      </div>
+    ) : fetchError ? (
+      <div class="empty-state">
+        <p>Kon restaurants niet laden. Probeer het later opnieuw.</p>
+      </div>
+    ) : restaurants.length === 0 ? (
+      <div class="empty-state">
+        <p>Nog geen restaurants beschikbaar.</p>
+      </div>
+    ) : (
+      <div class="container">
+        <p class="result-count" id="result-count">{restaurants.length} restaurants</p>
+        <div class="grid" id="restaurant-grid">
+          {restaurants.map((r) => {
+            const photo = r.photo_url?.split(',')[0].trim() ?? null;
+            const href = r.slug ? `/restaurant/${r.slug}` : null;
+            return (
+              <article
+                class="card reveal"
+                data-name={r.name.toLowerCase()}
+                data-city={(r.city ?? '').toLowerCase()}
+                data-cuisine={(r.cuisine ?? '').toLowerCase()}
+              >
+                <div class="card-photo-wrap">
+                  {photo ? (
+                    <img src={photo} alt={r.name} class="card-photo" loading="lazy" />
+                  ) : (
+                    <div class="card-photo-placeholder" />
+                  )}
+                  {r.is_premium && <span class="premium-badge">Premium</span>}
+                </div>
+                <div class="card-body">
+                  <h2 class="card-name">{r.name}</h2>
+                  {r.city && <p class="card-city">{r.city}</p>}
+                  <div class="card-tags">
+                    {r.cuisine && <span class="tag">{r.cuisine}</span>}
+                    {r.vibe && <span class="tag">{r.vibe}</span>}
+                    {r.price_level && <span class="tag">{priceLabel(r.price_level)}</span>}
+                    {r.weighted_score && (
+                      <span class="tag score">★ {Number(r.weighted_score).toFixed(1)}</span>
+                    )}
+                  </div>
+                  {r.description && <p class="card-desc">{r.description}</p>}
+                  {href ? (
+                    <a href={href} class="card-btn">Bekijk restaurant →</a>
+                  ) : (
+                    <span class="card-btn card-btn--disabled">Binnenkort beschikbaar</span>
+                  )}
+                </div>
+              </article>
+            );
+          })}
+        </div>
+        <p class="no-results" id="no-results" style="display:none">Geen restaurants gevonden voor deze zoekopdracht.</p>
+      </div>
+    )}
+  </div>
+</BaseLayout>
+
+<style>
+  .page {
+    min-height: 100vh;
+    background: var(--beige);
+    padding-bottom: var(--space-3xl);
+  }
+
+  .page-header {
+    background: linear-gradient(135deg, var(--brown) 0%, var(--brown-dark) 100%);
+    padding: 7rem var(--space-xl) var(--space-2xl);
+    text-align: center;
+    color: #fff;
+  }
+
+  .page-title {
+    font-family: var(--serif);
+    font-size: clamp(2.2rem, 5vw, 3.5rem);
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+  }
+
+  .page-sub {
+    font-size: var(--text-lg);
+    opacity: 0.8;
+    margin-bottom: var(--space-xl);
+  }
+
+  .search-wrap {
+    position: relative;
+    max-width: 520px;
+    margin: 0 auto var(--space-lg);
+  }
+
+  .search-icon {
+    position: absolute;
+    left: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-muted);
+    pointer-events: none;
+  }
+
+  .search-input {
+    width: 100%;
+    padding: 0.9rem 1rem 0.9rem 2.75rem;
+    border: none;
+    border-radius: var(--radius-md);
+    font-family: var(--sans);
+    font-size: var(--text-base);
+    background: #fff;
+    color: var(--text);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+    outline: none;
+    transition: box-shadow 0.2s;
+  }
+
+  .search-input:focus {
+    box-shadow: 0 4px 20px rgba(0,0,0,0.25);
+  }
+
+  .filter-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    justify-content: center;
+    max-width: 700px;
+    margin: 0 auto;
+  }
+
+  .filter-pill {
+    background: rgba(255,255,255,0.15);
+    border: 1px solid rgba(255,255,255,0.3);
+    color: #fff;
+    padding: 0.35rem 0.85rem;
+    border-radius: 100px;
+    font-size: var(--text-sm);
+    cursor: pointer;
+    transition: background 0.2s, border-color 0.2s;
+  }
+
+  .filter-pill:hover,
+  .filter-pill.active {
+    background: rgba(255,255,255,0.3);
+    border-color: rgba(255,255,255,0.6);
+  }
+
+  .container {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: var(--space-xl) var(--space-lg);
+  }
+
+  .result-count {
+    font-size: var(--text-sm);
+    color: var(--text-muted);
+    margin-bottom: var(--space-lg);
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1.5rem;
+  }
+
+  .card {
+    background: #fff;
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    box-shadow: var(--shadow-md);
+    transition: transform 0.25s, box-shadow 0.25s;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-lg);
+  }
+
+  .card-photo-wrap {
+    position: relative;
+    aspect-ratio: 16/9;
+    overflow: hidden;
+    background: var(--beige-dark);
+  }
+
+  .card-photo {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.4s ease;
+  }
+
+  .card:hover .card-photo {
+    transform: scale(1.04);
+  }
+
+  .card-photo-placeholder {
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, var(--beige-dark), var(--beige-deeper));
+  }
+
+  .premium-badge {
+    position: absolute;
+    top: 0.75rem;
+    right: 0.75rem;
+    background: var(--orange);
+    color: #fff;
+    font-size: var(--text-xs);
+    font-weight: 700;
+    padding: 0.25rem 0.65rem;
+    border-radius: 100px;
+    letter-spacing: 0.03em;
+  }
+
+  .card-body {
+    padding: var(--space-lg);
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+  }
+
+  .card-name {
+    font-family: var(--serif);
+    font-size: var(--text-xl);
+    color: var(--text);
+    margin-bottom: 0.25rem;
+  }
+
+  .card-city {
+    font-size: var(--text-sm);
+    color: var(--text-muted);
+    margin-bottom: var(--space-sm);
+  }
+
+  .card-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+    margin-bottom: var(--space-sm);
+  }
+
+  .tag {
+    font-size: var(--text-xs);
+    font-weight: 500;
+    color: var(--brown);
+    background: rgba(136,101,69,0.1);
+    padding: 0.2rem 0.6rem;
+    border-radius: 100px;
+  }
+
+  .tag.score {
+    color: var(--orange);
+    background: rgba(255,142,62,0.1);
+    font-weight: 600;
+  }
+
+  .card-desc {
+    font-size: var(--text-sm);
+    color: var(--text-muted);
+    line-height: 1.6;
+    margin-bottom: var(--space-md);
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .card-btn {
+    display: inline-block;
+    margin-top: auto;
+    background: var(--orange);
+    color: #fff;
+    text-decoration: none;
+    font-family: var(--sans);
+    font-weight: 600;
+    font-size: var(--text-sm);
+    padding: 0.65rem 1.25rem;
+    border-radius: var(--radius-sm);
+    text-align: center;
+    transition: background 0.2s, transform 0.2s;
+  }
+
+  .card-btn:hover {
+    background: var(--brown);
+    transform: translateY(-1px);
+  }
+
+  .card-btn--disabled {
+    background: var(--beige-dark);
+    color: var(--text-muted);
+    cursor: default;
+  }
+
+  .card-btn--disabled:hover {
+    background: var(--beige-dark);
+    transform: none;
+  }
+
+  .empty-state {
+    text-align: center;
+    padding: var(--space-3xl);
+    color: var(--text-muted);
+  }
+
+  .no-results {
+    text-align: center;
+    color: var(--text-muted);
+    padding: var(--space-2xl) 0;
+  }
+
+  @media (max-width: 600px) {
+    .grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
+
+<script>
+  const searchInput = document.getElementById('search-input') as HTMLInputElement | null;
+  const grid = document.getElementById('restaurant-grid');
+  const noResults = document.getElementById('no-results');
+  const resultCount = document.getElementById('result-count');
+  const cards = Array.from(document.querySelectorAll<HTMLElement>('.card[data-name]'));
+
+  let activeCity = '';
+  let searchQuery = searchInput?.value ?? '';
+
+  function filter() {
+    let visible = 0;
+    cards.forEach((card) => {
+      const name = card.dataset.name ?? '';
+      const city = card.dataset.city ?? '';
+      const cuisine = card.dataset.cuisine ?? '';
+      const q = searchQuery.toLowerCase();
+      const matchesSearch = !q || name.includes(q) || city.includes(q) || cuisine.includes(q);
+      const matchesCity = !activeCity || city === activeCity.toLowerCase();
+      const show = matchesSearch && matchesCity;
+      card.style.display = show ? '' : 'none';
+      if (show) visible++;
+    });
+    if (noResults) noResults.style.display = visible === 0 ? 'block' : 'none';
+    if (resultCount) resultCount.textContent = `${visible} restaurant${visible !== 1 ? 's' : ''}`;
+  }
+
+  searchInput?.addEventListener('input', () => {
+    searchQuery = searchInput.value;
+    filter();
+  });
+
+  // Apply initial query from URL param
+  if (searchQuery) filter();
+
+  document.querySelectorAll<HTMLButtonElement>('.filter-pill[data-filter="city"]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.filter-pill[data-filter="city"]').forEach((b) => b.classList.remove('active'));
+      btn.classList.add('active');
+      activeCity = btn.dataset.value ?? '';
+      filter();
+    });
+  });
+</script>

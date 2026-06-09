@@ -54,16 +54,57 @@ const title = restaurant
   : 'Restaurant — Tastory';
 const description = restaurant?.description
   ?? (restaurant ? `Bekijk ${restaurant.name} op Tastory.` : 'Bekijk dit restaurant op Tastory.');
-const ogImage = heroPhoto ?? 'https://tastory.nl/og-image.png';
+const ogImage = heroPhoto ?? 'https://www.tastory.nl/tastory-logo.png';
 const keywords = restaurant
-  ? [restaurant.name!, restaurant.city!, restaurant.cuisine!, restaurant.vibe!, 'restaurant', 'Tastory']
-      .filter(Boolean) as string[]
+  ? [
+      restaurant.name!,
+      restaurant.city!,
+      restaurant.cuisine!,
+      restaurant.vibe!,
+      'restaurant',
+      'Tastory',
+      `${restaurant.name} ${restaurant.city}`,
+      `${restaurant.cuisine} restaurant ${restaurant.city}`,
+    ].filter(Boolean) as string[]
   : [];
 
 const isPremium = restaurant?.is_premium === true;
+
+const restaurantSchema = restaurant
+  ? {
+      '@context': 'https://schema.org',
+      '@type': 'Restaurant',
+      name: restaurant.name,
+      description: restaurant.description ?? undefined,
+      url: `https://www.tastory.nl/restaurant/${restaurant.slug}`,
+      image: allPhotos.length > 0 ? allPhotos : undefined,
+      address: restaurant.address
+        ? {
+            '@type': 'PostalAddress',
+            streetAddress: restaurant.address,
+            addressLocality: restaurant.city ?? undefined,
+            addressCountry: 'NL',
+          }
+        : undefined,
+      servesCuisine: restaurant.cuisine ?? undefined,
+      priceRange: restaurant.price_level ? '€'.repeat(restaurant.price_level) : undefined,
+      aggregateRating: restaurant.weighted_score
+        ? {
+            '@type': 'AggregateRating',
+            ratingValue: Number(restaurant.weighted_score).toFixed(1),
+            bestRating: '10',
+            worstRating: '1',
+            ratingCount: '1',
+          }
+        : undefined,
+    }
+  : null;
 ---
 
 <BaseLayout ogImage={ogImage} title={title} description={description} keywords={keywords}>
+  {restaurantSchema && (
+    <script type="application/ld+json" set:html={JSON.stringify(restaurantSchema)} />
+  )}
   {isPremium ? (
 
     <div class="premium-page restaurant-premium-page" style={backgroundUrl ? `background-image: url('${backgroundUrl}')` : ''}>
@@ -212,7 +253,7 @@ const isPremium = restaurant?.is_premium === true;
             <>
               {allPhotos[0] && (
                 <div class="photo-wrap">
-                  <img src={allPhotos[0]} alt={restaurant.name} class="photo" />
+                  <img src={allPhotos[0]} alt={restaurant.name} class="photo" loading="lazy" />
                 </div>
               )}
               <div class="info">
