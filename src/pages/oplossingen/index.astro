@@ -13,6 +13,30 @@ import Icon from '../../components/Icon.astro';
     description="Tastory is de ultieme verbinding tussen restaurant en gast. Ontdek hoe onze app waarde creëert voor beide kanten."
   />
 
+  <script
+    type="application/ld+json"
+    set:html={JSON.stringify({
+      '@context': 'https://schema.org',
+      '@type': 'WebPage',
+      name: 'Oplossingen voor restaurants & gasten — Tastory',
+      url: 'https://www.tastory.nl/oplossingen',
+      description:
+        'Tastory verbindt toprestaurants met de juiste gasten via kwalitatieve video. Ontdek hoe onze app waarde creëert voor restaurants en foodies.',
+      inLanguage: 'nl-NL',
+      breadcrumb: {
+        '@type': 'BreadcrumbList',
+        itemListElement: [
+          { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://www.tastory.nl' },
+          {
+            '@type': 'ListItem',
+            position: 2,
+            name: 'Oplossingen',
+            item: 'https://www.tastory.nl/oplossingen',
+          },
+        ],
+      },
+    })}
+  />
   <section class="solutions-overview">
     <div class="solutions-grid">
       <a href="/oplossingen/restaurants" class="solution-card reveal">

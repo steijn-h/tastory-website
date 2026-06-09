@@ -12,6 +12,30 @@ import PageHero from '../components/PageHero.astro';
     description="Tastory is bijna klaar om gelanceerd te worden. Meld je nu aan en wees er als eerste bij."
   />
 
+  <script
+    type="application/ld+json"
+    set:html={JSON.stringify({
+      '@context': 'https://schema.org',
+      '@type': 'SoftwareApplication',
+      name: 'Tastory',
+      url: 'https://www.tastory.nl/download',
+      operatingSystem: 'iOS, Android',
+      applicationCategory: 'LifestyleApplication',
+      description:
+        'Download de Tastory app en ontdek restaurants die écht bij jou passen op basis van sfeer, keuken en stijl.',
+      inLanguage: 'nl-NL',
+      offers: {
+        '@type': 'Offer',
+        price: '0',
+        priceCurrency: 'EUR',
+      },
+      publisher: {
+        '@type': 'Organization',
+        name: 'Tastory',
+        url: 'https://www.tastory.nl',
+      },
+    })}
+  />
   <section class="signup-section">
     <div class="signup-grid">
       <div class="signup-card reveal">

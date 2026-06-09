@@ -20,6 +20,24 @@ const base = import.meta.env.BASE_URL;
     description="Blijf op de hoogte van de laatste ontwikkelingen, inzichten en verhalen van Tastory."
   />
 
+  <script
+    type="application/ld+json"
+    set:html={JSON.stringify({
+      '@context': 'https://schema.org',
+      '@type': 'Blog',
+      name: 'Tastory Blog',
+      url: 'https://www.tastory.nl/blog',
+      description:
+        'Lees de laatste artikelen en updates van Tastory. Blijf op de hoogte van onze reis, inzichten en restaurantnieuws.',
+      inLanguage: 'nl-NL',
+      publisher: {
+        '@type': 'Organization',
+        name: 'Tastory',
+        url: 'https://www.tastory.nl',
+        logo: 'https://www.tastory.nl/tastory-logo.png',
+      },
+    })}
+  />
   <section class="blog-section">
     <div class="blog-grid">
       {

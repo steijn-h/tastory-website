@@ -91,6 +91,44 @@ import PageHero from '../components/PageHero.astro';
       </div>
     </div>
   </section>
+  <script
+    type="application/ld+json"
+    set:html={JSON.stringify({
+      '@context': 'https://schema.org',
+      '@type': 'AboutPage',
+      name: 'Over Tastory — Het verhaal achter dé Nederlandse restaurantapp',
+      url: 'https://www.tastory.nl/over-ons',
+      description:
+        'Tastory verbindt restaurants en gasten via kwalitatieve videocontent. Ontdek ons verhaal en waarom wij geloven in eerlijke restaurantpresentatie.',
+      about: {
+        '@type': 'Organization',
+        name: 'Tastory',
+        url: 'https://www.tastory.nl',
+        foundingDate: '2024',
+        foundingLocation: {
+          '@type': 'Place',
+          addressLocality: 'Ulft',
+          addressCountry: 'NL',
+        },
+        employee: [
+          {
+            '@type': 'Person',
+            name: 'Steijn Holtkamp',
+            jobTitle: 'Co-founder',
+            telephone: '+31640866979',
+            email: 'Steijn@tastory.nl',
+          },
+          {
+            '@type': 'Person',
+            name: 'Fallon Rillmann',
+            jobTitle: 'Co-founder',
+            telephone: '+31624774605',
+            email: 'Fallon@tastory.nl',
+          },
+        ],
+      },
+    })}
+  />
 </BaseLayout>
 <style>
   .mission-grid {
