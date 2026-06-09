@@ -6,6 +6,7 @@
         "appID": "KDMY947UH6.nl.tastory.app",
         "paths": [
           "/restaurant/*",
+          "/story/*",
           "/join"
         ]
       }
