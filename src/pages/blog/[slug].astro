@@ -58,6 +58,10 @@ const { Content } = await post.render();
         '@type': 'WebPage',
         '@id': `https://www.tastory.nl/blog/${post.slug}`,
       },
+      speakable: {
+        '@type': 'SpeakableSpecification',
+        cssSelector: ['.blog-content p:first-of-type'],
+      },
     })}
   />
   <PageHero title={`<em>${post.data.title}</em>`} description={formatDate(post.data.date)} />
@@ -76,7 +80,7 @@ const { Content } = await post.render();
         <Content />
       </div>
       <div class="blog-back">
-        <a href="/blog" class="btn-secondary-light">&larr; Terug naar alle artikelen</a>
+        <a href={`${import.meta.env.BASE_URL}blog`} class="btn-secondary-light">&larr; Terug naar alle artikelen</a>
       </div>
     </div>
   </article>

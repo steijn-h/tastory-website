@@ -30,6 +30,13 @@ const base = import.meta.env.BASE_URL;
       description:
         'Lees de laatste artikelen en updates van Tastory. Blijf op de hoogte van onze reis, inzichten en restaurantnieuws.',
       inLanguage: 'nl-NL',
+      breadcrumb: {
+        '@type': 'BreadcrumbList',
+        itemListElement: [
+          { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://www.tastory.nl' },
+          { '@type': 'ListItem', position: 2, name: 'Blog', item: 'https://www.tastory.nl/blog' },
+        ],
+      },
       publisher: {
         '@type': 'Organization',
         name: 'Tastory',

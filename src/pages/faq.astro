@@ -87,6 +87,13 @@ import PageHero from '../components/PageHero.astro';
     set:html={JSON.stringify({
       '@context': 'https://schema.org',
       '@type': 'FAQPage',
+      name: 'Veelgestelde vragen — Tastory',
+      url: 'https://www.tastory.nl/faq',
+      inLanguage: 'nl-NL',
+      speakable: {
+        '@type': 'SpeakableSpecification',
+        cssSelector: ['.faq-item summary span', '.faq-item p'],
+      },
       mainEntity: [
         {
           '@type': 'Question',

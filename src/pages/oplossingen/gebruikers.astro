@@ -18,12 +18,19 @@ import { appFunctions } from '../../data/home';
     type="application/ld+json"
     set:html={JSON.stringify({
       '@context': 'https://schema.org',
-      '@type': 'WebPage',
+      '@type': ['WebPage', 'Service'],
       name: 'Oplossingen voor gasten — Tastory',
       url: 'https://www.tastory.nl/oplossingen/gebruikers',
       description:
         'Ontdek restaurants die écht bij jou passen. Download de Tastory app, proef en deel jouw ervaringen.',
       inLanguage: 'nl-NL',
+      serviceType: 'Restaurantontdekking voor gasten',
+      provider: {
+        '@type': 'Organization',
+        name: 'Tastory',
+        url: 'https://www.tastory.nl',
+      },
+      areaServed: { '@type': 'Country', name: 'Nederland' },
       breadcrumb: {
         '@type': 'BreadcrumbList',
         itemListElement: [
