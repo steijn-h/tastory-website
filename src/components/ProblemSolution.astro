@@ -248,7 +248,9 @@ import Icon from './Icon.astro';
   .phone-wrapper {
     position: relative;
     z-index: 1;
-    /* extra left margin so left-side buttons don't get cut off */
+    /* explicit size so absolute children (screen + SVG) anchor float cards correctly */
+    width: 280px;
+    height: 580px;
     margin-left: 4px;
   }
 
@@ -332,6 +334,7 @@ import Icon from './Icon.astro';
     .ps-phone { order: -1; justify-content: center; }
 
     /* scale ≈ 0.857 → 240×497 */
+    .phone-wrapper { width: 240px; height: 497px; }
     .phone-screen { left: 12px; top: 12px; width: 216px; height: 473px; border-radius: 26px; }
     .phone-frame-svg { width: 240px; height: 497px; }
 
@@ -343,6 +346,7 @@ import Icon from './Icon.astro';
 
   @media (max-width: 640px) {
     /* scale ≈ 0.714 → 200×414 */
+    .phone-wrapper { width: 200px; height: 414px; }
     .phone-screen { left: 10px; top: 10px; width: 180px; height: 394px; border-radius: 21px; }
     .phone-frame-svg { width: 200px; height: 414px; }
 
@@ -355,12 +359,14 @@ import Icon from './Icon.astro';
 
   @media (max-width: 390px) {
     /* scale ≈ 0.679 → 190×394 */
+    .phone-wrapper { width: 190px; height: 394px; }
     .phone-screen { left: 10px; top: 10px; width: 171px; height: 374px; border-radius: 20px; }
     .phone-frame-svg { width: 190px; height: 394px; }
   }
 
   @media (max-width: 360px) {
     /* scale ≈ 0.625 → 175×363 */
+    .phone-wrapper { width: 175px; height: 363px; }
     .phone-screen { left: 9px; top: 9px; width: 157px; height: 345px; border-radius: 19px; }
     .phone-frame-svg { width: 175px; height: 363px; }
 
