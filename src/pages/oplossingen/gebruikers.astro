@@ -91,21 +91,23 @@ import { appFunctions } from '../../data/home';
     <div class="cta-users-inner reveal">
       <h2 class="section-title">Klaar om te <em>ontdekken?</em></h2>
       <p>
-        De Tastory app komt binnenkort beschikbaar op iOS en Android. Meld je aan voor de
-        nieuwsbrief en wees de eerste die het hoort!
+        De Tastory app is nu live! Download hem gratis in de App Store en ontdek restaurants die
+        écht bij jou passen.
       </p>
-      <form class="email-form" id="gebruiker-cta-form">
-        <input
-          type="email"
-          id="gebruiker-cta-email"
-          placeholder="Jouw e-mailadres"
-          required
-          aria-label="E-mailadres"
+      <a
+        href="https://apps.apple.com/nl/app/tastory/id6762256086"
+        target="_blank"
+        rel="noopener noreferrer"
+        class="app-store-btn"
+      >
+        <img
+          src="https://developer.apple.com/assets/elements/badges/download-on-the-app-store.svg"
+          alt="Download on the App Store"
+          width="156"
+          height="52"
         />
-        <button type="submit">Aanmelden</button>
-      </form>
-      <div class="form-feedback" id="gebruiker-cta-feedback"></div>
-      <div class="cta-note">Geen spam. Altijd opzegbaar.</div>
+      </a>
+      <div class="cta-note">Gratis te downloaden. Beschikbaar op iOS.</div>
     </div>
   </section>
 </BaseLayout>
@@ -197,62 +199,15 @@ import { appFunctions } from '../../data/home';
     margin-bottom: 2.5rem;
   }
 
-  .email-form {
-    display: flex;
-    max-width: 520px;
-    margin: 0 auto;
-    background: var(--white);
-    border-radius: 100px;
-    border: 1px solid rgba(136, 101, 69, 0.1);
-    overflow: hidden;
-    box-shadow: 0 4px 20px rgba(136, 101, 69, 0.06);
+  .app-store-btn {
+    display: inline-block;
+    margin-top: 0.5rem;
+    margin-bottom: 0.5rem;
+    transition: opacity 0.2s;
   }
 
-  .email-form input {
-    flex: 1;
-    padding: 1rem 1.8rem;
-    background: transparent;
-    border: none;
-    font-family: var(--sans);
-    font-size: var(--text-base);
-    color: var(--text);
-    outline: none;
-  }
-
-  .email-form input::placeholder {
-    color: var(--text-muted);
-    opacity: 0.6;
-  }
-
-  .email-form button {
-    background: var(--orange);
-    color: var(--white);
-    border: none;
-    padding: 1rem 2rem;
-    font-family: var(--sans);
-    font-size: var(--text-base);
-    font-weight: 600;
-    cursor: pointer;
-    transition: background 0.2s;
-    border-radius: 0 100px 100px 0;
-  }
-
-  .email-form button:hover {
-    background: var(--brown);
-  }
-
-  .form-feedback {
-    font-size: 1rem;
-    margin-top: 1rem;
-    min-height: 1.5rem;
-  }
-
-  .form-feedback--success {
-    color: #2e7d32;
-  }
-
-  .form-feedback--error {
-    color: #c62828;
+  .app-store-btn:hover {
+    opacity: 0.85;
   }
 
   .cta-note {
@@ -267,65 +222,4 @@ import { appFunctions } from '../../data/home';
       grid-template-columns: 1fr;
     }
   }
-
-  @media (max-width: 640px) {
-    .email-form {
-      flex-direction: column;
-      border-radius: 16px;
-    }
-    .email-form button {
-      width: 100%;
-      border-radius: 0 0 16px 16px;
-    }
-  }
 </style>
-
-<script>
-  const form = document.getElementById('gebruiker-cta-form') as HTMLFormElement;
-  const emailInput = document.getElementById('gebruiker-cta-email') as HTMLInputElement;
-  const feedback = document.getElementById('gebruiker-cta-feedback') as HTMLDivElement;
-  const submitBtn = form.querySelector('button') as HTMLButtonElement;
-
-  form.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const email = emailInput.value.trim();
-    if (!email) return;
-
-    submitBtn.disabled = true;
-    submitBtn.textContent = 'Verzenden...';
-
-    try {
-      const res = await fetch('https://formsubmit.co/ajax/Info@tastory.nl', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
-        body: JSON.stringify({
-          name: 'Gast aanmelding',
-          email,
-          message: 'Nieuwe gast aangemeld via de gasten oplossingen pagina.',
-          _subject: 'Nieuwe gast aanmelding — Tastory',
-          _captcha: 'false',
-        }),
-      });
-
-      if (res.ok) {
-        feedback.textContent =
-          'Bedankt voor je aanmelding! We laten het je weten zodra de app beschikbaar is.';
-        feedback.className = 'form-feedback form-feedback--success';
-        emailInput.value = '';
-      } else {
-        throw new Error('Submit failed');
-      }
-    } catch {
-      feedback.textContent = 'Er ging iets mis. Probeer het later opnieuw.';
-      feedback.className = 'form-feedback form-feedback--error';
-    }
-
-    submitBtn.disabled = false;
-    submitBtn.textContent = 'Aanmelden';
-
-    setTimeout(() => {
-      feedback.textContent = '';
-      feedback.className = 'form-feedback';
-    }, 5000);
-  });
-</script>
