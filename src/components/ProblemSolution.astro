@@ -141,12 +141,13 @@ import Icon from './Icon.astro';
             d="M 44,0.3 H 236 A 43.7,43.7 0 0,1 279.7,44 V 536 A 43.7,43.7 0 0,1 236,579.7 H 44 A 43.7,43.7 0 0,1 0.3,536 V 44 A 43.7,43.7 0 0,1 44,0.3 Z"
           />
 
-          <!-- ⑥ Earpiece slot -->
-          <rect x="108" y="5" width="64" height="5" rx="2.5" fill="rgba(0,0,0,0.5)" />
-
-          <!-- ⑦ Dynamic Island -->
-          <rect x="91" y="18" width="98" height="28" rx="14" fill="#000" />
-          <rect x="91" y="18" width="98" height="14" rx="14" fill="rgba(255,255,255,0.03)" />
+          <!-- ⑦ Dynamic Island (no separate earpiece — it's integrated in DI on iPhone Pro) -->
+          <rect x="100" y="17" width="80" height="24" rx="12" fill="#000" />
+          <!-- Camera dot inside Dynamic Island -->
+          <circle cx="167" cy="29" r="6" fill="#0a0a0a" />
+          <circle cx="167" cy="29" r="4.5" fill="#111" />
+          <circle cx="167" cy="29" r="3" fill="#050505" />
+          <circle cx="165.5" cy="27.5" r="1" fill="rgba(255,255,255,0.12)" />
 
           <!-- ⑧ Buttons (5px wide, clean) -->
           <!-- Action button left -->
