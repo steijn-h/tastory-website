@@ -123,12 +123,27 @@ import Icon from './Icon.astro';
             </linearGradient>
           </defs>
 
-          <!-- ① Frame body with screen hole (even-odd) -->
+          <!--
+            Layers (bottom → top):
+            ① Orange frame: outer=5..285 r=46, hole=17..273 y=12..588 r=34
+            ② Black bezel ring: outer=17..273 r=34, hole=24..266 y=19..581 r=27
+            Screenshot shows through the inner hole (24..266, 19..581)
+          -->
+
+          <!-- ① Orange titanium frame -->
           <path
             fill-rule="evenodd"
             fill="url(#fg)"
             d="M 51,0 H 239 A 46,46 0 0,1 285,46 V 554 A 46,46 0 0,1 239,600 H 51 A 46,46 0 0,1 5,554 V 46 A 46,46 0 0,1 51,0 Z
                M 51,12 A 34,34 0 0,0 17,46 V 554 A 34,34 0 0,0 51,588 H 239 A 34,34 0 0,0 273,554 V 46 A 34,34 0 0,0 239,12 Z"
+          />
+
+          <!-- ② Black bezel ring (outer matches frame hole, inner is the actual screen opening) -->
+          <path
+            fill-rule="evenodd"
+            fill="#080808"
+            d="M 51,12 A 34,34 0 0,0 17,46 V 554 A 34,34 0 0,0 51,588 H 239 A 34,34 0 0,0 273,554 V 46 A 34,34 0 0,0 239,12 Z
+               M 51,19 A 27,27 0 0,0 24,46 V 554 A 27,27 0 0,0 51,581 H 239 A 27,27 0 0,0 266,554 V 46 A 27,27 0 0,0 239,19 Z"
           />
 
           <!-- ② Diagonal polished sheen over the whole frame -->
@@ -305,33 +320,29 @@ import Icon from './Icon.astro';
   }
 
   /*
-    Screen area matches SVG hole: x=17..273 y=12..588
-    → left=17 top=12 width=256 height=576
-    padding=3px creates the thin black bezel around the screenshot
+    Screen area matches SVG inner hole: x=24..266 y=19..581 r=27
+    → left=24 top=19 width=242 height=562 border-radius=27
+    Black bezel is handled by the SVG layer above
   */
   .phone-screen {
     position: absolute;
-    left: 17px; top: 12px;
-    width: 256px; height: 576px;
-    border-radius: 34px;
+    left: 24px; top: 19px;
+    width: 242px; height: 562px;
+    border-radius: 27px;
     overflow: hidden;
     background: #000;
-    padding: 3px;
-    box-sizing: border-box;
   }
 
   .phone-screenshot {
     width: 100%;
     height: auto;
     display: block;
-    border-radius: 31px;
-    /* +1.5s longer: 13.5s total */
-    animation: scroll-app 13.5s ease-in-out 1.5s infinite alternate;
+    animation: scroll-app 15s ease-in-out 1.5s infinite alternate;
   }
 
   @keyframes scroll-app {
-    0%, 14%  { transform: translateY(0); }
-    86%, 100% { transform: translateY(-47%); }
+    0%, 12%  { transform: translateY(0); }
+    88%, 100% { transform: translateY(-46%); }
   }
 
   @media (prefers-reduced-motion: reduce) {
@@ -340,7 +351,7 @@ import Icon from './Icon.astro';
 
   .screen-glare {
     position: absolute;
-    inset: 3px;
+    inset: 0;
     background: linear-gradient(
       135deg,
       rgba(255,255,255,0.055) 0%,
@@ -348,7 +359,7 @@ import Icon from './Icon.astro';
       transparent 55%
     );
     pointer-events: none;
-    border-radius: 31px;
+    border-radius: 27px;
   }
 
   /* SVG frame on top; drop-shadow follows real SVG shape */
@@ -403,7 +414,7 @@ import Icon from './Icon.astro';
     .ps-phone { order: -1; justify-content: center; }
 
     /* scale ≈ 0.855 (248/290) */
-    .phone-screen { left: 15px; top: 10px; width: 219px; height: 493px; border-radius: 29px; }
+    .phone-screen { left: 21px; top: 16px; width: 207px; height: 481px; border-radius: 23px; }
     .phone-frame-svg { width: 248px; height: 514px; }
 
     .float-card-1 { right: -60px; }
@@ -414,7 +425,7 @@ import Icon from './Icon.astro';
 
   @media (max-width: 640px) {
     /* scale ≈ 0.690 (200/290) */
-    .phone-screen { left: 12px; top: 8px; width: 177px; height: 398px; border-radius: 23px; }
+    .phone-screen { left: 17px; top: 13px; width: 167px; height: 388px; border-radius: 19px; }
     .phone-frame-svg { width: 200px; height: 414px; }
 
     .float-card { padding: 0.3rem 0.55rem; }
@@ -426,13 +437,13 @@ import Icon from './Icon.astro';
 
   @media (max-width: 390px) {
     /* scale ≈ 0.655 (190/290) */
-    .phone-screen { left: 11px; top: 8px; width: 168px; height: 378px; border-radius: 22px; }
+    .phone-screen { left: 16px; top: 12px; width: 158px; height: 368px; border-radius: 18px; }
     .phone-frame-svg { width: 190px; height: 393px; }
   }
 
   @media (max-width: 360px) {
     /* scale ≈ 0.603 (175/290) */
-    .phone-screen { left: 10px; top: 7px; width: 155px; height: 349px; border-radius: 21px; }
+    .phone-screen { left: 14px; top: 11px; width: 146px; height: 339px; border-radius: 16px; }
     .phone-frame-svg { width: 175px; height: 362px; }
     .float-card-1 { right: -65px; }
     .float-card-2 { right: -55px; }
