@@ -56,9 +56,9 @@ import Icon from './Icon.astro';
           SVG iPhone frame — clean and proportional
           ViewBox 0 0 280 580
           Frame outer:  x=0..280  y=0..580  rx=44
-          Screen hole:  x=8..272  y=8..572  rx=36   (8px frame)
-          Black bezel:  x=8..272  y=8..572  rx=36  inner hole x=14..266 y=14..566 rx=30  (6px bezel)
-          phone-screen CSS: left=14 top=14 width=252 height=552 rx=30
+          Screen hole:  x=5..275  y=5..575  rx=39   (5px frame)
+          Black bezel:  x=5..275  y=5..575  rx=39  inner hole x=11..269 y=11..569 rx=33  (6px bezel)
+          phone-screen CSS: left=11 top=11 width=258 height=558 rx=33
         -->
         <svg
           class="phone-frame-svg"
@@ -104,7 +104,7 @@ import Icon from './Icon.astro';
             fill-rule="evenodd"
             fill="url(#frame-g)"
             d="M 44,0 H 236 A 44,44 0 0,1 280,44 V 536 A 44,44 0 0,1 236,580 H 44 A 44,44 0 0,1 0,536 V 44 A 44,44 0 0,1 44,0 Z
-               M 44,8 A 36,36 0 0,0 8,44 V 536 A 36,36 0 0,0 44,572 H 236 A 36,36 0 0,0 272,536 V 44 A 36,36 0 0,0 236,8 Z"
+               M 44,5 A 39,39 0 0,0 5,44 V 536 A 39,39 0 0,0 44,575 H 236 A 39,39 0 0,0 275,536 V 44 A 39,39 0 0,0 236,5 Z"
           />
 
           <!-- ② Top edge highlight (subtle light catch) -->
@@ -121,8 +121,8 @@ import Icon from './Icon.astro';
           <path
             fill-rule="evenodd"
             fill="#0a0a0a"
-            d="M 44,8 A 36,36 0 0,0 8,44 V 536 A 36,36 0 0,0 44,572 H 236 A 36,36 0 0,0 272,536 V 44 A 36,36 0 0,0 236,8 Z
-               M 44,14 A 30,30 0 0,0 14,44 V 536 A 30,30 0 0,0 44,566 H 236 A 30,30 0 0,0 266,536 V 44 A 30,30 0 0,0 236,14 Z"
+            d="M 44,5 A 39,39 0 0,0 5,44 V 536 A 39,39 0 0,0 44,575 H 236 A 39,39 0 0,0 275,536 V 44 A 39,39 0 0,0 236,5 Z
+               M 44,11 A 33,33 0 0,0 11,44 V 536 A 33,33 0 0,0 44,569 H 236 A 33,33 0 0,0 269,536 V 44 A 33,33 0 0,0 236,11 Z"
           />
 
           <!-- ④ Polished inner chamfer — thin bright line at glass edge -->
@@ -130,7 +130,7 @@ import Icon from './Icon.astro';
             fill="none"
             stroke="rgba(255,230,160,0.35)"
             stroke-width="1"
-            d="M 44,8.5 A 35.5,35.5 0 0,0 8.5,44 V 536 A 35.5,35.5 0 0,0 44,571.5 H 236 A 35.5,35.5 0 0,0 271.5,536 V 44 A 35.5,35.5 0 0,0 236,8.5 Z"
+            d="M 44,5.5 A 38.5,38.5 0 0,0 5.5,44 V 536 A 38.5,38.5 0 0,0 44,574.5 H 236 A 38.5,38.5 0 0,0 274.5,536 V 44 A 38.5,38.5 0 0,0 236,5.5 Z"
           />
 
           <!-- ⑤ Outer rim -->
@@ -142,12 +142,12 @@ import Icon from './Icon.astro';
           />
 
           <!-- ⑦ Dynamic Island (no separate earpiece — it's integrated in DI on iPhone Pro) -->
-          <rect x="100" y="17" width="80" height="24" rx="12" fill="#000" />
+          <rect x="100" y="14" width="80" height="24" rx="12" fill="#000" />
           <!-- Camera dot inside Dynamic Island -->
-          <circle cx="167" cy="29" r="6" fill="#0a0a0a" />
-          <circle cx="167" cy="29" r="4.5" fill="#111" />
-          <circle cx="167" cy="29" r="3" fill="#050505" />
-          <circle cx="165.5" cy="27.5" r="1" fill="rgba(255,255,255,0.12)" />
+          <circle cx="167" cy="26" r="6" fill="#0a0a0a" />
+          <circle cx="167" cy="26" r="4.5" fill="#111" />
+          <circle cx="167" cy="26" r="3" fill="#050505" />
+          <circle cx="165.5" cy="24.5" r="1" fill="rgba(255,255,255,0.12)" />
 
           <!-- ⑧ Buttons (5px wide, clean) -->
           <!-- Action button left -->
@@ -256,14 +256,14 @@ import Icon from './Icon.astro';
   }
 
   /*
-    Matches SVG inner hole: x=14..266 y=14..566 rx=30  (in 280×580 viewBox)
-    phone-screen: left=14 top=14 width=252 height=552
+    Matches SVG inner hole: x=11..269 y=11..569 rx=33  (in 280×580 viewBox)
+    phone-screen: left=11 top=11 width=258 height=558
   */
   .phone-screen {
     position: absolute;
-    left: 14px; top: 14px;
-    width: 252px; height: 552px;
-    border-radius: 30px;
+    left: 11px; top: 11px;
+    width: 258px; height: 558px;
+    border-radius: 33px;
     overflow: hidden;
     background: #000;
   }
@@ -336,7 +336,7 @@ import Icon from './Icon.astro';
 
     /* scale ≈ 0.857 → 240×497 */
     .phone-wrapper { width: 240px; height: 497px; }
-    .phone-screen { left: 12px; top: 12px; width: 216px; height: 473px; border-radius: 26px; }
+    .phone-screen { left: 9px; top: 9px; width: 221px; height: 478px; border-radius: 28px; }
     .phone-frame-svg { width: 240px; height: 497px; }
 
     .float-card-1 { right: -60px; }
@@ -348,7 +348,7 @@ import Icon from './Icon.astro';
   @media (max-width: 640px) {
     /* scale ≈ 0.714 → 200×414 */
     .phone-wrapper { width: 200px; height: 414px; }
-    .phone-screen { left: 10px; top: 10px; width: 180px; height: 394px; border-radius: 21px; }
+    .phone-screen { left: 8px; top: 8px; width: 184px; height: 398px; border-radius: 24px; }
     .phone-frame-svg { width: 200px; height: 414px; }
 
     .float-card { padding: 0.3rem 0.55rem; }
@@ -361,14 +361,14 @@ import Icon from './Icon.astro';
   @media (max-width: 390px) {
     /* scale ≈ 0.679 → 190×394 */
     .phone-wrapper { width: 190px; height: 394px; }
-    .phone-screen { left: 10px; top: 10px; width: 171px; height: 374px; border-radius: 20px; }
+    .phone-screen { left: 7px; top: 7px; width: 175px; height: 379px; border-radius: 22px; }
     .phone-frame-svg { width: 190px; height: 394px; }
   }
 
   @media (max-width: 360px) {
     /* scale ≈ 0.625 → 175×363 */
     .phone-wrapper { width: 175px; height: 363px; }
-    .phone-screen { left: 9px; top: 9px; width: 157px; height: 345px; border-radius: 19px; }
+    .phone-screen { left: 7px; top: 7px; width: 161px; height: 349px; border-radius: 21px; }
     .phone-frame-svg { width: 175px; height: 363px; }
 
     .float-card-1 { right: -65px; }
