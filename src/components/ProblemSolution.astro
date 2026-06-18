@@ -38,19 +38,27 @@ import Icon from './Icon.astro';
     <div class="ps-phone reveal-right">
       <div class="phone-glow"></div>
       <div class="phone-wrapper">
+        <!-- Physical buttons positioned relative to phone-wrapper -->
+        <div class="phone-btn btn-action"></div>
+        <div class="phone-btn btn-vol-up"></div>
+        <div class="phone-btn btn-vol-down"></div>
+        <div class="phone-btn btn-power"></div>
+
         <div class="phone-mockup">
-          <div class="phone-notch"></div>
           <div class="phone-screen">
+            <!-- Dynamic Island -->
+            <div class="dynamic-island"></div>
             <img
-              src="/SCR-20260312-notu.jpeg"
+              src="/homepage-long-screenshot.png"
               alt="Tastory app screenshot"
               class="phone-screenshot"
-              width="751"
-              height="3905"
+              width="1170"
+              height="4944"
               loading="lazy"
             />
           </div>
         </div>
+
         <div class="float-card float-card-1">
           <div class="fc-label">Reviews met hoge<br />betrouwbaarheid</div>
         </div>
@@ -142,7 +150,7 @@ import Icon from './Icon.astro';
     font-weight: 600;
   }
 
-  /* Phone mockup */
+  /* ── Phone area ── */
   .ps-phone {
     display: flex;
     justify-content: flex-start;
@@ -166,47 +174,69 @@ import Icon from './Icon.astro';
   .phone-wrapper {
     position: relative;
     z-index: 1;
+    /* Extra padding on left so buttons don't get clipped */
+    padding-left: 6px;
   }
 
+  /* ── iPhone 17 Pro Max frame ── */
   .phone-mockup {
     width: 280px;
     height: 600px;
-    background: #1a1714;
-    border-radius: 44px;
+    /* Orange titanium gradient */
+    background: linear-gradient(
+      160deg,
+      #de8d45 0%,
+      #c97332 40%,
+      #c06c28 70%,
+      #b86024 100%
+    );
+    border-radius: 46px;
     position: relative;
     overflow: hidden;
+    /* Titanium chamfer highlights */
     box-shadow:
-      0 20px 60px rgba(0, 0, 0, 0.2),
-      0 0 0 1.5px rgba(255, 255, 255, 0.1),
-      inset 0 1px 0 rgba(255, 255, 255, 0.12);
-    --screenshot-scroll: -58%;
+      /* Outer depth */
+      0 28px 70px rgba(0, 0, 0, 0.32),
+      0 8px 24px rgba(0, 0, 0, 0.18),
+      /* Frame edge highlight (top-left light catch) */
+      inset 2px 2px 0 rgba(255, 210, 150, 0.35),
+      /* Frame edge shadow (bottom-right) */
+      inset -1px -1px 0 rgba(80, 30, 0, 0.4),
+      /* Outer rim */
+      0 0 0 1px rgba(180, 90, 20, 0.6);
+    --screenshot-scroll: -47%;
   }
 
-  .phone-notch {
-    position: absolute;
-    top: 0;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 100px;
-    height: 26px;
-    background: #0e0c0a;
-    border-radius: 0 0 18px 18px;
-    z-index: 5;
-  }
-
+  /* ── Screen inset ── */
   .phone-screen {
     position: absolute;
-    inset: 5px;
-    border-radius: 40px;
+    inset: 9px;
+    border-radius: 38px;
     overflow: hidden;
-    background: #161310;
+    background: #000;
   }
 
+  /* ── Dynamic Island ── */
+  .dynamic-island {
+    position: absolute;
+    top: 13px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 96px;
+    height: 30px;
+    background: #000;
+    border-radius: 20px;
+    z-index: 10;
+    /* Subtle pill inner shadow for depth */
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.8);
+  }
+
+  /* ── Scrolling screenshot ── */
   .phone-screenshot {
     width: 100%;
     height: auto;
     display: block;
-    animation: scroll-app 10s ease-in-out 1s infinite alternate;
+    animation: scroll-app 12s ease-in-out 1s infinite alternate;
   }
 
   @keyframes scroll-app {
@@ -226,6 +256,58 @@ import Icon from './Icon.astro';
     }
   }
 
+  /* ── Physical buttons (positioned relative to .phone-wrapper) ── */
+  .phone-btn {
+    position: absolute;
+    /* Slightly darker orange, same hue as frame */
+    background: linear-gradient(to right, #a85a1c, #b86524);
+    box-shadow:
+      -1px 0 4px rgba(0, 0, 0, 0.35),
+      inset 0 1px 0 rgba(255, 200, 120, 0.25);
+    z-index: 2;
+  }
+
+  /* Action button — left side, near top */
+  .btn-action {
+    left: 2px; /* phone-wrapper has padding-left: 6px, so mockup left edge is at 6px */
+    top: 108px;
+    width: 4px;
+    height: 30px;
+    border-radius: 2px 0 0 2px;
+  }
+
+  /* Volume up — left side */
+  .btn-vol-up {
+    left: 2px;
+    top: 160px;
+    width: 4px;
+    height: 56px;
+    border-radius: 2px 0 0 2px;
+  }
+
+  /* Volume down — left side */
+  .btn-vol-down {
+    left: 2px;
+    top: 228px;
+    width: 4px;
+    height: 56px;
+    border-radius: 2px 0 0 2px;
+  }
+
+  /* Power button — right side */
+  .btn-power {
+    left: calc(6px + 280px); /* padding-left + phone width */
+    top: 175px;
+    width: 4px;
+    height: 78px;
+    border-radius: 0 2px 2px 0;
+    background: linear-gradient(to left, #a85a1c, #b86524);
+    box-shadow:
+      1px 0 4px rgba(0, 0, 0, 0.35),
+      inset 0 1px 0 rgba(255, 200, 120, 0.25);
+  }
+
+  /* ── Float cards ── */
   .float-card {
     position: absolute;
     background: rgba(255, 252, 248, 0.95);
@@ -290,15 +372,44 @@ import Icon from './Icon.astro';
       justify-content: center;
     }
 
+    .phone-wrapper {
+      padding-left: 6px;
+    }
+
     .phone-mockup {
       width: 240px;
-      height: 500px;
-      border-radius: 38px;
+      height: 514px;
+      border-radius: 40px;
+      --screenshot-scroll: -47%;
     }
 
     .phone-screen {
-      inset: 4px;
-      border-radius: 35px;
+      inset: 8px;
+      border-radius: 33px;
+    }
+
+    .dynamic-island {
+      top: 11px;
+      width: 82px;
+      height: 26px;
+    }
+
+    .btn-action {
+      top: 92px;
+      height: 26px;
+    }
+    .btn-vol-up {
+      top: 137px;
+      height: 48px;
+    }
+    .btn-vol-down {
+      top: 196px;
+      height: 48px;
+    }
+    .btn-power {
+      left: calc(6px + 240px);
+      top: 150px;
+      height: 67px;
     }
 
     .float-card-1 {
@@ -321,11 +432,40 @@ import Icon from './Icon.astro';
       width: 200px;
       height: 428px;
       border-radius: 36px;
+      --screenshot-scroll: -47%;
     }
 
     .phone-screen {
-      inset: 3px;
-      border-radius: 33px;
+      inset: 7px;
+      border-radius: 30px;
+    }
+
+    .dynamic-island {
+      top: 9px;
+      width: 68px;
+      height: 22px;
+    }
+
+    .btn-action {
+      top: 77px;
+      height: 22px;
+      width: 3px;
+    }
+    .btn-vol-up {
+      top: 114px;
+      height: 40px;
+      width: 3px;
+    }
+    .btn-vol-down {
+      top: 163px;
+      height: 40px;
+      width: 3px;
+    }
+    .btn-power {
+      left: calc(6px + 200px);
+      top: 125px;
+      height: 56px;
+      width: 3px;
     }
 
     .float-card {
@@ -354,15 +494,27 @@ import Icon from './Icon.astro';
       border-radius: 34px;
     }
 
-    .float-card-1 {
-      right: -80px;
+    .phone-screen {
+      inset: 7px;
+      border-radius: 28px;
     }
-    .float-card-2 {
-      right: -70px;
+
+    .dynamic-island {
+      width: 64px;
+      height: 20px;
     }
-    .float-card-3 {
-      right: -75px;
+
+    .btn-action { top: 73px; }
+    .btn-vol-up { top: 108px; }
+    .btn-vol-down { top: 155px; }
+    .btn-power {
+      left: calc(6px + 190px);
+      top: 118px;
     }
+
+    .float-card-1 { right: -80px; }
+    .float-card-2 { right: -70px; }
+    .float-card-3 { right: -75px; }
   }
 
   @media (max-width: 360px) {
@@ -372,14 +524,10 @@ import Icon from './Icon.astro';
       border-radius: 32px;
     }
 
-    .float-card-1 {
-      right: -65px;
-    }
-    .float-card-2 {
-      right: -55px;
-    }
-    .float-card-3 {
-      right: -60px;
-    }
+    .btn-power { left: calc(6px + 175px); }
+
+    .float-card-1 { right: -65px; }
+    .float-card-2 { right: -55px; }
+    .float-card-3 { right: -60px; }
   }
 </style>
