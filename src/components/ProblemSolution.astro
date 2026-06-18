@@ -38,6 +38,7 @@ import Icon from './Icon.astro';
     <div class="ps-phone reveal-right">
       <div class="phone-glow"></div>
       <div class="phone-wrapper">
+
         <!-- Screenshot sits behind the SVG frame -->
         <div class="phone-screen">
           <img
@@ -51,7 +52,13 @@ import Icon from './Icon.astro';
           <div class="screen-glare"></div>
         </div>
 
-        <!-- SVG iPhone 17 Pro Max frame (renders on top) -->
+        <!--
+          SVG iPhone 17 Pro Max frame
+          ViewBox: 0 0 290 600
+          Outer frame: x=5..285, y=0..600, rx=46  (12px thick sides, 12px top/bottom)
+          Screen hole: x=17..273, y=12..588, rx=34
+          phone-screen div in CSS matches the hole exactly
+        -->
         <svg
           class="phone-frame-svg"
           viewBox="0 0 290 600"
@@ -59,120 +66,151 @@ import Icon from './Icon.astro';
           aria-hidden="true"
         >
           <defs>
-            <!-- Orange titanium frame gradient -->
-            <linearGradient id="frame-grad" x1="0" y1="0" x2="1" y2="1">
-              <stop offset="0%" stop-color="#E8954E" />
-              <stop offset="25%" stop-color="#D4803A" />
-              <stop offset="60%" stop-color="#C07030" />
-              <stop offset="100%" stop-color="#A85E20" />
+            <!-- Main orange titanium gradient: light top-left → dark bottom-right -->
+            <linearGradient id="fg" x1="0.1" y1="0" x2="0.9" y2="1">
+              <stop offset="0%"   stop-color="#EEA060" />
+              <stop offset="20%"  stop-color="#D98038" />
+              <stop offset="55%"  stop-color="#C47030" />
+              <stop offset="100%" stop-color="#A05820" />
             </linearGradient>
-            <!-- Button gradient left -->
-            <linearGradient id="btn-left" x1="0" y1="0" x2="1" y2="0">
-              <stop offset="0%" stop-color="#8A4810" />
-              <stop offset="100%" stop-color="#C06828" />
-            </linearGradient>
-            <!-- Button gradient right -->
-            <linearGradient id="btn-right" x1="0" y1="0" x2="1" y2="0">
-              <stop offset="0%" stop-color="#C06828" />
-              <stop offset="100%" stop-color="#8A4810" />
-            </linearGradient>
-            <!-- Top chamfer highlight -->
-            <linearGradient id="top-hi" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stop-color="rgba(255,220,160,0.65)" />
+
+            <!-- Polished-face sheen: a bright diagonal sweep across the frame surface -->
+            <linearGradient id="sheen" x1="0" y1="0" x2="1" y2="0.6">
+              <stop offset="0%"   stop-color="rgba(255,220,160,0)" />
+              <stop offset="35%"  stop-color="rgba(255,220,160,0.18)" />
+              <stop offset="50%"  stop-color="rgba(255,235,180,0.32)" />
+              <stop offset="65%"  stop-color="rgba(255,220,160,0.12)" />
               <stop offset="100%" stop-color="rgba(255,220,160,0)" />
             </linearGradient>
-            <!-- Left chamfer highlight -->
+
+            <!-- Top-edge chamfer highlight -->
+            <linearGradient id="top-hi" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%"   stop-color="rgba(255,230,160,0.7)" />
+              <stop offset="100%" stop-color="rgba(255,230,160,0)" />
+            </linearGradient>
+            <!-- Left-edge chamfer highlight -->
             <linearGradient id="left-hi" x1="0" y1="0" x2="1" y2="0">
-              <stop offset="0%" stop-color="rgba(255,210,140,0.5)" />
-              <stop offset="100%" stop-color="rgba(255,210,140,0)" />
+              <stop offset="0%"   stop-color="rgba(255,220,140,0.55)" />
+              <stop offset="100%" stop-color="rgba(255,220,140,0)" />
             </linearGradient>
-            <!-- Right chamfer shadow -->
+            <!-- Right-edge shadow -->
             <linearGradient id="right-sh" x1="0" y1="0" x2="1" y2="0">
-              <stop offset="0%" stop-color="rgba(60,20,0,0)" />
-              <stop offset="100%" stop-color="rgba(60,20,0,0.45)" />
+              <stop offset="0%"   stop-color="rgba(50,15,0,0)" />
+              <stop offset="100%" stop-color="rgba(50,15,0,0.5)" />
             </linearGradient>
-            <!-- Bottom chamfer shadow -->
+            <!-- Bottom-edge shadow -->
             <linearGradient id="bot-sh" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stop-color="rgba(60,20,0,0)" />
-              <stop offset="100%" stop-color="rgba(60,20,0,0.4)" />
+              <stop offset="0%"   stop-color="rgba(50,15,0,0)" />
+              <stop offset="100%" stop-color="rgba(50,15,0,0.45)" />
+            </linearGradient>
+
+            <!-- Button left (catches light from left) -->
+            <linearGradient id="btn-l" x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0%"   stop-color="#7A3C0A" />
+              <stop offset="40%"  stop-color="#C06428" />
+              <stop offset="100%" stop-color="#D07030" />
+            </linearGradient>
+            <!-- Button right (catches light from right edge) -->
+            <linearGradient id="btn-r" x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0%"   stop-color="#D07030" />
+              <stop offset="60%"  stop-color="#C06428" />
+              <stop offset="100%" stop-color="#7A3C0A" />
+            </linearGradient>
+            <!-- Button top highlight -->
+            <linearGradient id="btn-hi" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%"   stop-color="rgba(255,210,130,0.4)" />
+              <stop offset="100%" stop-color="rgba(255,210,130,0)" />
             </linearGradient>
           </defs>
 
-          <!--
-            Frame: outer rounded rect (5,0)→(285,600) r=46
-            Screen cutout: inner rounded rect (17,12)→(273,588) r=34
-            even-odd fill rule creates the transparent screen hole
-          -->
+          <!-- ① Frame body with screen hole (even-odd) -->
           <path
             fill-rule="evenodd"
-            fill="url(#frame-grad)"
-            d="
-              M 51,0 H 239 A 46,46 0 0,1 285,46 V 554 A 46,46 0 0,1 239,600 H 51 A 46,46 0 0,1 5,554 V 46 A 46,46 0 0,1 51,0 Z
-              M 51,12 A 34,34 0 0,0 17,46 V 554 A 34,34 0 0,0 51,588 H 239 A 34,34 0 0,0 273,554 V 46 A 34,34 0 0,0 239,12 Z
-            "
+            fill="url(#fg)"
+            d="M 51,0 H 239 A 46,46 0 0,1 285,46 V 554 A 46,46 0 0,1 239,600 H 51 A 46,46 0 0,1 5,554 V 46 A 46,46 0 0,1 51,0 Z
+               M 51,12 A 34,34 0 0,0 17,46 V 554 A 34,34 0 0,0 51,588 H 239 A 34,34 0 0,0 273,554 V 46 A 34,34 0 0,0 239,12 Z"
           />
 
-          <!-- Top chamfer highlight strip -->
+          <!-- ② Diagonal polished sheen over the whole frame -->
+          <path
+            fill-rule="evenodd"
+            fill="url(#sheen)"
+            d="M 51,0 H 239 A 46,46 0 0,1 285,46 V 554 A 46,46 0 0,1 239,600 H 51 A 46,46 0 0,1 5,554 V 46 A 46,46 0 0,1 51,0 Z
+               M 51,12 A 34,34 0 0,0 17,46 V 554 A 34,34 0 0,0 51,588 H 239 A 34,34 0 0,0 273,554 V 46 A 34,34 0 0,0 239,12 Z"
+          />
+
+          <!-- ③ Chamfer highlights and shadows (4 strips) -->
+          <!-- Top face highlight -->
           <path
             fill="url(#top-hi)"
-            d="M 51,0 H 239 A 46,46 0 0,1 285,46 V 50 A 46,46 0 0,0 239,4 H 51 A 46,46 0 0,0 5,50 V 46 A 46,46 0 0,1 51,0 Z"
+            d="M 51,0 H 239 A 46,46 0 0,1 285,46 V 52 A 46,46 0 0,0 239,6 H 51 A 46,46 0 0,0 5,52 V 46 A 46,46 0 0,1 51,0 Z"
           />
-          <!-- Left chamfer highlight -->
-          <rect x="5" y="46" width="5" height="508" fill="url(#left-hi)" />
-          <!-- Right chamfer shadow -->
-          <rect x="280" y="46" width="5" height="508" fill="url(#right-sh)" />
-          <!-- Bottom chamfer shadow -->
+          <!-- Left face highlight -->
+          <rect x="5" y="46" width="6" height="508" fill="url(#left-hi)" />
+          <!-- Right face shadow -->
+          <rect x="279" y="46" width="6" height="508" fill="url(#right-sh)" />
+          <!-- Bottom face shadow -->
           <path
             fill="url(#bot-sh)"
-            d="M 51,600 H 239 A 46,46 0 0,0 285,554 V 550 A 46,46 0 0,1 239,596 H 51 A 46,46 0 0,1 5,550 V 554 A 46,46 0 0,0 51,600 Z"
+            d="M 51,600 H 239 A 46,46 0 0,0 285,554 V 548 A 46,46 0 0,1 239,594 H 51 A 46,46 0 0,1 5,548 V 554 A 46,46 0 0,0 51,600 Z"
           />
 
-          <!-- Outer rim line (subtle edge definition) -->
+          <!-- ④ Polished inner chamfer — bright line where titanium bevels toward the glass -->
           <path
             fill="none"
-            stroke="rgba(255,180,80,0.18)"
-            stroke-width="1"
-            d="M 51,0.5 H 239 A 45.5,45.5 0 0,1 284.5,46 V 554 A 45.5,45.5 0 0,1 239,599.5 H 51 A 45.5,45.5 0 0,1 5.5,554 V 46 A 45.5,45.5 0 0,1 51,0.5 Z"
-          />
-          <!-- Inner screen edge (where frame meets glass) -->
-          <path
-            fill="none"
-            stroke="rgba(0,0,0,0.55)"
+            stroke="rgba(255,235,170,0.45)"
             stroke-width="1.5"
+            d="M 51,13.5 A 32.5,32.5 0 0,0 18.5,46 V 554 A 32.5,32.5 0 0,0 51,586.5 H 239 A 32.5,32.5 0 0,0 271.5,554 V 46 A 32.5,32.5 0 0,0 239,13.5 Z"
+          />
+
+          <!-- ⑤ Dark shadow line at screen edge (depth between glass and frame) -->
+          <path
+            fill="none"
+            stroke="rgba(0,0,0,0.75)"
+            stroke-width="2"
             d="M 51,12 A 34,34 0 0,0 17,46 V 554 A 34,34 0 0,0 51,588 H 239 A 34,34 0 0,0 273,554 V 46 A 34,34 0 0,0 239,12 Z"
           />
 
-          <!-- Dynamic Island pill -->
-          <rect x="97" y="20" width="96" height="30" rx="15" ry="15" fill="#000" />
-          <!-- DI inner subtle highlight -->
-          <rect
-            x="97"
-            y="20"
-            width="96"
-            height="30"
-            rx="15"
-            ry="15"
+          <!-- ⑥ Outer edge rim -->
+          <path
             fill="none"
-            stroke="rgba(255,255,255,0.07)"
-            stroke-width="1"
+            stroke="rgba(255,160,60,0.2)"
+            stroke-width="0.75"
+            d="M 51,0.4 H 239 A 45.6,45.6 0 0,1 284.6,46 V 554 A 45.6,45.6 0 0,1 239,599.6 H 51 A 45.6,45.6 0 0,1 5.4,554 V 46 A 45.6,45.6 0 0,1 51,0.4 Z"
           />
 
-          <!-- ── Physical buttons ── -->
-          <!-- Action button (left, top) -->
-          <rect x="1" y="112" width="6" height="30" rx="3" fill="url(#btn-left)" />
-          <rect x="1" y="112" width="6" height="30" rx="3" fill="none" stroke="rgba(255,190,100,0.2)" stroke-width="0.5" />
+          <!-- ⑦ Earpiece slot above Dynamic Island -->
+          <rect x="123" y="10" width="44" height="6" rx="3" fill="rgba(0,0,0,0.55)" />
+          <rect x="123" y="10" width="44" height="6" rx="3" fill="none" stroke="rgba(0,0,0,0.4)" stroke-width="0.5" />
+          <!-- Earpiece inner highlight -->
+          <rect x="123" y="10.5" width="44" height="2" rx="1" fill="rgba(255,180,80,0.06)" />
+
+          <!-- ⑧ Dynamic Island -->
+          <rect x="97" y="21" width="96" height="30" rx="15" fill="#050505" />
+          <!-- DI inner glow/depth -->
+          <rect x="97" y="21" width="96" height="30" rx="15" fill="none" stroke="rgba(255,255,255,0.07)" stroke-width="1" />
+          <rect x="97" y="21" width="96" height="15" rx="15" fill="rgba(255,255,255,0.025)" />
+
+          <!-- ⑨ Physical buttons — 8 px wide for good visibility -->
+          <!-- Action button (left top) -->
+          <rect x="1" y="110" width="8" height="32" rx="3" fill="url(#btn-l)" />
+          <rect x="1" y="110" width="8" height="16" rx="3" fill="url(#btn-hi)" />
+          <rect x="1" y="110" width="8" height="32" rx="3" fill="none" stroke="rgba(255,190,90,0.22)" stroke-width="0.75" />
 
           <!-- Volume up (left) -->
-          <rect x="1" y="164" width="6" height="55" rx="3" fill="url(#btn-left)" />
-          <rect x="1" y="164" width="6" height="55" rx="3" fill="none" stroke="rgba(255,190,100,0.2)" stroke-width="0.5" />
+          <rect x="1" y="163" width="8" height="56" rx="3" fill="url(#btn-l)" />
+          <rect x="1" y="163" width="8" height="28" rx="3" fill="url(#btn-hi)" />
+          <rect x="1" y="163" width="8" height="56" rx="3" fill="none" stroke="rgba(255,190,90,0.22)" stroke-width="0.75" />
 
           <!-- Volume down (left) -->
-          <rect x="1" y="231" width="6" height="55" rx="3" fill="url(#btn-left)" />
-          <rect x="1" y="231" width="6" height="55" rx="3" fill="none" stroke="rgba(255,190,100,0.2)" stroke-width="0.5" />
+          <rect x="1" y="231" width="8" height="56" rx="3" fill="url(#btn-l)" />
+          <rect x="1" y="231" width="8" height="28" rx="3" fill="url(#btn-hi)" />
+          <rect x="1" y="231" width="8" height="56" rx="3" fill="none" stroke="rgba(255,190,90,0.22)" stroke-width="0.75" />
 
           <!-- Power / side button (right) -->
-          <rect x="283" y="180" width="6" height="76" rx="3" fill="url(#btn-right)" />
-          <rect x="283" y="180" width="6" height="76" rx="3" fill="none" stroke="rgba(255,190,100,0.2)" stroke-width="0.5" />
+          <rect x="281" y="178" width="8" height="78" rx="3" fill="url(#btn-r)" />
+          <rect x="281" y="178" width="8" height="39" rx="3" fill="url(#btn-hi)" />
+          <rect x="281" y="178" width="8" height="78" rx="3" fill="none" stroke="rgba(255,190,90,0.22)" stroke-width="0.75" />
         </svg>
 
         <div class="float-card float-card-1">
@@ -190,9 +228,7 @@ import Icon from './Icon.astro';
 </section>
 
 <style>
-  section {
-    scroll-margin-top: 80px;
-  }
+  section { scroll-margin-top: 80px; }
 
   .ps-grid {
     display: grid;
@@ -202,11 +238,7 @@ import Icon from './Icon.astro';
     align-items: center;
   }
 
-  .problem-grid {
-    display: flex;
-    flex-direction: column;
-    gap: 1.5rem;
-  }
+  .problem-grid { display: flex; flex-direction: column; gap: 1.5rem; }
 
   .problem-card {
     padding: 2.5rem;
@@ -217,8 +249,7 @@ import Icon from './Icon.astro';
 
   .problem-bg-icon {
     position: absolute;
-    bottom: 10px;
-    right: 10px;
+    bottom: 10px; right: 10px;
     opacity: 0.1;
     pointer-events: none;
   }
@@ -245,16 +276,11 @@ import Icon from './Icon.astro';
     margin-bottom: 1.2rem;
   }
 
-  .problem-card p {
-    font-size: 1rem;
-    line-height: 1.8;
-    color: var(--text-muted);
-  }
-
+  .problem-card p { font-size: 1rem; line-height: 1.8; color: var(--text-muted); }
   .problem-card .hl { color: var(--text); font-weight: 500; }
   .problem-card.problem strong { color: var(--text); font-weight: 600; }
 
-  /* ── Phone section ── */
+  /* ── Phone ── */
   .ps-phone {
     display: flex;
     justify-content: flex-start;
@@ -263,12 +289,10 @@ import Icon from './Icon.astro';
 
   .phone-glow {
     position: absolute;
-    width: 350px;
-    height: 350px;
-    top: 50%;
-    left: 50%;
+    width: 350px; height: 350px;
+    top: 50%; left: 50%;
     transform: translate(-50%, -50%);
-    background: radial-gradient(circle, rgba(255, 142, 62, 0.28) 0%, transparent 70%);
+    background: radial-gradient(circle, rgba(255,142,62,0.28) 0%, transparent 70%);
     border-radius: 50%;
     filter: blur(40px);
     pointer-events: none;
@@ -280,84 +304,79 @@ import Icon from './Icon.astro';
     z-index: 1;
   }
 
-  /* ── Phone outer: contains screen + SVG frame ── */
-
   /*
-    SVG viewBox: 0 0 290 600
-    Screen area in SVG coords: x=17 y=12 w=256 h=576 rx=34
-    phone-screen positioned to match exactly
+    Screen area matches SVG hole: x=17..273 y=12..588
+    → left=17 top=12 width=256 height=576
+    padding=3px creates the thin black bezel around the screenshot
   */
   .phone-screen {
     position: absolute;
-    left: 17px;
-    top: 12px;
-    width: 256px;
-    height: 576px;
+    left: 17px; top: 12px;
+    width: 256px; height: 576px;
     border-radius: 34px;
     overflow: hidden;
     background: #000;
+    padding: 3px;
+    box-sizing: border-box;
   }
 
   .phone-screenshot {
     width: 100%;
     height: auto;
     display: block;
-    animation: scroll-app 12s ease-in-out 1.5s infinite alternate;
+    border-radius: 31px;
+    /* +1.5s longer: 13.5s total */
+    animation: scroll-app 13.5s ease-in-out 1.5s infinite alternate;
   }
 
-  /* translateY % is relative to element's own height → scale-independent */
   @keyframes scroll-app {
-    0%, 15%  { transform: translateY(0); }
-    85%, 100% { transform: translateY(-47%); }
+    0%, 14%  { transform: translateY(0); }
+    86%, 100% { transform: translateY(-47%); }
   }
 
   @media (prefers-reduced-motion: reduce) {
     .phone-screenshot { animation: none; }
   }
 
-  /* Very subtle screen glass glare */
   .screen-glare {
     position: absolute;
-    inset: 0;
+    inset: 3px;
     background: linear-gradient(
       135deg,
-      rgba(255, 255, 255, 0.05) 0%,
-      rgba(255, 255, 255, 0.01) 40%,
-      transparent 60%
+      rgba(255,255,255,0.055) 0%,
+      rgba(255,255,255,0.015) 35%,
+      transparent 55%
     );
     pointer-events: none;
-    border-radius: inherit;
+    border-radius: 31px;
   }
 
-  /* SVG frame sits on top, pointer-events none so screenshot is accessible */
+  /* SVG frame on top; drop-shadow follows real SVG shape */
   .phone-frame-svg {
     position: absolute;
-    top: 0;
-    left: 0;
-    width: 290px;
-    height: 600px;
+    top: 0; left: 0;
+    width: 290px; height: 600px;
     pointer-events: none;
-    /* Drop shadow follows the actual SVG shape (not bounding box) */
     filter:
-      drop-shadow(0 28px 60px rgba(0, 0, 0, 0.38))
-      drop-shadow(0 8px 20px rgba(150, 70, 10, 0.28))
-      drop-shadow(0 2px 6px rgba(0, 0, 0, 0.25));
+      drop-shadow(0 32px 64px rgba(0,0,0,0.42))
+      drop-shadow(0 10px 24px rgba(140,60,10,0.3))
+      drop-shadow(0 2px 6px rgba(0,0,0,0.28));
   }
 
   /* ── Float cards ── */
   .float-card {
     position: absolute;
-    background: rgba(255, 252, 248, 0.95);
+    background: rgba(255,252,248,0.95);
     backdrop-filter: blur(24px);
-    border: 1.5px solid rgba(255, 142, 62, 0.35);
+    border: 1.5px solid rgba(255,142,62,0.35);
     border-radius: var(--radius-sm);
     padding: 0.4rem 0.75rem;
     animation: float 6s ease-in-out infinite;
     white-space: nowrap;
     box-shadow:
-      0 4px 12px rgba(58, 46, 34, 0.08),
-      0 12px 40px rgba(58, 46, 34, 0.1),
-      0 0 0 1px rgba(255, 142, 62, 0.08);
+      0 4px 12px rgba(58,46,34,0.08),
+      0 12px 40px rgba(58,46,34,0.1),
+      0 0 0 1px rgba(255,142,62,0.08);
   }
 
   .float-card-1 { top: 22%; right: -135px; animation-delay: 0s; }
@@ -380,22 +399,12 @@ import Icon from './Icon.astro';
   }
 
   @media (max-width: 1024px) {
-    .ps-grid {
-      grid-template-columns: 1fr;
-      gap: 3rem;
-    }
-    .ps-phone {
-      order: -1;
-      justify-content: center;
-    }
+    .ps-grid { grid-template-columns: 1fr; gap: 3rem; }
+    .ps-phone { order: -1; justify-content: center; }
 
-    /* Scale: 248/290 ≈ 0.855 */
-    .phone-screen {
-      left: 14px; top: 10px;
-      width: 219px; height: 492px;
-      border-radius: 29px;
-    }
-    .phone-frame-svg { width: 248px; height: 513px; }
+    /* scale ≈ 0.855 (248/290) */
+    .phone-screen { left: 15px; top: 10px; width: 219px; height: 493px; border-radius: 29px; }
+    .phone-frame-svg { width: 248px; height: 514px; }
 
     .float-card-1 { right: -60px; }
     .float-card-2 { right: -55px; }
@@ -404,12 +413,8 @@ import Icon from './Icon.astro';
   }
 
   @media (max-width: 640px) {
-    /* Scale: 200/290 ≈ 0.690 */
-    .phone-screen {
-      left: 12px; top: 8px;
-      width: 177px; height: 397px;
-      border-radius: 24px;
-    }
+    /* scale ≈ 0.690 (200/290) */
+    .phone-screen { left: 12px; top: 8px; width: 177px; height: 398px; border-radius: 23px; }
     .phone-frame-svg { width: 200px; height: 414px; }
 
     .float-card { padding: 0.3rem 0.55rem; }
@@ -420,28 +425,15 @@ import Icon from './Icon.astro';
   }
 
   @media (max-width: 390px) {
-    /* Scale: 190/290 ≈ 0.655 */
-    .phone-screen {
-      left: 11px; top: 8px;
-      width: 168px; height: 378px;
-      border-radius: 22px;
-    }
+    /* scale ≈ 0.655 (190/290) */
+    .phone-screen { left: 11px; top: 8px; width: 168px; height: 378px; border-radius: 22px; }
     .phone-frame-svg { width: 190px; height: 393px; }
-
-    .float-card-1 { right: -80px; }
-    .float-card-2 { right: -70px; }
-    .float-card-3 { right: -75px; }
   }
 
   @media (max-width: 360px) {
-    /* Scale: 175/290 ≈ 0.603 */
-    .phone-screen {
-      left: 10px; top: 7px;
-      width: 155px; height: 348px;
-      border-radius: 21px;
-    }
+    /* scale ≈ 0.603 (175/290) */
+    .phone-screen { left: 10px; top: 7px; width: 155px; height: 349px; border-radius: 21px; }
     .phone-frame-svg { width: 175px; height: 362px; }
-
     .float-card-1 { right: -65px; }
     .float-card-2 { right: -55px; }
     .float-card-3 { right: -60px; }
