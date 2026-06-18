@@ -5,11 +5,11 @@ import PageHero from '../components/PageHero.astro';
 
 <BaseLayout
   title="Download de app — Tastory"
-  description="Tastory komt in 2026! Meld je nu aan als restaurant of als Foodie en wees er als eerste bij."
+  description="De Tastory app is nu live! Download hem gratis in de App Store en ontdek restaurants die écht bij jou passen."
 >
   <PageHero
-    title="De app komt in <em>2026</em>"
-    description="Tastory is bijna klaar om gelanceerd te worden. Meld je nu aan en wees er als eerste bij."
+    title="De app is <em>live!</em>"
+    description="Download Tastory gratis in de App Store en ontdek restaurants die écht bij jou passen."
   />
 
   <script
@@ -19,7 +19,7 @@ import PageHero from '../components/PageHero.astro';
       '@type': 'SoftwareApplication',
       name: 'Tastory',
       url: 'https://www.tastory.nl/download',
-      downloadUrl: 'https://apps.apple.com/nl/app/tastory/id6744042066',
+      downloadUrl: 'https://apps.apple.com/nl/app/tastory/id6762256086',
       screenshot: 'https://www.tastory.nl/tastory-logo.png',
       softwareVersion: '1.0',
       operatingSystem: 'iOS, Android',
@@ -71,30 +71,25 @@ import PageHero from '../components/PageHero.astro';
 
       <div class="signup-card reveal">
         <div class="card-tag">Voor Foodies</div>
-        <h2>Aanmelden als <em>Foodie</em></h2>
+        <h2>Download <em>Tastory</em></h2>
         <p>
-          Ontdek restaurants die écht bij jou passen op basis van sfeer, keuken en stijl. Meld je
-          aan en ontvang een melding zodra de app beschikbaar is.
+          Ontdek restaurants die écht bij jou passen op basis van sfeer, keuken en stijl. De app is
+          nu gratis beschikbaar in de App Store.
         </p>
-        <form class="signup-form" id="foodie-form">
-          <input
-            type="text"
-            id="foodie-name"
-            placeholder="Jouw naam"
-            required
-            aria-label="Jouw naam"
+        <a
+          href="https://apps.apple.com/nl/app/tastory/id6762256086"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="app-store-btn"
+        >
+          <img
+            src="https://developer.apple.com/assets/elements/badges/download-on-the-app-store.svg"
+            alt="Download on the App Store"
+            width="156"
+            height="52"
           />
-          <input
-            type="email"
-            id="foodie-email"
-            placeholder="E-mailadres"
-            required
-            aria-label="E-mailadres"
-          />
-          <button type="submit">Aanmelden als Foodie</button>
-        </form>
-        <div class="form-feedback" id="foodie-feedback"></div>
-        <div class="card-note">Geen spam. Altijd opzegbaar. Binnenkort op iOS &amp; Android.</div>
+        </a>
+        <div class="card-note">Gratis te downloaden. Beschikbaar op iOS.</div>
       </div>
     </div>
   </section>
@@ -227,6 +222,17 @@ import PageHero from '../components/PageHero.astro';
     margin-top: 0.75rem;
   }
 
+  .app-store-btn {
+    display: inline-block;
+    margin-top: 0.5rem;
+    margin-bottom: 0.5rem;
+    transition: opacity 0.2s;
+  }
+
+  .app-store-btn:hover {
+    opacity: 0.85;
+  }
+
   @media (max-width: 768px) {
     .signup-section {
       padding: 4rem 1.5rem 5rem;
@@ -311,5 +317,4 @@ import PageHero from '../components/PageHero.astro';
     'restaurant-feedback',
     'Restaurant',
   );
-  submitForm('foodie-form', 'foodie-name', 'foodie-email', 'foodie-feedback', 'Foodie');
 </script>

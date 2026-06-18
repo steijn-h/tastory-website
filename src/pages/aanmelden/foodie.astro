@@ -1,174 +1,47 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import PageHero from '../../components/PageHero.astro';
 ---
 
 <BaseLayout
-  title="Meld je aan als foodie — Tastory"
-  description="Meld je aan als foodie bij Tastory en ontdek restaurants die écht bij jou passen via kwalitatieve videocontent."
+  title="Download Tastory — App Store"
+  description="De Tastory app is nu live! Download hem gratis in de App Store."
 >
-  <PageHero
-    title="Aanmelden als <em>foodie</em>"
-    description="Ontdek restaurants die écht bij jou passen via eerlijke en transparante restaurantprofielen. Vul je gegevens in en we houden je op de hoogte zodra Tastory live gaat."
-  />
-
-  <script
-    type="application/ld+json"
-    set:html={JSON.stringify({
-      '@context': 'https://schema.org',
-      '@type': 'WebPage',
-      name: 'Meld je aan als foodie — Tastory',
-      url: 'https://www.tastory.nl/aanmelden/foodie',
-      description:
-        'Meld je aan als foodie bij Tastory en ontdek restaurants die écht bij jou passen via kwalitatieve videocontent.',
-      inLanguage: 'nl-NL',
-      breadcrumb: {
-        '@type': 'BreadcrumbList',
-        itemListElement: [
-          { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://www.tastory.nl' },
-          {
-            '@type': 'ListItem',
-            position: 2,
-            name: 'Aanmelden als foodie',
-            item: 'https://www.tastory.nl/aanmelden/foodie',
-          },
-        ],
-      },
-    })}
-  />
-  <section class="signup-section">
-    <div class="signup-wrapper reveal">
-      <form class="signup-form" id="signup-form" aria-label="Aanmeldformulier foodie">
-        <div class="form-group">
-          <label for="name">Naam *</label>
-          <input type="text" id="name" name="name" required />
-        </div>
-        <div class="form-group">
-          <label for="email">E-mailadres *</label>
-          <input type="email" id="email" name="email" required />
-        </div>
-        <div class="form-group">
-          <label for="phone">Telefoonnummer <span class="optional">(optioneel)</span></label>
-          <input type="tel" id="phone" name="phone" />
-        </div>
-        <button type="submit" class="btn-primary">Aanmelden als foodie</button>
-        <div class="signup-feedback" id="signup-feedback" role="status"></div>
-      </form>
+  <section class="redirect-section">
+    <div class="redirect-inner">
+      <p class="redirect-text">Je wordt doorgestuurd naar de App Store…</p>
+      <a
+        href="https://apps.apple.com/nl/app/tastory/id6762256086"
+        class="btn-primary"
+        rel="noopener noreferrer"
+      >
+        Download de app
+      </a>
     </div>
   </section>
 </BaseLayout>
 
 <script>
-  import { submitForm } from '../../utils/submitForm';
-
-  const form = document.getElementById('signup-form') as HTMLFormElement;
-  const feedback = document.getElementById('signup-feedback') as HTMLDivElement;
-  const submitBtn = form.querySelector('button') as HTMLButtonElement;
-
-  form.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const data = new FormData(form);
-
-    submitBtn.disabled = true;
-    submitBtn.textContent = 'Aanmelden...';
-
-    try {
-      await submitForm({
-        name: data.get('name') as string,
-        email: data.get('email') as string,
-        phone: (data.get('phone') as string) || undefined,
-        subject: 'Nieuwe foodie-aanmelding — Tastory website',
-      });
-
-      feedback.textContent =
-        'Bedankt voor je aanmelding! We houden je op de hoogte zodra Tastory live gaat.';
-      feedback.className = 'signup-feedback signup-feedback--success';
-      form.reset();
-    } catch {
-      feedback.textContent = 'Er ging iets mis. Probeer het later opnieuw.';
-      feedback.className = 'signup-feedback signup-feedback--error';
-    }
-
-    submitBtn.disabled = false;
-    submitBtn.textContent = 'Aanmelden als foodie';
-
-    setTimeout(() => {
-      feedback.textContent = '';
-      feedback.className = 'signup-feedback';
-    }, 5000);
-  });
+  window.location.replace('https://apps.apple.com/nl/app/tastory/id6762256086');
 </script>
 
 <style>
-  .signup-section {
-    max-width: 600px;
+  .redirect-section {
+    min-height: 60vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 
-  .signup-wrapper {
-    background: var(--white);
-    border: 1px solid rgba(136, 101, 69, 0.08);
-    border-radius: var(--radius-lg);
-    padding: 3rem;
-    box-shadow: var(--shadow-md);
-  }
-
-  .signup-form {
+  .redirect-inner {
+    text-align: center;
     display: flex;
     flex-direction: column;
-    gap: var(--space-lg);
+    align-items: center;
+    gap: 2rem;
   }
 
-  .form-group {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-sm);
-  }
-
-  .form-group label {
-    font-size: var(--text-base);
-    font-weight: 500;
-    color: var(--text);
-  }
-
-  .optional {
-    font-weight: 400;
+  .redirect-text {
+    font-size: 1.2rem;
     color: var(--text-muted);
-    font-size: 0.9em;
-  }
-
-  .form-group input {
-    font-family: var(--sans);
-    font-size: var(--text-base);
-    padding: 0.9rem 1.2rem;
-    border: 1px solid rgba(136, 101, 69, 0.15);
-    border-radius: var(--radius-sm);
-    background: var(--beige);
-    color: var(--text);
-    outline: none;
-    transition: border-color 0.3s;
-  }
-
-  .form-group input:focus {
-    border-color: var(--orange);
-  }
-
-  .signup-feedback {
-    font-size: var(--text-base);
-    min-height: 1.5rem;
-    transition: all 0.3s;
-  }
-
-  .signup-feedback--success {
-    color: #2e7d32;
-  }
-
-  .signup-feedback--error {
-    color: #c62828;
-  }
-
-  @media (max-width: 640px) {
-    .signup-wrapper {
-      padding: 2rem 1.5rem;
-    }
   }
 </style>
