@@ -38,26 +38,195 @@ import Icon from './Icon.astro';
     <div class="ps-phone reveal-right">
       <div class="phone-glow"></div>
       <div class="phone-wrapper">
-        <!-- Physical buttons positioned relative to phone-wrapper -->
-        <div class="phone-btn btn-action"></div>
-        <div class="phone-btn btn-vol-up"></div>
-        <div class="phone-btn btn-vol-down"></div>
-        <div class="phone-btn btn-power"></div>
 
-        <div class="phone-mockup">
-          <div class="phone-screen">
-            <!-- Dynamic Island -->
-            <div class="dynamic-island"></div>
-            <img
-              src="/homepage-long-screenshot.png"
-              alt="Tastory app screenshot"
-              class="phone-screenshot"
-              width="1170"
-              height="4944"
-              loading="lazy"
-            />
-          </div>
+        <!-- Screenshot sits behind the SVG frame -->
+        <div class="phone-screen">
+          <img
+            src="/homepage-long-screenshot.png"
+            alt="Tastory app screenshot"
+            class="phone-screenshot"
+            width="1170"
+            height="4944"
+            loading="lazy"
+          />
+          <div class="screen-glare"></div>
         </div>
+
+        <!--
+          SVG iPhone 17 Pro Max frame
+          ViewBox: 0 0 290 600
+          Outer frame: x=5..285, y=0..600, rx=46  (12px thick sides, 12px top/bottom)
+          Screen hole: x=17..273, y=12..588, rx=34
+          phone-screen div in CSS matches the hole exactly
+        -->
+        <svg
+          class="phone-frame-svg"
+          viewBox="0 0 290 600"
+          xmlns="http://www.w3.org/2000/svg"
+          aria-hidden="true"
+        >
+          <defs>
+            <!-- Main orange titanium gradient: light top-left → dark bottom-right -->
+            <linearGradient id="fg" x1="0.1" y1="0" x2="0.9" y2="1">
+              <stop offset="0%"   stop-color="#EEA060" />
+              <stop offset="20%"  stop-color="#D98038" />
+              <stop offset="55%"  stop-color="#C47030" />
+              <stop offset="100%" stop-color="#A05820" />
+            </linearGradient>
+
+            <!-- Polished-face sheen: a bright diagonal sweep across the frame surface -->
+            <linearGradient id="sheen" x1="0" y1="0" x2="1" y2="0.6">
+              <stop offset="0%"   stop-color="rgba(255,220,160,0)" />
+              <stop offset="35%"  stop-color="rgba(255,220,160,0.18)" />
+              <stop offset="50%"  stop-color="rgba(255,235,180,0.32)" />
+              <stop offset="65%"  stop-color="rgba(255,220,160,0.12)" />
+              <stop offset="100%" stop-color="rgba(255,220,160,0)" />
+            </linearGradient>
+
+            <!-- Top-edge chamfer highlight -->
+            <linearGradient id="top-hi" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%"   stop-color="rgba(255,230,160,0.7)" />
+              <stop offset="100%" stop-color="rgba(255,230,160,0)" />
+            </linearGradient>
+            <!-- Left-edge chamfer highlight -->
+            <linearGradient id="left-hi" x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0%"   stop-color="rgba(255,220,140,0.55)" />
+              <stop offset="100%" stop-color="rgba(255,220,140,0)" />
+            </linearGradient>
+            <!-- Right-edge shadow -->
+            <linearGradient id="right-sh" x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0%"   stop-color="rgba(50,15,0,0)" />
+              <stop offset="100%" stop-color="rgba(50,15,0,0.5)" />
+            </linearGradient>
+            <!-- Bottom-edge shadow -->
+            <linearGradient id="bot-sh" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%"   stop-color="rgba(50,15,0,0)" />
+              <stop offset="100%" stop-color="rgba(50,15,0,0.45)" />
+            </linearGradient>
+
+            <!-- Button left (catches light from left) -->
+            <linearGradient id="btn-l" x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0%"   stop-color="#7A3C0A" />
+              <stop offset="40%"  stop-color="#C06428" />
+              <stop offset="100%" stop-color="#D07030" />
+            </linearGradient>
+            <!-- Button right (catches light from right edge) -->
+            <linearGradient id="btn-r" x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0%"   stop-color="#D07030" />
+              <stop offset="60%"  stop-color="#C06428" />
+              <stop offset="100%" stop-color="#7A3C0A" />
+            </linearGradient>
+            <!-- Button top highlight -->
+            <linearGradient id="btn-hi" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%"   stop-color="rgba(255,210,130,0.4)" />
+              <stop offset="100%" stop-color="rgba(255,210,130,0)" />
+            </linearGradient>
+          </defs>
+
+          <!--
+            Layers (bottom → top):
+            ① Orange frame: outer=5..285 r=46, hole=17..273 y=12..588 r=34
+            ② Black bezel ring: outer=17..273 r=34, hole=24..266 y=19..581 r=27
+            Screenshot shows through the inner hole (24..266, 19..581)
+          -->
+
+          <!-- ① Orange titanium frame -->
+          <path
+            fill-rule="evenodd"
+            fill="url(#fg)"
+            d="M 51,0 H 239 A 46,46 0 0,1 285,46 V 554 A 46,46 0 0,1 239,600 H 51 A 46,46 0 0,1 5,554 V 46 A 46,46 0 0,1 51,0 Z
+               M 51,12 A 34,34 0 0,0 17,46 V 554 A 34,34 0 0,0 51,588 H 239 A 34,34 0 0,0 273,554 V 46 A 34,34 0 0,0 239,12 Z"
+          />
+
+          <!-- ② Black bezel ring (outer matches frame hole, inner is the actual screen opening) -->
+          <path
+            fill-rule="evenodd"
+            fill="#080808"
+            d="M 51,12 A 34,34 0 0,0 17,46 V 554 A 34,34 0 0,0 51,588 H 239 A 34,34 0 0,0 273,554 V 46 A 34,34 0 0,0 239,12 Z
+               M 51,19 A 27,27 0 0,0 24,46 V 554 A 27,27 0 0,0 51,581 H 239 A 27,27 0 0,0 266,554 V 46 A 27,27 0 0,0 239,19 Z"
+          />
+
+          <!-- ② Diagonal polished sheen over the whole frame -->
+          <path
+            fill-rule="evenodd"
+            fill="url(#sheen)"
+            d="M 51,0 H 239 A 46,46 0 0,1 285,46 V 554 A 46,46 0 0,1 239,600 H 51 A 46,46 0 0,1 5,554 V 46 A 46,46 0 0,1 51,0 Z
+               M 51,12 A 34,34 0 0,0 17,46 V 554 A 34,34 0 0,0 51,588 H 239 A 34,34 0 0,0 273,554 V 46 A 34,34 0 0,0 239,12 Z"
+          />
+
+          <!-- ③ Chamfer highlights and shadows (4 strips) -->
+          <!-- Top face highlight -->
+          <path
+            fill="url(#top-hi)"
+            d="M 51,0 H 239 A 46,46 0 0,1 285,46 V 52 A 46,46 0 0,0 239,6 H 51 A 46,46 0 0,0 5,52 V 46 A 46,46 0 0,1 51,0 Z"
+          />
+          <!-- Left face highlight -->
+          <rect x="5" y="46" width="6" height="508" fill="url(#left-hi)" />
+          <!-- Right face shadow -->
+          <rect x="279" y="46" width="6" height="508" fill="url(#right-sh)" />
+          <!-- Bottom face shadow -->
+          <path
+            fill="url(#bot-sh)"
+            d="M 51,600 H 239 A 46,46 0 0,0 285,554 V 548 A 46,46 0 0,1 239,594 H 51 A 46,46 0 0,1 5,548 V 554 A 46,46 0 0,0 51,600 Z"
+          />
+
+          <!-- ④ Polished inner chamfer — bright line where titanium bevels toward the glass -->
+          <path
+            fill="none"
+            stroke="rgba(255,235,170,0.45)"
+            stroke-width="1.5"
+            d="M 51,13.5 A 32.5,32.5 0 0,0 18.5,46 V 554 A 32.5,32.5 0 0,0 51,586.5 H 239 A 32.5,32.5 0 0,0 271.5,554 V 46 A 32.5,32.5 0 0,0 239,13.5 Z"
+          />
+
+          <!-- ⑤ Dark shadow line at screen edge (depth between glass and frame) -->
+          <path
+            fill="none"
+            stroke="rgba(0,0,0,0.75)"
+            stroke-width="2"
+            d="M 51,12 A 34,34 0 0,0 17,46 V 554 A 34,34 0 0,0 51,588 H 239 A 34,34 0 0,0 273,554 V 46 A 34,34 0 0,0 239,12 Z"
+          />
+
+          <!-- ⑥ Outer edge rim -->
+          <path
+            fill="none"
+            stroke="rgba(255,160,60,0.2)"
+            stroke-width="0.75"
+            d="M 51,0.4 H 239 A 45.6,45.6 0 0,1 284.6,46 V 554 A 45.6,45.6 0 0,1 239,599.6 H 51 A 45.6,45.6 0 0,1 5.4,554 V 46 A 45.6,45.6 0 0,1 51,0.4 Z"
+          />
+
+          <!-- ⑦ Earpiece slot above Dynamic Island -->
+          <rect x="123" y="10" width="44" height="6" rx="3" fill="rgba(0,0,0,0.55)" />
+          <rect x="123" y="10" width="44" height="6" rx="3" fill="none" stroke="rgba(0,0,0,0.4)" stroke-width="0.5" />
+          <!-- Earpiece inner highlight -->
+          <rect x="123" y="10.5" width="44" height="2" rx="1" fill="rgba(255,180,80,0.06)" />
+
+          <!-- ⑧ Dynamic Island -->
+          <rect x="97" y="21" width="96" height="30" rx="15" fill="#050505" />
+          <!-- DI inner glow/depth -->
+          <rect x="97" y="21" width="96" height="30" rx="15" fill="none" stroke="rgba(255,255,255,0.07)" stroke-width="1" />
+          <rect x="97" y="21" width="96" height="15" rx="15" fill="rgba(255,255,255,0.025)" />
+
+          <!-- ⑨ Physical buttons — 8 px wide for good visibility -->
+          <!-- Action button (left top) -->
+          <rect x="1" y="110" width="8" height="32" rx="3" fill="url(#btn-l)" />
+          <rect x="1" y="110" width="8" height="16" rx="3" fill="url(#btn-hi)" />
+          <rect x="1" y="110" width="8" height="32" rx="3" fill="none" stroke="rgba(255,190,90,0.22)" stroke-width="0.75" />
+
+          <!-- Volume up (left) -->
+          <rect x="1" y="163" width="8" height="56" rx="3" fill="url(#btn-l)" />
+          <rect x="1" y="163" width="8" height="28" rx="3" fill="url(#btn-hi)" />
+          <rect x="1" y="163" width="8" height="56" rx="3" fill="none" stroke="rgba(255,190,90,0.22)" stroke-width="0.75" />
+
+          <!-- Volume down (left) -->
+          <rect x="1" y="231" width="8" height="56" rx="3" fill="url(#btn-l)" />
+          <rect x="1" y="231" width="8" height="28" rx="3" fill="url(#btn-hi)" />
+          <rect x="1" y="231" width="8" height="56" rx="3" fill="none" stroke="rgba(255,190,90,0.22)" stroke-width="0.75" />
+
+          <!-- Power / side button (right) -->
+          <rect x="281" y="178" width="8" height="78" rx="3" fill="url(#btn-r)" />
+          <rect x="281" y="178" width="8" height="39" rx="3" fill="url(#btn-hi)" />
+          <rect x="281" y="178" width="8" height="78" rx="3" fill="none" stroke="rgba(255,190,90,0.22)" stroke-width="0.75" />
+        </svg>
 
         <div class="float-card float-card-1">
           <div class="fc-label">Reviews met hoge<br />betrouwbaarheid</div>
@@ -74,9 +243,7 @@ import Icon from './Icon.astro';
 </section>
 
 <style>
-  section {
-    scroll-margin-top: 80px;
-  }
+  section { scroll-margin-top: 80px; }
 
   .ps-grid {
     display: grid;
@@ -86,11 +253,7 @@ import Icon from './Icon.astro';
     align-items: center;
   }
 
-  .problem-grid {
-    display: flex;
-    flex-direction: column;
-    gap: 1.5rem;
-  }
+  .problem-grid { display: flex; flex-direction: column; gap: 1.5rem; }
 
   .problem-card {
     padding: 2.5rem;
@@ -101,19 +264,13 @@ import Icon from './Icon.astro';
 
   .problem-bg-icon {
     position: absolute;
-    bottom: 10px;
-    right: 10px;
+    bottom: 10px; right: 10px;
     opacity: 0.1;
     pointer-events: none;
   }
 
-  .problem-card.problem .problem-bg-icon {
-    color: var(--brown);
-  }
-
-  .problem-card.solution .problem-bg-icon {
-    color: var(--orange);
-  }
+  .problem-card.problem .problem-bg-icon { color: var(--brown); }
+  .problem-card.solution .problem-bg-icon { color: var(--orange); }
 
   .problem-card.problem {
     background: rgba(136, 101, 69, 0.08);
@@ -134,23 +291,11 @@ import Icon from './Icon.astro';
     margin-bottom: 1.2rem;
   }
 
-  .problem-card p {
-    font-size: 1rem;
-    line-height: 1.8;
-    color: var(--text-muted);
-  }
+  .problem-card p { font-size: 1rem; line-height: 1.8; color: var(--text-muted); }
+  .problem-card .hl { color: var(--text); font-weight: 500; }
+  .problem-card.problem strong { color: var(--text); font-weight: 600; }
 
-  .problem-card .hl {
-    color: var(--text);
-    font-weight: 500;
-  }
-
-  .problem-card.problem strong {
-    color: var(--text);
-    font-weight: 600;
-  }
-
-  /* ── Phone area ── */
+  /* ── Phone ── */
   .ps-phone {
     display: flex;
     justify-content: flex-start;
@@ -159,12 +304,10 @@ import Icon from './Icon.astro';
 
   .phone-glow {
     position: absolute;
-    width: 350px;
-    height: 350px;
-    top: 50%;
-    left: 50%;
+    width: 350px; height: 350px;
+    top: 50%; left: 50%;
     transform: translate(-50%, -50%);
-    background: radial-gradient(circle, rgba(255, 142, 62, 0.28) 0%, transparent 70%);
+    background: radial-gradient(circle, rgba(255,142,62,0.28) 0%, transparent 70%);
     border-radius: 50%;
     filter: blur(40px);
     pointer-events: none;
@@ -174,172 +317,82 @@ import Icon from './Icon.astro';
   .phone-wrapper {
     position: relative;
     z-index: 1;
-    /* Extra padding on left so buttons don't get clipped */
-    padding-left: 6px;
   }
 
-  /* ── iPhone 17 Pro Max frame ── */
-  .phone-mockup {
-    width: 280px;
-    height: 600px;
-    /* Orange titanium gradient */
-    background: linear-gradient(
-      160deg,
-      #de8d45 0%,
-      #c97332 40%,
-      #c06c28 70%,
-      #b86024 100%
-    );
-    border-radius: 46px;
-    position: relative;
-    overflow: hidden;
-    /* Titanium chamfer highlights */
-    box-shadow:
-      /* Outer depth */
-      0 28px 70px rgba(0, 0, 0, 0.32),
-      0 8px 24px rgba(0, 0, 0, 0.18),
-      /* Frame edge highlight (top-left light catch) */
-      inset 2px 2px 0 rgba(255, 210, 150, 0.35),
-      /* Frame edge shadow (bottom-right) */
-      inset -1px -1px 0 rgba(80, 30, 0, 0.4),
-      /* Outer rim */
-      0 0 0 1px rgba(180, 90, 20, 0.6);
-    --screenshot-scroll: -47%;
-  }
-
-  /* ── Screen inset ── */
+  /*
+    Screen area matches SVG inner hole: x=24..266 y=19..581 r=27
+    → left=24 top=19 width=242 height=562 border-radius=27
+    Black bezel is handled by the SVG layer above
+  */
   .phone-screen {
     position: absolute;
-    inset: 9px;
-    border-radius: 38px;
+    left: 24px; top: 19px;
+    width: 242px; height: 562px;
+    border-radius: 27px;
     overflow: hidden;
     background: #000;
   }
 
-  /* ── Dynamic Island ── */
-  .dynamic-island {
-    position: absolute;
-    top: 13px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 96px;
-    height: 30px;
-    background: #000;
-    border-radius: 20px;
-    z-index: 10;
-    /* Subtle pill inner shadow for depth */
-    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.8);
-  }
-
-  /* ── Scrolling screenshot ── */
   .phone-screenshot {
     width: 100%;
     height: auto;
     display: block;
-    animation: scroll-app 12s ease-in-out 1s infinite alternate;
+    animation: scroll-app 15s ease-in-out 1.5s infinite alternate;
   }
 
   @keyframes scroll-app {
-    0%,
-    15% {
-      transform: translateY(0);
-    }
-    85%,
-    100% {
-      transform: translateY(var(--screenshot-scroll));
-    }
+    0%, 12%  { transform: translateY(0); }
+    88%, 100% { transform: translateY(-46%); }
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .phone-screenshot {
-      animation: none;
-    }
+    .phone-screenshot { animation: none; }
   }
 
-  /* ── Physical buttons (positioned relative to .phone-wrapper) ── */
-  .phone-btn {
+  .screen-glare {
     position: absolute;
-    /* Slightly darker orange, same hue as frame */
-    background: linear-gradient(to right, #a85a1c, #b86524);
-    box-shadow:
-      -1px 0 4px rgba(0, 0, 0, 0.35),
-      inset 0 1px 0 rgba(255, 200, 120, 0.25);
-    z-index: 2;
+    inset: 0;
+    background: linear-gradient(
+      135deg,
+      rgba(255,255,255,0.055) 0%,
+      rgba(255,255,255,0.015) 35%,
+      transparent 55%
+    );
+    pointer-events: none;
+    border-radius: 27px;
   }
 
-  /* Action button — left side, near top */
-  .btn-action {
-    left: 2px; /* phone-wrapper has padding-left: 6px, so mockup left edge is at 6px */
-    top: 108px;
-    width: 4px;
-    height: 30px;
-    border-radius: 2px 0 0 2px;
-  }
-
-  /* Volume up — left side */
-  .btn-vol-up {
-    left: 2px;
-    top: 160px;
-    width: 4px;
-    height: 56px;
-    border-radius: 2px 0 0 2px;
-  }
-
-  /* Volume down — left side */
-  .btn-vol-down {
-    left: 2px;
-    top: 228px;
-    width: 4px;
-    height: 56px;
-    border-radius: 2px 0 0 2px;
-  }
-
-  /* Power button — right side */
-  .btn-power {
-    left: calc(6px + 280px); /* padding-left + phone width */
-    top: 175px;
-    width: 4px;
-    height: 78px;
-    border-radius: 0 2px 2px 0;
-    background: linear-gradient(to left, #a85a1c, #b86524);
-    box-shadow:
-      1px 0 4px rgba(0, 0, 0, 0.35),
-      inset 0 1px 0 rgba(255, 200, 120, 0.25);
+  /* SVG frame on top; drop-shadow follows real SVG shape */
+  .phone-frame-svg {
+    position: absolute;
+    top: 0; left: 0;
+    width: 290px; height: 600px;
+    pointer-events: none;
+    filter:
+      drop-shadow(0 32px 64px rgba(0,0,0,0.42))
+      drop-shadow(0 10px 24px rgba(140,60,10,0.3))
+      drop-shadow(0 2px 6px rgba(0,0,0,0.28));
   }
 
   /* ── Float cards ── */
   .float-card {
     position: absolute;
-    background: rgba(255, 252, 248, 0.95);
+    background: rgba(255,252,248,0.95);
     backdrop-filter: blur(24px);
-    border: 1.5px solid rgba(255, 142, 62, 0.35);
+    border: 1.5px solid rgba(255,142,62,0.35);
     border-radius: var(--radius-sm);
     padding: 0.4rem 0.75rem;
     animation: float 6s ease-in-out infinite;
     white-space: nowrap;
     box-shadow:
-      0 4px 12px rgba(58, 46, 34, 0.08),
-      0 12px 40px rgba(58, 46, 34, 0.1),
-      0 0 0 1px rgba(255, 142, 62, 0.08);
+      0 4px 12px rgba(58,46,34,0.08),
+      0 12px 40px rgba(58,46,34,0.1),
+      0 0 0 1px rgba(255,142,62,0.08);
   }
 
-  .float-card-1 {
-    top: 22%;
-    right: -135px;
-    animation-delay: 0s;
-  }
-
-  .float-card-2 {
-    bottom: 16%;
-    right: -120px;
-    animation-delay: 2s;
-  }
-
-  .float-card-3 {
-    top: 52%;
-    right: -130px;
-    animation-delay: 4s;
-  }
+  .float-card-1 { top: 22%; right: -135px; animation-delay: 0s; }
+  .float-card-2 { bottom: 16%; right: -120px; animation-delay: 2s; }
+  .float-card-3 { top: 52%; right: -130px; animation-delay: 4s; }
 
   .fc-label {
     font-size: 0.8rem;
@@ -349,183 +402,49 @@ import Icon from './Icon.astro';
     font-weight: 500;
   }
 
+  /* ── Responsive ── */
   @media (max-width: 1200px) {
-    .float-card-1 {
-      right: -80px;
-    }
-    .float-card-2 {
-      right: -70px;
-    }
-    .float-card-3 {
-      right: -75px;
-    }
-  }
-
-  @media (max-width: 1024px) {
-    .ps-grid {
-      grid-template-columns: 1fr;
-      gap: 3rem;
-    }
-
-    .ps-phone {
-      order: -1;
-      justify-content: center;
-    }
-
-    .phone-wrapper {
-      padding-left: 6px;
-    }
-
-    .phone-mockup {
-      width: 240px;
-      height: 514px;
-      border-radius: 40px;
-      --screenshot-scroll: -47%;
-    }
-
-    .phone-screen {
-      inset: 8px;
-      border-radius: 33px;
-    }
-
-    .dynamic-island {
-      top: 11px;
-      width: 82px;
-      height: 26px;
-    }
-
-    .btn-action {
-      top: 92px;
-      height: 26px;
-    }
-    .btn-vol-up {
-      top: 137px;
-      height: 48px;
-    }
-    .btn-vol-down {
-      top: 196px;
-      height: 48px;
-    }
-    .btn-power {
-      left: calc(6px + 240px);
-      top: 150px;
-      height: 67px;
-    }
-
-    .float-card-1 {
-      right: -60px;
-    }
-    .float-card-2 {
-      right: -55px;
-    }
-    .float-card-3 {
-      right: -55px;
-    }
-
-    .fc-label {
-      font-size: 0.65rem;
-    }
-  }
-
-  @media (max-width: 640px) {
-    .phone-mockup {
-      width: 200px;
-      height: 428px;
-      border-radius: 36px;
-      --screenshot-scroll: -47%;
-    }
-
-    .phone-screen {
-      inset: 7px;
-      border-radius: 30px;
-    }
-
-    .dynamic-island {
-      top: 9px;
-      width: 68px;
-      height: 22px;
-    }
-
-    .btn-action {
-      top: 77px;
-      height: 22px;
-      width: 3px;
-    }
-    .btn-vol-up {
-      top: 114px;
-      height: 40px;
-      width: 3px;
-    }
-    .btn-vol-down {
-      top: 163px;
-      height: 40px;
-      width: 3px;
-    }
-    .btn-power {
-      left: calc(6px + 200px);
-      top: 125px;
-      height: 56px;
-      width: 3px;
-    }
-
-    .float-card {
-      padding: 0.3rem 0.55rem;
-    }
-
-    .float-card-1 {
-      right: -80px;
-    }
-    .float-card-2 {
-      right: -70px;
-    }
-    .float-card-3 {
-      right: -75px;
-    }
-
-    .fc-label {
-      font-size: 0.55rem;
-    }
-  }
-
-  @media (max-width: 390px) {
-    .phone-mockup {
-      width: 190px;
-      height: 405px;
-      border-radius: 34px;
-    }
-
-    .phone-screen {
-      inset: 7px;
-      border-radius: 28px;
-    }
-
-    .dynamic-island {
-      width: 64px;
-      height: 20px;
-    }
-
-    .btn-action { top: 73px; }
-    .btn-vol-up { top: 108px; }
-    .btn-vol-down { top: 155px; }
-    .btn-power {
-      left: calc(6px + 190px);
-      top: 118px;
-    }
-
     .float-card-1 { right: -80px; }
     .float-card-2 { right: -70px; }
     .float-card-3 { right: -75px; }
   }
 
+  @media (max-width: 1024px) {
+    .ps-grid { grid-template-columns: 1fr; gap: 3rem; }
+    .ps-phone { order: -1; justify-content: center; }
+
+    /* scale ≈ 0.855 (248/290) */
+    .phone-screen { left: 21px; top: 16px; width: 207px; height: 481px; border-radius: 23px; }
+    .phone-frame-svg { width: 248px; height: 514px; }
+
+    .float-card-1 { right: -60px; }
+    .float-card-2 { right: -55px; }
+    .float-card-3 { right: -55px; }
+    .fc-label { font-size: 0.65rem; }
+  }
+
+  @media (max-width: 640px) {
+    /* scale ≈ 0.690 (200/290) */
+    .phone-screen { left: 17px; top: 13px; width: 167px; height: 388px; border-radius: 19px; }
+    .phone-frame-svg { width: 200px; height: 414px; }
+
+    .float-card { padding: 0.3rem 0.55rem; }
+    .float-card-1 { right: -80px; }
+    .float-card-2 { right: -70px; }
+    .float-card-3 { right: -75px; }
+    .fc-label { font-size: 0.55rem; }
+  }
+
+  @media (max-width: 390px) {
+    /* scale ≈ 0.655 (190/290) */
+    .phone-screen { left: 16px; top: 12px; width: 158px; height: 368px; border-radius: 18px; }
+    .phone-frame-svg { width: 190px; height: 393px; }
+  }
+
   @media (max-width: 360px) {
-    .phone-mockup {
-      width: 175px;
-      height: 375px;
-      border-radius: 32px;
-    }
-
-    .btn-power { left: calc(6px + 175px); }
-
+    /* scale ≈ 0.603 (175/290) */
+    .phone-screen { left: 14px; top: 11px; width: 146px; height: 339px; border-radius: 16px; }
+    .phone-frame-svg { width: 175px; height: 362px; }
     .float-card-1 { right: -65px; }
     .float-card-2 { right: -55px; }
     .float-card-3 { right: -60px; }
