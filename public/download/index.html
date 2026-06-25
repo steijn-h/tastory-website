@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex" />
+  <title>Download Tastory</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      min-height: 100dvh;
+      background: #F5EBDD;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      color: #2C1810;
+      padding: 2rem 1.5rem;
+      text-align: center;
+    }
+
+    .logo {
+      font-size: 2.2rem;
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      color: #C8773A;
+      margin-bottom: 0.5rem;
+    }
+
+    .tagline {
+      font-size: 1rem;
+      color: #7A5C48;
+      margin-bottom: 2.5rem;
+    }
+
+    .card {
+      background: #fff;
+      border-radius: 20px;
+      padding: 2rem 1.75rem;
+      max-width: 360px;
+      width: 100%;
+      box-shadow: 0 4px 24px rgba(44, 24, 16, 0.10);
+    }
+
+    .card h1 {
+      font-size: 1.4rem;
+      font-weight: 700;
+      margin-bottom: 0.6rem;
+      line-height: 1.3;
+    }
+
+    .card p {
+      font-size: 0.95rem;
+      color: #7A5C48;
+      line-height: 1.5;
+      margin-bottom: 1.5rem;
+    }
+
+    .btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.6rem;
+      width: 100%;
+      padding: 0.9rem 1.25rem;
+      border-radius: 12px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      text-decoration: none;
+      transition: opacity 0.15s, transform 0.1s;
+    }
+    .btn:active { opacity: 0.85; transform: scale(0.98); }
+
+    .btn-primary {
+      background: #C8773A;
+      color: #fff;
+      margin-bottom: 0.85rem;
+    }
+
+    .btn-secondary {
+      background: #F5EBDD;
+      color: #C8773A;
+      border: 2px solid #C8773A;
+    }
+
+    /* Email signup for Android waiting */
+    .email-form {
+      display: flex;
+      flex-direction: column;
+      gap: 0.7rem;
+      margin-top: 0.5rem;
+    }
+
+    .email-form input[type="email"] {
+      width: 100%;
+      padding: 0.8rem 1rem;
+      border-radius: 10px;
+      border: 1.5px solid #E0CFC0;
+      font-size: 1rem;
+      background: #FAF4EE;
+      color: #2C1810;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+    .email-form input[type="email"]:focus { border-color: #C8773A; }
+
+    .success-msg {
+      font-size: 0.9rem;
+      color: #5A8C5A;
+      font-weight: 600;
+      display: none;
+      margin-top: 0.5rem;
+    }
+
+    .divider {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin: 1.2rem 0;
+      color: #B0937D;
+      font-size: 0.85rem;
+    }
+    .divider::before, .divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: #E0CFC0;
+    }
+
+    /* Redirect screen */
+    .redirecting {
+      font-size: 0.9rem;
+      color: #7A5C48;
+    }
+    .spinner {
+      width: 28px; height: 28px;
+      border: 3px solid #E0CFC0;
+      border-top-color: #C8773A;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      margin: 1rem auto;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    footer {
+      margin-top: 2rem;
+      font-size: 0.8rem;
+      color: #B0937D;
+    }
+  </style>
+</head>
+<body>
+  <div class="logo">Tastory</div>
+  <div class="tagline">Find it. Taste it. Share it.</div>
+
+  <div class="card" id="card-ios" style="display:none">
+    <h1>Download Tastory</h1>
+    <p>Je wordt doorgestuurd naar de App Store. Even geduld…</p>
+    <div class="spinner"></div>
+    <p class="redirecting">Niet automatisch doorgestuurd?</p>
+    <a class="btn btn-primary" id="ios-link" href="https://apps.apple.com/nl/app/tastory/id6762256086">
+      ⬇ Open App Store
+    </a>
+  </div>
+
+  <div class="card" id="card-android" style="display:none">
+    <h1>Tastory komt binnenkort naar Android!</h1>
+    <p>We werken hard aan de Android-versie. Laat je e-mailadres achter en we laten het je weten zodra hij beschikbaar is.</p>
+    <form class="email-form" id="android-form" onsubmit="submitAndroid(event)">
+      <input type="email" id="android-email" placeholder="jouw@email.nl" required autocomplete="email" />
+      <button type="submit" class="btn btn-primary">Houd me op de hoogte</button>
+    </form>
+    <div class="success-msg" id="android-success">
+      ✓ Gelukt! We sturen je een bericht zodra Tastory op Android beschikbaar is.
+    </div>
+    <!-- TODO: When Android launches, replace the contents of card-android with:
+         window.location.href = 'https://play.google.com/store/apps/details?id=nl.tastory.app';
+         One-liner change in the platform() redirect block at the bottom of this file. -->
+  </div>
+
+  <div class="card" id="card-desktop" style="display:none">
+    <h1>Download de Tastory app</h1>
+    <p>Scan de QR-code met je telefoon, of kies hieronder jouw platform.</p>
+    <a class="btn btn-primary" href="https://apps.apple.com/nl/app/tastory/id6762256086">
+      🍎 Download voor iPhone
+    </a>
+    <div class="divider">of</div>
+    <div style="background:#F5EBDD; border-radius:10px; padding:1rem; font-size:0.9rem; color:#7A5C48;">
+      📱 Android komt binnenkort beschikbaar
+    </div>
+  </div>
+
+  <footer>© 2025 Tastory &middot; <a href="https://tastory.nl" style="color:#C8773A; text-decoration:none;">tastory.nl</a></footer>
+
+  <script>
+    // ─── CONFIG ────────────────────────────────────────────────────────────────
+    // Replace with your actual Supabase anon key (EXPO_PUBLIC_SUPABASE_ANON_KEY)
+    var SUPABASE_URL = 'https://vyqpdtjpocndgdqylzeo.supabase.co';
+    var SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY'; // <-- fill this in
+    var REF = 'kaartje';
+    var APP_STORE_URL = 'https://apps.apple.com/nl/app/tastory/id6762256086';
+    // ──────────────────────────────────────────────────────────────────────────
+
+    function getPlatform() {
+      var ua = navigator.userAgent || '';
+      if (/iPad|iPhone|iPod/.test(ua) && !window.MSStream) return 'ios';
+      if (/android/i.test(ua)) return 'android';
+      return 'desktop';
+    }
+
+    function trackScan(platform) {
+      try {
+        fetch(SUPABASE_URL + '/rest/v1/qr_scans', {
+          method: 'POST',
+          headers: {
+            'apikey': SUPABASE_ANON_KEY,
+            'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
+            'Content-Type': 'application/json',
+            'Prefer': 'return=minimal'
+          },
+          body: JSON.stringify({
+            platform: platform,
+            timestamp: new Date().toISOString(),
+            user_agent: navigator.userAgent,
+            ref: REF
+          })
+        }).catch(function() {}); // fire-and-forget; don't block redirect
+      } catch(e) {}
+    }
+
+    function copyRefToClipboard() {
+      // Silent clipboard write — must happen before any redirect so the app
+      // can read "ref=kaartje" on first launch for deferred deep linking.
+      try {
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          return navigator.clipboard.writeText('ref=' + REF);
+        }
+        // Fallback for older browsers
+        var ta = document.createElement('textarea');
+        ta.value = 'ref=' + REF;
+        ta.style.position = 'fixed';
+        ta.style.opacity = '0';
+        document.body.appendChild(ta);
+        ta.focus();
+        ta.select();
+        document.execCommand('copy');
+        document.body.removeChild(ta);
+      } catch(e) {}
+      return Promise.resolve();
+    }
+
+    function submitAndroid(e) {
+      e.preventDefault();
+      var email = document.getElementById('android-email').value;
+      // Store Android waitlist signup in Supabase
+      fetch(SUPABASE_URL + '/rest/v1/android_waitlist', {
+        method: 'POST',
+        headers: {
+          'apikey': SUPABASE_ANON_KEY,
+          'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
+          'Content-Type': 'application/json',
+          'Prefer': 'return=minimal'
+        },
+        body: JSON.stringify({ email: email, ref: REF, signed_up_at: new Date().toISOString() })
+      }).catch(function() {});
+      document.getElementById('android-form').style.display = 'none';
+      document.getElementById('android-success').style.display = 'block';
+    }
+
+    (function init() {
+      var platform = getPlatform();
+
+      // 1. Track the scan (non-blocking)
+      trackScan(platform);
+
+      if (platform === 'ios') {
+        document.getElementById('card-ios').style.display = 'block';
+
+        // 2. Copy ref to clipboard BEFORE redirecting — deferred deep link
+        copyRefToClipboard().then(function() {
+          // Small delay so clipboard write completes before app opens
+          setTimeout(function() {
+            window.location.href = APP_STORE_URL;
+          }, 300);
+        }).catch(function() {
+          // Clipboard denied — redirect anyway
+          setTimeout(function() { window.location.href = APP_STORE_URL; }, 300);
+        });
+
+      } else if (platform === 'android') {
+        // TODO: When Android launches, replace the line below with:
+        // window.location.href = 'https://play.google.com/store/apps/details?id=nl.tastory.app';
+        document.getElementById('card-android').style.display = 'block';
+
+      } else {
+        document.getElementById('card-desktop').style.display = 'block';
+      }
+    })();
+  </script>
+</body>
+</html>
