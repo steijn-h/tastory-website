@@ -1,0 +1,111 @@
+---
+import Nav from '../components/Nav.astro';
+import Footer from '../components/Footer.astro';
+import '../styles/global.css';
+
+interface Props {
+  title: string;
+  description?: string;
+}
+
+const {
+  title,
+  description = 'Garcia Policedogs — africhting en fokkerij van werklijn Nederlandse Herders vanuit Enschede, gericht op KNPV en politiewerk.',
+} = Astro.props;
+const canonicalURL = new URL(Astro.url.pathname, Astro.site);
+---
+
+<!doctype html>
+<html lang="nl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content={description} />
+    <meta name="theme-color" content="#111111" />
+
+    <!-- Open Graph -->
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content={canonicalURL} />
+    <meta property="og:locale" content="nl_NL" />
+    <meta property="og:image" content={new URL('/garcia-logo.png', Astro.site).toString()} />
+    <meta property="og:site_name" content="Garcia Policedogs" />
+
+    <link rel="canonical" href={canonicalURL} />
+    <link rel="icon" type="image/png" href="/garcia-mark.png" />
+
+    <!-- Font loading via link tags (non-render-blocking) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Work+Sans:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+
+    <title>{title}</title>
+  </head>
+  <body>
+    <a href="#main-content" class="skip-to-content">Naar inhoud</a>
+    <Nav />
+    <main id="main-content">
+      <slot />
+    </main>
+    <Footer />
+
+    <script>
+      const reveals = document.querySelectorAll('.reveal');
+      const observer = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              const el = entry.target as HTMLElement;
+              const siblings = Array.from(el.parentElement?.children ?? []).filter((c) =>
+                c.classList.contains('reveal'),
+              );
+              const idx = siblings.indexOf(el);
+              if (idx > 0) {
+                el.style.setProperty('--reveal-delay', `${idx * 90}ms`);
+              }
+              el.classList.add('visible');
+              observer.unobserve(el);
+            }
+          });
+        },
+        { threshold: 0.08, rootMargin: '0px 0px -40px 0px' },
+      );
+      reveals.forEach((el) => observer.observe(el));
+
+      let ticking = false;
+      window.addEventListener('scroll', () => {
+        if (!ticking) {
+          window.requestAnimationFrame(() => {
+            document.getElementById('navbar')?.classList.toggle('scrolled', window.scrollY > 40);
+            ticking = false;
+          });
+          ticking = true;
+        }
+      });
+
+      const menuBtn = document.getElementById('menu-toggle');
+      const mobileMenu = document.getElementById('mobile-menu');
+      const backdrop = document.getElementById('mobile-backdrop');
+
+      const closeMenu = () => {
+        document.body.classList.remove('menu-open');
+        menuBtn?.setAttribute('aria-expanded', 'false');
+      };
+
+      const toggleMenu = () => {
+        const isOpen = document.body.classList.toggle('menu-open');
+        menuBtn?.setAttribute('aria-expanded', String(isOpen));
+      };
+
+      menuBtn?.addEventListener('click', toggleMenu);
+      backdrop?.addEventListener('click', closeMenu);
+      mobileMenu?.querySelectorAll('a').forEach((link) => {
+        link.addEventListener('click', closeMenu);
+      });
+    </script>
+  </body>
+</html>

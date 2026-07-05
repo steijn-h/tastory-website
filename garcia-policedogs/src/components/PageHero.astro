@@ -1,0 +1,29 @@
+---
+interface Props {
+  kicker: string;
+  title: string;
+  description?: string;
+}
+
+const { kicker, title, description } = Astro.props;
+---
+
+<section class="page-hero">
+  <div class="page-hero-inner">
+    <p class="kicker">{kicker}</p>
+    <h1 class="page-hero-title" set:html={title} />
+    {description && <p class="page-hero-desc">{description}</p>}
+  </div>
+</section>
+
+<style>
+  .page-hero-title {
+    font-family: var(--display);
+    font-size: clamp(2.4rem, 5.5vw, 4.2rem);
+    line-height: 1.05;
+  }
+  .page-hero-title :global(em) {
+    color: var(--red);
+    font-style: normal;
+  }
+</style>

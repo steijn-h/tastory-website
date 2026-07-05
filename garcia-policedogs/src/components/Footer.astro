@@ -1,0 +1,124 @@
+---
+
+---
+
+<footer>
+  <div class="footer-inner">
+    <div class="footer-brand-block">
+      <div class="footer-brand">Garcia<em>policedogs</em></div>
+      <p class="footer-tagline">
+        Werklijn Nederlandse Herders &mdash; africhting &amp; fokkerij vanuit Enschede.
+      </p>
+    </div>
+    <div class="footer-cols">
+      <div class="footer-col">
+        <h4>Navigatie</h4>
+        <a href="/over-mij">Over mij</a>
+        <a href="/mijn-fokkerij">Mijn fokkerij</a>
+        <a href="/contact">Contact</a>
+      </div>
+      <div class="footer-col">
+        <h4>Contact</h4>
+        <a href="mailto:info@garciapolicedogs.nl">info@garciapolicedogs.nl</a>
+        <a href="https://facebook.com/Garciapolicedogs" target="_blank" rel="noopener">Facebook</a>
+        <a href="https://instagram.com/Garciapolicedogs" target="_blank" rel="noopener">Instagram</a
+        >
+      </div>
+    </div>
+    <div class="footer-legal">
+      <p>Enschede, Nederland</p>
+      <p>&copy; {new Date().getFullYear()} Garcia Policedogs</p>
+    </div>
+  </div>
+</footer>
+<style>
+  footer {
+    background: var(--black);
+    padding: 4rem 3rem 2.5rem;
+    color: rgba(242, 241, 237, 0.6);
+    position: relative;
+    border-top: 1px solid var(--line);
+  }
+  .footer-inner {
+    max-width: 1280px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1.2fr auto 1fr;
+    gap: 3rem;
+    align-items: start;
+  }
+  .footer-brand {
+    font-family: var(--display);
+    font-size: var(--text-2xl);
+    color: var(--paper);
+    text-transform: uppercase;
+    margin-bottom: 0.6rem;
+  }
+  .footer-brand em {
+    display: block;
+    font-style: normal;
+    font-size: 0.75rem;
+    letter-spacing: 0.3em;
+    color: var(--red);
+    margin-top: 0.3rem;
+  }
+  .footer-tagline {
+    font-size: var(--text-sm);
+    line-height: 1.7;
+    color: rgba(242, 241, 237, 0.45);
+    max-width: 320px;
+  }
+  .footer-cols {
+    display: flex;
+    gap: 3rem;
+  }
+  .footer-col {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+  }
+  .footer-col h4 {
+    font-family: var(--display);
+    font-size: var(--text-xs);
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--red);
+    margin-bottom: 0.4rem;
+    font-weight: 500;
+  }
+  .footer-col a {
+    font-size: var(--text-sm);
+    color: rgba(242, 241, 237, 0.55);
+    text-decoration: none;
+    transition: color 0.3s;
+  }
+  .footer-col a:hover {
+    color: var(--paper);
+  }
+  .footer-legal {
+    text-align: right;
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+  }
+  .footer-legal p {
+    font-size: var(--text-xs);
+    color: rgba(242, 241, 237, 0.35);
+  }
+  @media (max-width: 768px) {
+    footer {
+      padding: 3rem 1.5rem 2rem;
+    }
+    .footer-inner {
+      grid-template-columns: 1fr;
+      gap: 2rem;
+    }
+    .footer-cols {
+      flex-wrap: wrap;
+      gap: 2rem;
+    }
+    .footer-legal {
+      text-align: left;
+    }
+  }
+</style>

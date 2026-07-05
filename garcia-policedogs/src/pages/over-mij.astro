@@ -1,0 +1,118 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHero from '../components/PageHero.astro';
+---
+
+<BaseLayout
+  title="Over mij — Garcia Policedogs"
+  description="J. Manuel Garcia traint sinds 1990 werkhonden. Sinds 2023 lid van de Koninklijke Nederlandse Politiehond Vereniging (KNPV), vanuit Enschede."
+>
+  <PageHero
+    kicker="Instructeur & fokker"
+    title="J. Manuel <em>Garcia</em>"
+    description="53 jaar, gevestigd in Enschede. Al meer dan drie decennia bezig met het africhten van werkhonden."
+  />
+
+  <section class="timeline">
+    <div class="timeline-item reveal">
+      <span class="timeline-year">1990</span>
+      <div>
+        <h3>Start bij de SV</h3>
+        <p>
+          Training bij de Duitse Herdershondenvereniging (SV), samen met mijn hond Wolf vom
+          Spanierland.
+        </p>
+      </div>
+    </div>
+    <div class="timeline-item reveal">
+      <span class="timeline-year">&mdash;</span>
+      <div>
+        <h3>SCHH1 &middot; SCHH2 &middot; IPO1 &middot; SCHH3</h3>
+        <p>Succesvol afgelegd in de jaren die volgden, met verschillende honden.</p>
+      </div>
+    </div>
+    <div class="timeline-item reveal">
+      <span class="timeline-year">2023</span>
+      <div>
+        <h3>Lid van de KNPV</h3>
+        <p>
+          Sindsdien lid van de Koninklijke Nederlandse Politiehond Vereniging. Slaagde voor het
+          BKD-examen met een 9.5 van de 10.
+        </p>
+      </div>
+    </div>
+    <div class="timeline-item reveal">
+      <span class="timeline-year">Vandaag</span>
+      <div>
+        <h3>Nederlandse Herders</h3>
+        <p>
+          Ik train Nederlandse Herders, met mijn eigen honden Luna en Cort&eacute;s Garcia, gericht
+          op sport en politiewerk.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <section class="cta on-paper">
+    <div class="cta-inner reveal">
+      <p class="kicker">Vragen over africhting?</p>
+      <h2 class="section-title">Neem gerust <em>contact</em> op</h2>
+      <a href="/contact" class="btn-secondary">Naar contact</a>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .timeline {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    max-width: 780px;
+  }
+  .timeline-item {
+    display: grid;
+    grid-template-columns: 120px 1fr;
+    gap: 2rem;
+    padding: 2.2rem 0;
+    border-bottom: 1px solid var(--line);
+  }
+  .timeline-item:first-child {
+    padding-top: 0;
+  }
+  .timeline-year {
+    font-family: var(--display);
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--red);
+  }
+  .timeline-item h3 {
+    font-size: var(--text-xl);
+    margin-bottom: 0.6rem;
+  }
+  .timeline-item p {
+    font-family: var(--sans);
+    font-size: var(--text-base);
+    line-height: 1.75;
+    color: rgba(242, 241, 237, 0.65);
+    text-transform: none;
+  }
+
+  .cta {
+    text-align: center;
+  }
+  .cta-inner {
+    max-width: 560px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.2rem;
+  }
+
+  @media (max-width: 640px) {
+    .timeline-item {
+      grid-template-columns: 1fr;
+      gap: 0.6rem;
+    }
+  }
+</style>

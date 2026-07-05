@@ -1,0 +1,156 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHero from '../components/PageHero.astro';
+
+const traits = [
+  { label: 'Registratie', value: 'BRN 44862' },
+  { label: 'Geboren', value: '3 september 2021' },
+  { label: 'Ras', value: 'Nederlandse Herder (werklijn)' },
+  { label: 'Training', value: 'Gestart op 6 maanden leeftijd' },
+  { label: 'Bouw', value: 'Middelgroot, atletisch, sterke volle beet' },
+  {
+    label: 'Gezondheid',
+    value: '100% medisch gekeurd en geröntgd — goedgekeurd voor sport & fokkerij',
+  },
+];
+---
+
+<BaseLayout
+  title="Mijn fokkerij — Garcia Policedogs"
+  description="Luna, werklijn Nederlandse Herder (BRN 44862), 100% medisch gekeurd en goedgekeurd voor sport & fokkerij. Fokkerij vanuit Enschede."
+>
+  <PageHero
+    kicker="Mijn fokkerij"
+    title="Luna"
+    description="Middelgrote, atletische en talentvolle teef, klaar voor sport en fokkerij."
+  />
+
+  <section class="profile">
+    <div class="profile-card reveal">
+      <div class="profile-card-header">
+        <span class="profile-tag">Dossier</span>
+        <span class="profile-name">Luna</span>
+      </div>
+      <dl class="profile-traits">
+        {
+          traits.map((t) => (
+            <div class="trait">
+              <dt>{t.label}</dt>
+              <dd>{t.value}</dd>
+            </div>
+          ))
+        }
+      </dl>
+    </div>
+
+    <div class="profile-text reveal">
+      <p class="section-desc">
+        Luna is een middelgrote, atletische en zeer talentvolle hond. Ze is lichamelijk sterk en
+        heeft een machtige, volle beet. De training begon toen ze zes maanden oud was.
+      </p>
+      <p class="section-desc">
+        Ze is 100% medisch gekeurd en ger&ouml;ntgd: goedgekeurd voor zowel sport als fokkerij.
+      </p>
+      <p class="section-desc">
+        Naast Luna train en fok ik ook met Cort&eacute;s Garcia. Samen vormen zij de basis van mijn
+        fokkerij van werklijn Nederlandse Herders.
+      </p>
+    </div>
+  </section>
+
+  <section class="cta on-paper">
+    <div class="cta-inner reveal">
+      <p class="kicker">Pup of dekreu</p>
+      <h2 class="section-title">Interesse in <em>een nest of dekking</em>?</h2>
+      <p class="section-desc" style="margin: 0 auto 0.5rem;">
+        Neem contact op voor de actuele mogelijkheden &mdash; ik informeer je graag persoonlijk.
+      </p>
+      <a href="/contact" class="btn-secondary">Naar contact</a>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .profile {
+    display: grid;
+    grid-template-columns: 0.85fr 1fr;
+    gap: 3rem;
+    align-items: start;
+  }
+  .profile-card {
+    background: var(--black-panel);
+    border: 1px solid var(--line);
+    border-left: 4px solid var(--red);
+  }
+  .profile-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    padding: 1.4rem 1.6rem;
+    border-bottom: 1px solid var(--line);
+  }
+  .profile-tag {
+    font-family: var(--display);
+    font-size: var(--text-xs);
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: rgba(242, 241, 237, 0.4);
+  }
+  .profile-name {
+    font-family: var(--display);
+    font-size: 1.6rem;
+    font-weight: 600;
+    color: var(--red);
+    text-transform: uppercase;
+  }
+  .profile-traits {
+    padding: 0.4rem 1.6rem 1.4rem;
+  }
+  .trait {
+    display: grid;
+    grid-template-columns: 1fr 1.4fr;
+    gap: 1rem;
+    padding: 0.85rem 0;
+    border-bottom: 1px solid var(--line);
+  }
+  .trait:last-child {
+    border-bottom: none;
+  }
+  .trait dt {
+    font-family: var(--display);
+    font-size: var(--text-xs);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: rgba(242, 241, 237, 0.45);
+  }
+  .trait dd {
+    font-family: var(--sans);
+    font-size: var(--text-sm);
+    line-height: 1.6;
+    color: var(--paper);
+  }
+  .profile-text {
+    display: flex;
+    flex-direction: column;
+    gap: 1.2rem;
+    padding-top: 0.5rem;
+  }
+
+  .cta {
+    text-align: center;
+  }
+  .cta-inner {
+    max-width: 560px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  @media (max-width: 900px) {
+    .profile {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
