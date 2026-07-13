@@ -1,0 +1,160 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHero from '../components/PageHero.astro';
+---
+
+<BaseLayout
+  title="Account verwijderen — Tastory"
+  description="Wil je jouw Tastory-account verwijderen? Vul je e-mailadres en gebruikersnaam in en wij verwerken je verzoek."
+>
+  <PageHero
+    title="Account <em>verwijderen</em>"
+    description="Je kunt je account ook direct verwijderen via Profiel → Instellingen → Account verwijderen in de app. Liever via de website? Vul onderstaand formulier in, dan verwerken wij je verzoek zo snel mogelijk."
+  />
+
+  <section class="delete-content">
+    <div class="delete-inner">
+      <div class="delete-form-wrapper reveal">
+        <p class="delete-notice">
+          Bij verwijdering worden al jouw gegevens (account, stories, reviews, reacties, opgeslagen
+          restaurants, collecties en vriendverzoeken) permanent gewist. Dit is onomkeerbaar.
+        </p>
+        <form class="delete-form" id="delete-form" aria-label="Formulier account verwijderen">
+          <div class="form-group">
+            <label for="delete-email">E-mailadres *</label>
+            <input type="email" id="delete-email" name="email" required />
+          </div>
+          <div class="form-group">
+            <label for="delete-username">Gebruikersnaam *</label>
+            <input type="text" id="delete-username" name="username" required />
+          </div>
+          <div class="form-group">
+            <label for="delete-reason">Reden (optioneel)</label>
+            <textarea id="delete-reason" name="reason" rows="4"></textarea>
+          </div>
+          <button type="submit" class="btn-primary">Account verwijderen aanvragen</button>
+          <div class="delete-feedback" id="delete-feedback" role="status"></div>
+        </form>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<script>
+  import { submitForm } from '../utils/submitForm';
+
+  const form = document.getElementById('delete-form') as HTMLFormElement;
+  const feedback = document.getElementById('delete-feedback') as HTMLDivElement;
+  const submitBtn = form.querySelector('button') as HTMLButtonElement;
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const data = new FormData(form);
+
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Verzenden...';
+
+    try {
+      await submitForm({
+        email: data.get('email') as string,
+        username: data.get('username') as string,
+        reason: data.get('reason') as string,
+        subject: 'Verzoek accountverwijdering — Tastory website',
+      });
+
+      feedback.textContent =
+        'Je verzoek is verzonden. We verwerken de verwijdering van je account zo snel mogelijk.';
+      feedback.className = 'delete-feedback delete-feedback--success';
+      form.reset();
+    } catch {
+      feedback.textContent =
+        'Er ging iets mis. Probeer het later opnieuw of mail ons op info@tastory.nl.';
+      feedback.className = 'delete-feedback delete-feedback--error';
+    }
+
+    submitBtn.disabled = false;
+    submitBtn.textContent = 'Account verwijderen aanvragen';
+
+    setTimeout(() => {
+      feedback.textContent = '';
+      feedback.className = 'delete-feedback';
+    }, 5000);
+  });
+</script>
+
+<style>
+  .delete-content {
+    max-width: 700px;
+    margin: 0 auto;
+  }
+
+  .delete-form-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xl);
+  }
+
+  .delete-notice {
+    background: color-mix(in srgb, var(--orange) 8%, transparent);
+    border-left: 3px solid var(--orange);
+    padding: var(--space-sm) var(--space-md);
+    border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+    font-size: var(--text-sm);
+    line-height: 1.7;
+    color: var(--text-muted);
+  }
+
+  .delete-form {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-lg);
+  }
+
+  .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+  }
+
+  .form-group label {
+    font-size: var(--text-base);
+    font-weight: 500;
+    color: var(--text);
+  }
+
+  .form-group input,
+  .form-group textarea {
+    font-family: var(--sans);
+    font-size: var(--text-base);
+    padding: 0.9rem 1.2rem;
+    border: 1px solid rgba(136, 101, 69, 0.15);
+    border-radius: var(--radius-sm);
+    background: var(--white);
+    color: var(--text);
+    outline: none;
+    transition: border-color 0.3s;
+  }
+
+  .form-group input:focus,
+  .form-group textarea:focus {
+    border-color: var(--orange);
+  }
+
+  .form-group textarea {
+    resize: vertical;
+  }
+
+  .delete-feedback {
+    font-size: var(--text-base);
+    min-height: 1.5rem;
+    transition: all 0.3s;
+  }
+
+  .delete-feedback--success {
+    color: #2e7d32;
+  }
+
+  .delete-feedback--error {
+    color: #c62828;
+  }
+</style>
