@@ -80,13 +80,13 @@ import PageHero from '../components/PageHero.astro';
             href="https://play.google.com/store/apps/details?id=nl.tastory.app&pli=1"
             target="_blank"
             rel="noopener noreferrer"
-            class="app-store-btn"
+            class="app-store-btn google-play-btn"
           >
             <img
               src="https://play.google.com/intl/en_us/badges/static/images/badges/en_badge_web_generic.png"
               alt="Get it on Google Play"
-              width="175"
-              height="52"
+              width="200"
+              height="77"
             />
           </a>
         </div>
@@ -179,6 +179,19 @@ import PageHero from '../components/PageHero.astro';
 
   .app-store-btn:hover {
     opacity: 0.85;
+  }
+
+  /* Google's official badge has ~40px of baked-in transparent padding around
+     the button, while Apple's does not — crop it so both badges read at the
+     same visual height. */
+  .google-play-btn {
+    height: 52px;
+    overflow: hidden;
+  }
+
+  .google-play-btn img {
+    height: 77px;
+    margin: -13px 0 0 -13px;
   }
 
   @media (max-width: 768px) {
