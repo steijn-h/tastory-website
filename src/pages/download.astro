@@ -7,6 +7,20 @@ import PageHero from '../components/PageHero.astro';
   title="Download de app — Tastory"
   description="De Tastory app is nu live! Download hem gratis in de App Store en ontdek restaurants die écht bij jou passen."
 >
+  <script is:inline>
+    (function () {
+      var ua = navigator.userAgent || navigator.vendor || '';
+      var iosUrl = 'https://apps.apple.com/nl/app/tastory/id6762256086';
+      var androidUrl = 'https://play.google.com/store/apps/details?id=nl.tastory.app';
+
+      if (/android/i.test(ua)) {
+        window.location.replace(androidUrl);
+      } else if (/iPad|iPhone|iPod/.test(ua) && !window.MSStream) {
+        window.location.replace(iosUrl);
+      }
+    })();
+  </script>
+
   <PageHero
     title="De app is <em>live!</em>"
     description="Download Tastory gratis in de App Store en ontdek restaurants die écht bij jou passen."
@@ -42,54 +56,41 @@ import PageHero from '../components/PageHero.astro';
   <section class="signup-section">
     <div class="signup-grid">
       <div class="signup-card reveal">
-        <div class="card-tag">Voor restaurants</div>
-        <h2>Aanmelden als <em>Restaurant</em></h2>
-        <p>
-          Presenteer jouw restaurant via authentieke videocontent en bereik gasten die écht bij jou
-          passen. Meld je nu aan en wij nemen contact met je op zodra we live gaan.
-        </p>
-        <form class="signup-form" id="restaurant-form">
-          <input
-            type="text"
-            id="restaurant-name"
-            placeholder="Naam restaurant"
-            required
-            aria-label="Naam restaurant"
-          />
-          <input
-            type="email"
-            id="restaurant-email"
-            placeholder="E-mailadres"
-            required
-            aria-label="E-mailadres"
-          />
-          <button type="submit">Aanmelden als restaurant</button>
-        </form>
-        <div class="form-feedback" id="restaurant-feedback"></div>
-        <div class="card-note">Geen spam. We nemen contact met je op bij de lancering.</div>
-      </div>
-
-      <div class="signup-card reveal">
         <div class="card-tag">Voor Foodies</div>
         <h2>Download <em>Tastory</em></h2>
         <p>
           Ontdek restaurants die écht bij jou passen op basis van sfeer, keuken en stijl. De app is
-          nu gratis beschikbaar in de App Store.
+          nu gratis beschikbaar in de App Store en Google Play.
         </p>
-        <a
-          href="https://apps.apple.com/nl/app/tastory/id6762256086"
-          target="_blank"
-          rel="noopener noreferrer"
-          class="app-store-btn"
-        >
-          <img
-            src="https://developer.apple.com/assets/elements/badges/download-on-the-app-store.svg"
-            alt="Download on the App Store"
-            width="156"
-            height="52"
-          />
-        </a>
-        <div class="card-note">Gratis te downloaden. Beschikbaar op iOS.</div>
+        <div class="store-badges">
+          <a
+            href="https://apps.apple.com/nl/app/tastory/id6762256086"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="app-store-btn"
+          >
+            <img
+              src="https://developer.apple.com/assets/elements/badges/download-on-the-app-store.svg"
+              alt="Download on the App Store"
+              width="156"
+              height="52"
+            />
+          </a>
+          <a
+            href="https://play.google.com/store/apps/details?id=nl.tastory.app&pli=1"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="app-store-btn google-play-btn"
+          >
+            <img
+              src="https://play.google.com/intl/en_us/badges/static/images/badges/en_badge_web_generic.png"
+              alt="Get it on Google Play"
+              width="200"
+              height="77"
+            />
+          </a>
+        </div>
+        <div class="card-note">Gratis te downloaden. Beschikbaar op iOS &amp; Android.</div>
       </div>
     </div>
   </section>
@@ -103,9 +104,8 @@ import PageHero from '../components/PageHero.astro';
 
   .signup-grid {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 2rem;
-    max-width: 1100px;
+    grid-template-columns: 1fr;
+    max-width: 550px;
     margin: 0 auto;
   }
 
@@ -151,75 +151,18 @@ import PageHero from '../components/PageHero.astro';
     margin-bottom: 2rem;
   }
 
-  .signup-form {
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
-  }
-
-  .signup-form input {
-    padding: 0.9rem 1.2rem;
-    border: 1px solid rgba(136, 101, 69, 0.2);
-    border-radius: var(--radius-md);
-    background: var(--beige);
-    color: var(--text);
-    font-family: var(--sans);
-    font-size: 1rem;
-    outline: none;
-    transition: border-color 0.2s;
-  }
-
-  .signup-form input:focus {
-    border-color: var(--orange);
-  }
-
-  .signup-form input::placeholder {
-    color: var(--text-muted);
-    opacity: 0.7;
-  }
-
-  .signup-form button {
-    background: var(--orange);
-    color: var(--white);
-    border: none;
-    padding: 1rem 1.5rem;
-    border-radius: var(--radius-md);
-    font-family: var(--sans);
-    font-size: 1rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition:
-      background 0.3s,
-      transform 0.2s,
-      box-shadow 0.3s;
-    margin-top: 0.25rem;
-  }
-
-  .signup-form button:hover {
-    background: var(--brown);
-    transform: translateY(-1px);
-    box-shadow: 0 8px 28px rgba(255, 142, 62, 0.3);
-  }
-
-  .form-feedback {
-    font-size: 0.95rem;
-    margin-top: 0.75rem;
-    min-height: 1.4rem;
-  }
-
-  .form-feedback--success {
-    color: #2e7d32;
-  }
-
-  .form-feedback--error {
-    color: #c62828;
-  }
-
   .card-note {
     font-size: 0.85rem;
     color: var(--text-muted);
     opacity: 0.6;
     margin-top: 0.75rem;
+  }
+
+  .store-badges {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.75rem;
   }
 
   .app-store-btn {
@@ -229,8 +172,26 @@ import PageHero from '../components/PageHero.astro';
     transition: opacity 0.2s;
   }
 
+  .app-store-btn img {
+    height: 52px;
+    width: auto;
+  }
+
   .app-store-btn:hover {
     opacity: 0.85;
+  }
+
+  /* Google's official badge has ~40px of baked-in transparent padding around
+     the button, while Apple's does not — crop it so both badges read at the
+     same visual height. */
+  .google-play-btn {
+    height: 52px;
+    overflow: hidden;
+  }
+
+  .google-play-btn img {
+    height: 77px;
+    margin: -13px 0 0 -13px;
   }
 
   @media (max-width: 768px) {
@@ -247,74 +208,3 @@ import PageHero from '../components/PageHero.astro';
     }
   }
 </style>
-
-<script>
-  async function submitForm(
-    formId: string,
-    nameInputId: string,
-    emailInputId: string,
-    feedbackId: string,
-    type: string,
-  ) {
-    const form = document.getElementById(formId) as HTMLFormElement;
-    const nameInput = document.getElementById(nameInputId) as HTMLInputElement;
-    const emailInput = document.getElementById(emailInputId) as HTMLInputElement;
-    const feedback = document.getElementById(feedbackId) as HTMLDivElement;
-    const submitBtn = form.querySelector('button') as HTMLButtonElement;
-
-    form.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const name = nameInput.value.trim();
-      const email = emailInput.value.trim();
-      if (!name || !email) return;
-
-      submitBtn.disabled = true;
-      const originalText = submitBtn.textContent ?? 'Aanmelden';
-      submitBtn.textContent = 'Verzenden...';
-
-      try {
-        const res = await fetch('https://formsubmit.co/ajax/Info@tastory.nl', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
-          body: JSON.stringify({
-            name,
-            email,
-            message: `Nieuwe aanmelding via de download pagina als ${type}.`,
-            _subject: `Nieuwe aanmelding als ${type} — Tastory`,
-            _captcha: 'false',
-            _template: 'table',
-          }),
-        });
-
-        if (res.ok) {
-          feedback.textContent =
-            'Bedankt voor je aanmelding! We nemen contact met je op bij de lancering.';
-          feedback.className = 'form-feedback form-feedback--success';
-          nameInput.value = '';
-          emailInput.value = '';
-        } else {
-          throw new Error('Submit failed');
-        }
-      } catch {
-        feedback.textContent = 'Er ging iets mis. Probeer het later opnieuw.';
-        feedback.className = 'form-feedback form-feedback--error';
-      }
-
-      submitBtn.disabled = false;
-      submitBtn.textContent = originalText;
-
-      setTimeout(() => {
-        feedback.textContent = '';
-        feedback.className = 'form-feedback';
-      }, 6000);
-    });
-  }
-
-  submitForm(
-    'restaurant-form',
-    'restaurant-name',
-    'restaurant-email',
-    'restaurant-feedback',
-    'Restaurant',
-  );
-</script>

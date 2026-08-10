@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tastory — Download de app</title>
+<meta name="robots" content="noindex">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@600;700&family=Roboto:wght@400;500&display=swap');
+
+  :root{
+    --beige:#F5EBDD;
+    --orange:#E8612A;
+    --brown:#6B5B3E;
+    --brown-deep:#4A3F2C;
+    --white:#FFFDF9;
+  }
+
+  *{box-sizing:border-box;}
+
+  body{
+    margin:0;
+    min-height:100vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:var(--beige);
+    font-family:'Roboto',sans-serif;
+    color:var(--brown-deep);
+    padding:24px;
+  }
+
+  .card{
+    width:100%;
+    max-width:400px;
+    text-align:center;
+  }
+
+  .wordmark{
+    font-family:'Fredoka',sans-serif;
+    font-weight:700;
+    font-size:28px;
+    color:var(--brown-deep);
+    letter-spacing:-0.01em;
+    margin-bottom:6px;
+  }
+
+  .tagline{
+    font-size:14px;
+    color:var(--brown);
+    margin-bottom:36px;
+  }
+
+  .spinner{
+    width:34px;
+    height:34px;
+    margin:0 auto 20px;
+    border:3px solid rgba(107,91,62,0.18);
+    border-top-color:var(--orange);
+    border-radius:50%;
+    animation:spin 0.8s linear infinite;
+  }
+
+  @keyframes spin{ to{ transform:rotate(360deg); } }
+
+  .status{
+    font-size:15px;
+    color:var(--brown);
+    margin-bottom:28px;
+    line-height:1.5;
+  }
+
+  .iab-notice{
+    display:none;
+    background:var(--white);
+    border:1px solid rgba(107,91,62,0.15);
+    border-radius:14px;
+    padding:20px;
+    margin-bottom:28px;
+    text-align:left;
+  }
+
+  .iab-notice.show{ display:block; }
+
+  .iab-notice h2{
+    font-family:'Fredoka',sans-serif;
+    font-size:17px;
+    margin:0 0 10px;
+    color:var(--brown-deep);
+  }
+
+  .iab-notice p{
+    font-size:14px;
+    line-height:1.55;
+    margin:0 0 10px;
+    color:var(--brown);
+  }
+
+  .iab-notice p:last-child{ margin-bottom:0; }
+
+  .iab-notice strong{ color:var(--brown-deep); }
+
+  .buttons{
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+  }
+
+  .btn{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:10px;
+    padding:14px 20px;
+    border-radius:999px;
+    font-family:'Fredoka',sans-serif;
+    font-weight:600;
+    font-size:15px;
+    text-decoration:none;
+    transition:transform 0.15s ease, opacity 0.15s ease;
+  }
+
+  .btn:active{ transform:scale(0.97); }
+
+  .btn-primary{
+    background:var(--orange);
+    color:var(--white);
+  }
+
+  .btn-secondary{
+    background:transparent;
+    color:var(--brown-deep);
+    border:1.5px solid rgba(107,91,62,0.35);
+  }
+
+  .footnote{
+    margin-top:28px;
+    font-size:12px;
+    color:rgba(107,91,62,0.7);
+  }
+</style>
+</head>
+<body>
+
+  <div class="card">
+    <div class="wordmark">Tastory</div>
+    <div class="tagline">Find it. Taste it. Share it.</div>
+
+    <div class="spinner" id="spinner"></div>
+    <div class="status" id="status">Je wordt doorgestuurd naar de App Store…</div>
+
+    <div class="iab-notice" id="iabNotice">
+      <h2>Nog een tikje nodig</h2>
+      <p>Je opent deze link vanuit Instagram, en Instagram staat geen automatische doorverwijzing naar de App Store toe.</p>
+      <p>Tik rechtsboven op <strong>⋯</strong> en kies <strong>"Openen in browser"</strong> (of "Open in Safari"). Daarna werkt de knop hieronder gewoon.</p>
+    </div>
+
+    <div class="buttons">
+      <a class="btn btn-primary" id="iosBtn" href="https://apps.apple.com/nl/app/tastory/id6762256086">Download voor iPhone</a>
+      <a class="btn btn-secondary" id="androidBtn" href="https://play.google.com/store/apps/details?id=nl.tastory.app">Download voor Android</a>
+    </div>
+
+    <div class="footnote">Tastory · Enschede</div>
+  </div>
+
+<script>
+  var ua = navigator.userAgent || navigator.vendor || window.opera;
+  var isIOS = /iPad|iPhone|iPod/.test(ua) && !window.MSStream;
+  var isAndroid = /android/i.test(ua);
+  var isInAppBrowser = /Instagram|FBAN|FBAV|FB_IAB|Line\//i.test(ua);
+
+  var IOS_URL = "https://apps.apple.com/nl/app/tastory/id6762256086";
+  var ANDROID_URL = "https://play.google.com/store/apps/details?id=nl.tastory.app";
+
+  var statusEl = document.getElementById('status');
+  var spinnerEl = document.getElementById('spinner');
+  var iabEl = document.getElementById('iabNotice');
+  var iosBtn = document.getElementById('iosBtn');
+  var androidBtn = document.getElementById('androidBtn');
+
+  // Highlight the relevant button for this device, keep the other as fallback
+  if (isAndroid) {
+    iosBtn.style.display = 'none';
+  } else if (isIOS) {
+    androidBtn.style.display = 'none';
+  }
+
+  if (isInAppBrowser) {
+    // Auto-redirect will very likely stall inside Instagram/Facebook's
+    // in-app browser — skip straight to instructions instead of spinning forever.
+    spinnerEl.style.display = 'none';
+    statusEl.style.display = 'none';
+    iabEl.classList.add('show');
+  } else {
+    var target = isAndroid ? ANDROID_URL : IOS_URL;
+    if (isIOS || isAndroid) {
+      setTimeout(function () {
+        window.location.href = target;
+      }, 700);
+    } else {
+      // Desktop or unrecognized device: no auto-redirect, just show both options
+      spinnerEl.style.display = 'none';
+      statusEl.textContent = 'Kies je platform hieronder:';
+    }
+  }
+</script>
+
+</body>
+</html>
