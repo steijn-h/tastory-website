@@ -1,961 +1,1368 @@
 ---
+// Openbare restaurantpagina (zoals TripAdvisor): voor iedereen zichtbaar, ook
+// zonder account. Toont dezelfde gegevens als de restaurantpagina in de app.
 export const prerender = false;
+
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import RatingStars from '../../components/RatingStars.astro';
+import ReviewCard from '../../components/ReviewCard.astro';
+import RestaurantCard from '../../components/RestaurantCard.astro';
+import {
+  cityPath,
+  getAllRestaurants,
+  getRestaurant,
+  getReviews,
+  getReviewStats,
+  getStories,
+  isPartnerRestaurant,
+  isUuid,
+  restaurantPath,
+  type Restaurant,
+} from '../../lib/restaurants';
+import {
+  capitalize,
+  displayWebsite,
+  formatReviewDate,
+  isImageUrl,
+  normalizeCity,
+  normalizeWebsite,
+  parseOpeningHours,
+  priceLabel,
+  safeHttpsUrl,
+  splitUrls,
+  todayDutch,
+} from '../../lib/format';
+import { APP_STORE_URL, SITE_URL } from '../../lib/links';
 
-const { slug } = Astro.params;
+const param = Astro.params.slug ?? '';
+const lookup = await getRestaurant(param);
 
-let restaurant: {
-  id: string;
-  name: string;
-  photo_url: string | null;
-  background_url: string | null;
-  city: string | null;
-  cuisine: string | null;
-  vibe: string | null;
-  price_level: number | null;
-  weighted_score: number | null;
-  description: string | null;
-  website: string | null;
-  address: string | null;
-  slug: string | null;
-  opening_hours: string | null;
-  is_premium: boolean;
-  video_url: string | null;
-} | null = null;
-
-try {
-  const res = await fetch(`https://vyqpdtjpocndgdqylzeo.supabase.co/functions/v1/Restaurant-pagina?slug=${slug}`);
-  if (res.ok) {
-    const data = await res.json();
-    restaurant = data ?? null;
-  }
-} catch {
-  restaurant = null;
+// Oude deellinks uit de app gebruiken het id — stuur door naar de nette URL.
+if (lookup.status === 'ok' && isUuid(param) && lookup.restaurant.slug) {
+  return Astro.redirect(`/restaurant/${lookup.restaurant.slug}`, 301);
 }
 
-const priceLabel = (level: number | null) => '€'.repeat(Math.max(1, Math.min(level ?? 1, 4)));
-const allPhotos: string[] = restaurant?.photo_url
-  ? restaurant.photo_url.split(',').map(s => s.trim()).filter(Boolean)
-  : [];
-const videoUrl = restaurant?.video_url ?? null;
-const backgroundUrl = restaurant?.background_url ?? null;
-const heroPhoto = allPhotos[0] ?? null;
-const visiblePhotos = allPhotos.slice(0, 3);
-const extraCount = allPhotos.length - 3;
+const restaurant: Restaurant | null = lookup.status === 'ok' ? lookup.restaurant : null;
 
-const appStoreUrl = 'https://apps.apple.com/nl/app/tastory/id6744042066';
-const deepLinkUrl = `tastory://restaurant/${restaurant?.id ?? ''}`;
-const mapsUrl = restaurant?.address
-  ? `https://maps.google.com/?q=${encodeURIComponent(restaurant.address + ' ' + (restaurant.city ?? ''))}`
+const [reviewPage, stats, stories, allRestaurants] = restaurant
+  ? await Promise.all([
+      getReviews(restaurant.id),
+      getReviewStats(restaurant.id),
+      getStories(restaurant.id),
+      getAllRestaurants(),
+    ])
+  : [null, null, [], null];
+
+if (lookup.status === 'not-found') {
+  Astro.response.status = 404;
+} else if (lookup.status === 'error') {
+  // Tijdelijke fout: 503 zodat Google de pagina niet uit de index haalt.
+  Astro.response.status = 503;
+  Astro.response.headers.set('Retry-After', '120');
+} else {
+  // Vercel bewaart de pagina 5 minuten aan de rand van het netwerk.
+  Astro.response.headers.set('Cache-Control', 'public, s-maxage=300, stale-while-revalidate=3600');
+}
+
+// ── Afgeleide gegevens ─────────────────────────────────────────────────────
+const name = restaurant?.name ?? 'Restaurant';
+const city = normalizeCity(restaurant?.city);
+const photos = splitUrls(restaurant?.photo_url);
+const isPartner = restaurant ? isPartnerRestaurant(restaurant) : false;
+const videoUrl = safeHttpsUrl(restaurant?.video_url);
+const backgroundUrl = safeHttpsUrl(restaurant?.background_url);
+const score =
+  restaurant?.weighted_score && restaurant.weighted_score > 0 ? Number(restaurant.weighted_score) : null;
+const reviewCount = stats?.count ?? restaurant?.published_review_count ?? 0;
+const reviews = reviewPage?.reviews ?? [];
+const hours = parseOpeningHours(restaurant?.opening_hours);
+const today = todayDutch();
+const website = normalizeWebsite(restaurant?.website);
+const reserveUrl = safeHttpsUrl(restaurant?.Reserveer_url) ?? safeHttpsUrl(restaurant?.reservering_url);
+const menuUrls = splitUrls(restaurant?.menukaart_url);
+const menuImages = menuUrls.filter(isImageUrl);
+const menuLink = menuUrls.find((u) => !isImageUrl(u)) ?? null;
+const instagram = safeHttpsUrl(restaurant?.instagram_url);
+const facebook = safeHttpsUrl(restaurant?.facebook_url);
+const facilities = (restaurant?.facilities ?? []).filter(Boolean).map(capitalize);
+const allergies = (restaurant?.allergie_keuze ?? []).filter(Boolean).map(capitalize);
+const phone = restaurant?.phone?.trim() || null;
+const phoneHref = phone ? `tel:${phone.replace(/[^\d+]/g, '')}` : null;
+const hasCoords =
+  typeof restaurant?.lat === 'number' && typeof restaurant?.lng === 'number' && restaurant.lat !== 0;
+const routeUrl = restaurant
+  ? hasCoords
+    ? `https://www.google.com/maps/dir/?api=1&destination=${restaurant.lat},${restaurant.lng}`
+    : restaurant.address
+      ? `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(`${restaurant.address} ${restaurant.city ?? ''}`)}`
+      : null
   : null;
+const mapEmbedUrl =
+  hasCoords && restaurant
+    ? `https://www.openstreetmap.org/export/embed.html?bbox=${restaurant.lng! - 0.006},${restaurant.lat! - 0.003},${restaurant.lng! + 0.006},${restaurant.lat! + 0.003}&layer=mapnik&marker=${restaurant.lat},${restaurant.lng}`
+    : null;
+const deepLinkUrl = restaurant ? `tastory://restaurant/${restaurant.id}` : 'tastory://';
+const nearby = (allRestaurants ?? [])
+  .filter((r) => restaurant && r.id !== restaurant.id && city && normalizeCity(r.city) === city)
+  .slice(0, 4);
+// Mozaïek: hoofdbeeld + 0, 2 of 4 kleine foto's (nooit een leeg vak).
+const thumbPool = videoUrl ? photos : photos.slice(1);
+const thumbs = thumbPool.slice(0, thumbPool.length >= 4 ? 4 : thumbPool.length >= 2 ? 2 : 0);
+const thumbOffset = videoUrl ? 0 : 1;
+const maxDistribution = stats ? Math.max(1, ...stats.distribution) : 1;
+const formatScore = (value: number) =>
+  value.toLocaleString('nl-NL', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
 
+// ── SEO ────────────────────────────────────────────────────────────────────
+const canonicalPath = restaurant ? restaurantPath(restaurant) : `/restaurant/${param}`;
 const title = restaurant
-  ? `${restaurant.name} in ${restaurant.city} — Tastory`
-  : 'Restaurant — Tastory';
-const description = restaurant?.description
-  ?? (restaurant ? `Bekijk ${restaurant.name} op Tastory.` : 'Bekijk dit restaurant op Tastory.');
-const ogImage = heroPhoto ?? 'https://www.tastory.nl/tastory-logo.png';
+  ? `${name}${city ? `, ${city}` : ''} — reviews, foto's & menu | Tastory`
+  : 'Restaurant niet gevonden | Tastory';
+const description = restaurant
+  ? (restaurant.description?.trim().slice(0, 155) ||
+      `${name}${city ? ` in ${city}` : ''}${restaurant.cuisine ? ` (${restaurant.cuisine})` : ''}: bekijk ${reviewCount > 0 ? `${reviewCount} reviews, ` : ''}foto's, openingstijden en reserveer direct via Tastory.`)
+  : 'Dit restaurant staat niet (meer) op Tastory.';
 const keywords = restaurant
-  ? [
-      restaurant.name!,
-      restaurant.city!,
-      restaurant.cuisine!,
-      restaurant.vibe!,
-      'restaurant',
-      'Tastory',
-      `${restaurant.name} ${restaurant.city}`,
-      `${restaurant.cuisine} restaurant ${restaurant.city}`,
-    ].filter(Boolean) as string[]
+  ? [name, city, restaurant.cuisine, restaurant.vibe, city ? `restaurant ${city}` : null, 'reviews', 'Tastory'].filter(
+      (k): k is string => Boolean(k),
+    )
   : [];
 
-const isPremium = restaurant?.is_premium === true;
-
-const restaurantSchema = restaurant
+const jsonLd = restaurant
   ? {
       '@context': 'https://schema.org',
       '@type': 'Restaurant',
-      name: restaurant.name,
+      '@id': `${SITE_URL}${canonicalPath}#restaurant`,
+      name,
+      url: `${SITE_URL}${canonicalPath}`,
       description: restaurant.description ?? undefined,
-      url: `https://www.tastory.nl/restaurant/${restaurant.slug}`,
-      image: allPhotos.length > 0 ? allPhotos : undefined,
+      image: photos.length > 0 ? photos.slice(0, 6) : undefined,
+      servesCuisine: restaurant.cuisine ?? undefined,
+      priceRange: restaurant.price_level ? priceLabel(restaurant.price_level) : undefined,
+      telephone: phone ?? undefined,
+      menu: menuLink ?? undefined,
+      acceptsReservations: reserveUrl ? 'True' : undefined,
+      sameAs: [website, instagram, facebook].filter(Boolean),
       address: restaurant.address
         ? {
             '@type': 'PostalAddress',
             streetAddress: restaurant.address,
-            addressLocality: restaurant.city ?? undefined,
+            addressLocality: city ?? undefined,
             addressCountry: 'NL',
           }
         : undefined,
-      servesCuisine: restaurant.cuisine ?? undefined,
-      priceRange: restaurant.price_level ? '€'.repeat(restaurant.price_level) : undefined,
-      aggregateRating: restaurant.weighted_score
-        ? {
-            '@type': 'AggregateRating',
-            ratingValue: Number(restaurant.weighted_score).toFixed(1),
-            bestRating: '10',
-            worstRating: '1',
-            ratingCount: '1',
-          }
-        : undefined,
+      geo: hasCoords ? { '@type': 'GeoCoordinates', latitude: restaurant.lat, longitude: restaurant.lng } : undefined,
+      aggregateRating:
+        score !== null && reviewCount > 0
+          ? {
+              '@type': 'AggregateRating',
+              ratingValue: score.toFixed(1),
+              bestRating: '5',
+              worstRating: '1',
+              reviewCount: String(reviewCount),
+            }
+          : undefined,
+      review: reviews
+        .filter((r) => r.rating)
+        .slice(0, 5)
+        .map((r) => ({
+          '@type': 'Review',
+          author: { '@type': 'Person', name: r.author.name },
+          datePublished: r.created_at?.slice(0, 10),
+          reviewBody: r.text ?? undefined,
+          reviewRating: { '@type': 'Rating', ratingValue: String(r.rating), bestRating: '5', worstRating: '1' },
+        })),
     }
   : null;
+
+const breadcrumbs = [
+  { name: 'Home', path: '/' },
+  { name: 'Restaurants', path: '/restaurants' },
+  ...(city ? [{ name: city, path: cityPath(city) }] : []),
+  ...(restaurant ? [{ name, path: canonicalPath }] : []),
+];
+const breadcrumbLd = {
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: breadcrumbs.map((b, i) => ({
+    '@type': 'ListItem',
+    position: i + 1,
+    name: b.name,
+    item: `${SITE_URL}${b.path}`,
+  })),
+};
 ---
 
-<BaseLayout ogImage={ogImage} title={title} description={description} keywords={keywords}>
-  {restaurantSchema && (
-    <script type="application/ld+json" set:html={JSON.stringify(restaurantSchema)} />
-  )}
-  {isPremium ? (
+<BaseLayout
+  title={title}
+  description={description}
+  keywords={keywords}
+  ogImage={photos[0]}
+  noindex={!restaurant}
+>
+  {jsonLd && <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />}
+  {restaurant && <script type="application/ld+json" set:html={JSON.stringify(breadcrumbLd)} />}
 
-    <div class="premium-page restaurant-premium-page" style={backgroundUrl ? `background-image: url('${backgroundUrl}')` : ''}>
-      <div class="page-inner">
-
-        <!-- Hero: video of eerste foto -->
-        <div class="hero reveal">
-          {videoUrl ? (
+  {!restaurant ? (
+    <div class="page">
+      <div class="container narrow">
+        <div class="state-card">
+          {lookup.status === 'not-found' ? (
             <>
-              <video id="hero-video" src={videoUrl} class="hero-media" autoplay muted loop playsinline preload="auto" />
-              <button class="sound-btn" id="sound-btn" aria-label="Geluid aan">
-                <svg id="sound-off-icon" viewBox="0 0 24 24" fill="currentColor" width="20" height="20">
-                  <path d="M16.5 12A4.5 4.5 0 0 0 14 7.97v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z"/>
-                </svg>
-                <svg id="sound-on-icon" viewBox="0 0 24 24" fill="currentColor" width="20" height="20" style="display:none">
-                  <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3A4.5 4.5 0 0 0 14 7.97v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>
-                </svg>
-              </button>
+              <h1>Restaurant niet gevonden</h1>
+              <p>Dit restaurant staat niet (meer) op Tastory, of de link is niet helemaal goed.</p>
             </>
-          ) : heroPhoto ? (
-            <img src={heroPhoto} alt={restaurant!.name} class="hero-media" />
           ) : (
-            <div class="hero-placeholder" />
+            <>
+              <h1>Even geduld</h1>
+              <p>We kunnen dit restaurant op dit moment niet laden. Probeer het over een paar minuten opnieuw.</p>
+            </>
           )}
-          <div class="hero-overlay" />
-          <div class="hero-content">
-            <h1 class="hero-name">{restaurant!.name}</h1>
-            {mapsUrl ? (
-              <a href={mapsUrl} target="_blank" rel="noopener noreferrer" class="hero-city hero-city-link">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
-                {restaurant!.city}{restaurant!.address && <span class="hero-address"> · {restaurant!.address}</span>}
-              </a>
-            ) : (
-              <p class="hero-city">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
-                {restaurant!.city}
+          <a class="btn btn-primary" href="/restaurants">Bekijk alle restaurants</a>
+        </div>
+      </div>
+    </div>
+  ) : (
+    <div class:list={['page', { partner: isPartner && backgroundUrl }]} style={isPartner && backgroundUrl ? `--partner-bg: url('${backgroundUrl}')` : undefined}>
+      <div class="container">
+        <nav class="breadcrumbs" aria-label="Kruimelpad">
+          <ol>
+            {breadcrumbs.map((b, i) => (
+              <li>
+                {i < breadcrumbs.length - 1 ? <a href={b.path}>{b.name}</a> : <span aria-current="page">{b.name}</span>}
+              </li>
+            ))}
+          </ol>
+        </nav>
+
+        <!-- Kop -->
+        <header class="head">
+          <div class="head-main">
+            <h1 class="name">{name}</h1>
+            <div class="head-meta">
+              {score !== null && (
+                <a href="#reviews" class="head-score">
+                  <RatingStars rating={score} size={18} />
+                  <strong>{formatScore(score)}</strong>
+                  <span class="muted">{reviewCount === 1 ? '1 review' : `${reviewCount} reviews`}</span>
+                </a>
+              )}
+              {[restaurant.cuisine, restaurant.vibe, restaurant.price_level ? priceLabel(restaurant.price_level) : null]
+                .filter(Boolean)
+                .map((tag) => <span class="tag">{tag}</span>)}
+              {isPartner && <span class="tag tag-partner">Tastory partner</span>}
+            </div>
+            {restaurant.address && (
+              <p class="head-address">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" /></svg>
+                {restaurant.address}{city && !restaurant.address.toLowerCase().includes(city.toLowerCase()) ? `, ${city}` : ''}
               </p>
             )}
-            <div class="hero-tags">
-              {restaurant!.cuisine && <span class="hero-tag">{restaurant!.cuisine}</span>}
-              {restaurant!.vibe && <span class="hero-tag">{restaurant!.vibe}</span>}
-              {restaurant!.price_level && <span class="hero-tag">{priceLabel(restaurant!.price_level)}</span>}
-              {restaurant!.weighted_score && (
-                <span class="hero-tag score">★ {Number(restaurant!.weighted_score).toFixed(1)}</span>
-              )}
-            </div>
           </div>
-        </div>
-
-        <!-- CTA: 3 vakken (desktop), verborgen op mobiel -->
-        <div class="cta-grid reveal">
-          {mapsUrl ? (
-            <a href={mapsUrl} class="cta-block cta-info" target="_blank" rel="noopener noreferrer">
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
-              <span class="cta-block-label">{restaurant!.address}</span>
-              <span class="cta-block-sub">Bekijk op kaart</span>
-            </a>
-          ) : (
-            <div class="cta-block cta-info">
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
-              <span class="cta-block-label">{restaurant!.city}</span>
-              <span class="cta-block-sub">Locatie</span>
-            </div>
-          )}
-          <a href={appStoreUrl} class="cta-block cta-secondary" target="_blank" rel="noopener noreferrer">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>
-            <span class="cta-block-label">Download Tastory</span>
-            <span class="cta-block-sub">Gratis op iOS</span>
-          </a>
-          <a href={deepLinkUrl} class="cta-block cta-primary" id="open-app-btn">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>
-            <span class="cta-block-label">Open in Tastory</span>
-            <span class="cta-block-sub">Bekijk video's & reviews</span>
-          </a>
-        </div>
-
-        <!-- Beschrijving -->
-        {restaurant!.description && (
-          <section class="content-section reveal">
-            <h2 class="section-title">Over dit restaurant</h2>
-            <p class="description">{restaurant!.description}</p>
-          </section>
-        )}
-
-        <!-- Foto's -->
-        {allPhotos.length > 0 && (
-          <section class="content-section reveal">
-            <h2 class="section-title">Foto's</h2>
-            <div class="gallery">
-              {visiblePhotos.map((src, i) => (
-                <div class="gallery-item" data-index={i}>
-                  <img src={src} alt={`${restaurant!.name} foto ${i + 1}`} loading={i === 0 ? 'eager' : 'lazy'} />
-                </div>
-              ))}
-              {extraCount > 0 && (
-                <button class="gallery-more" id="gallery-more-btn">
-                  <span>+{extraCount}</span>
-                  <span class="gallery-more-sub">meer foto's</span>
-                </button>
-              )}
-            </div>
-            <!-- Verborgen extra foto's -->
-            {extraCount > 0 && (
-              <div class="gallery-extra" id="gallery-extra" style="display:none">
-                {allPhotos.slice(3).map((src, i) => (
-                  <div class="gallery-item">
-                    <img src={src} alt={`${restaurant!.name} foto ${i + 4}`} loading="lazy" />
-                  </div>
-                ))}
-              </div>
+          <div class="head-actions">
+            <button type="button" class="btn btn-ghost" id="share-btn" data-title={name} data-url={`${SITE_URL}${canonicalPath}`}>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8" /><path d="m16 6-4-4-4 4" /><path d="M12 2v13" /></svg>
+              <span id="share-label">Delen</span>
+            </button>
+            {reserveUrl && (
+              <a class="btn btn-primary" href={reserveUrl} target="_blank" rel="noopener noreferrer">Reserveer</a>
             )}
+          </div>
+        </header>
+
+        <!-- Foto's / video -->
+        {(videoUrl || photos.length > 0) && (
+          <section class:list={['media', `thumbs-${thumbs.length}`]} aria-label="Foto's">
+            {videoUrl ? (
+              <div class="media-main">
+                <video src={videoUrl} poster={photos[0]} autoplay muted loop playsinline preload="metadata" class="media-img" aria-label={`Video van ${name}`} />
+                <button type="button" class="sound-btn" id="sound-btn" aria-label="Geluid aan" aria-pressed="false">🔇</button>
+              </div>
+            ) : (
+              <button type="button" class="media-main photo-btn" data-index="0" aria-label="Foto 1 vergroten">
+                <img src={photos[0]} alt={`${name} — foto 1`} class="media-img" fetchpriority="high" />
+              </button>
+            )}
+            {thumbs.map((src, i) => {
+              const index = i + thumbOffset;
+              const isLast = i === thumbs.length - 1 && photos.length > thumbs.length + thumbOffset;
+              return (
+                <button type="button" class="media-thumb photo-btn" data-index={index} aria-label={`Foto ${index + 1} vergroten`}>
+                  <img src={src} alt={`${name} — foto ${index + 1}`} loading="lazy" decoding="async" class="media-img" />
+                  {isLast && <span class="media-more">Alle {photos.length} foto's</span>}
+                </button>
+              );
+            })}
           </section>
         )}
 
-        <!-- Lightbox -->
-        <div class="lightbox" id="lightbox" style="display:none">
-          <button class="lightbox-close" id="lightbox-close">✕</button>
-          <button class="lightbox-prev" id="lightbox-prev">‹</button>
-          <button class="lightbox-next" id="lightbox-next">›</button>
-          <img class="lightbox-img" id="lightbox-img" src="" alt="" />
-          <p class="lightbox-counter" id="lightbox-counter"></p>
-        </div>
+        <div class="layout">
+          <!-- Hoofdkolom -->
+          <div class="main">
+            {restaurant.description && (
+              <section class="block">
+                <h2>Over {name}</h2>
+                <p class="description">{restaurant.description}</p>
+              </section>
+            )}
 
-        <!-- Openingstijden -->
-        {restaurant!.opening_hours && (
-          <section class="content-section reveal">
-            <h2 class="section-title">Openingstijden</h2>
-            <p class="hours-text">{restaurant!.opening_hours}</p>
-          </section>
-        )}
+            {(menuImages.length > 0 || menuLink) && (
+              <section class="block" id="menu">
+                <h2>Menukaart</h2>
+                {menuImages.length > 0 && (
+                  <div class="menu-grid">
+                    {menuImages.map((src, i) => (
+                      <a href={src} target="_blank" rel="noopener noreferrer" class="menu-item">
+                        <img src={src} alt={`Menukaart ${name} — pagina ${i + 1}`} loading="lazy" decoding="async" />
+                      </a>
+                    ))}
+                  </div>
+                )}
+                {menuLink && (
+                  <a href={menuLink} class="text-link" target="_blank" rel="noopener noreferrer">Bekijk de menukaart op de website van {name} →</a>
+                )}
+              </section>
+            )}
 
-      </div>
+            {(facilities.length > 0 || allergies.length > 0) && (
+              <section class="block">
+                {facilities.length > 0 && (
+                  <>
+                    <h2>Voorzieningen</h2>
+                    <ul class="chips">{facilities.map((f) => <li>{f}</li>)}</ul>
+                  </>
+                )}
+                {allergies.length > 0 && (
+                  <>
+                    <h3 class="subhead">Dieetwensen &amp; allergieën</h3>
+                    <ul class="chips">{allergies.map((a) => <li>{a}</li>)}</ul>
+                  </>
+                )}
+              </section>
+            )}
 
-      <!-- Mobiele sticky CTA balk -->
-      <div class="mobile-cta">
-        <a href={deepLinkUrl} class="mobile-cta-btn" id="mobile-app-btn">Open in Tastory</a>
-        <a href={appStoreUrl} class="mobile-cta-download" target="_blank" rel="noopener noreferrer">Download</a>
-      </div>
+            <!-- Reviews -->
+            <section class="block" id="reviews">
+              <div class="reviews-head">
+                <h2>Reviews{reviewCount > 0 ? ` (${reviewCount})` : ''}</h2>
+                <a class="btn btn-ghost btn-sm" href={deepLinkUrl} data-app-link>Schrijf een review</a>
+              </div>
 
-    </div>
-
-  ) : (
-
-    <!-- STANDAARD PAGINA -->
-    <div class="restaurant-page">
-      <div class="content">
-        <div class="card reveal">
-          {restaurant ? (
-            <>
-              {allPhotos[0] && (
-                <div class="photo-wrap">
-                  <img src={allPhotos[0]} alt={restaurant.name} class="photo" loading="lazy" />
+              {stats && stats.count > 0 && (
+                <div class="summary">
+                  <div class="summary-score">
+                    {score !== null && <span class="big-score">{formatScore(score)}</span>}
+                    {score !== null && <RatingStars rating={score} size={20} />}
+                    <span class="muted">{reviewCount === 1 ? '1 review' : `${reviewCount} reviews`}</span>
+                  </div>
+                  <div class="summary-bars" aria-label="Verdeling van de beoordelingen">
+                    {[5, 4, 3, 2, 1].map((stars) => {
+                      const count = stats.distribution[stars - 1];
+                      return (
+                        <div class="bar-row">
+                          <span class="bar-label">{stars} {stars === 1 ? 'ster' : 'sterren'}</span>
+                          <span class="bar"><span class="bar-fill" style={`width:${(count / maxDistribution) * 100}%`} /></span>
+                          <span class="bar-count">{count}</span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                  <dl class="summary-aspects">
+                    {stats.aspects.map((a) => (
+                      <div class="aspect-row">
+                        <dt>{a.label}</dt>
+                        <dd>
+                          {a.average !== null ? (
+                            <>
+                              <RatingStars rating={a.average} size={12} />
+                              <span>{formatScore(a.average)}</span>
+                            </>
+                          ) : (
+                            <span class="muted">—</span>
+                          )}
+                        </dd>
+                      </div>
+                    ))}
+                  </dl>
                 </div>
               )}
-              <div class="info">
-                <h1 class="name">{restaurant.name}</h1>
-                <p class="city">{restaurant.city}</p>
-                <div class="meta">
-                  {restaurant.cuisine && <span class="tag">{restaurant.cuisine}</span>}
-                  {restaurant.vibe && <span class="tag">{restaurant.vibe}</span>}
-                  {restaurant.price_level && <span class="tag">{priceLabel(restaurant.price_level)}</span>}
-                  {restaurant.weighted_score && (
-                    <span class="tag score">★ {Number(restaurant.weighted_score).toFixed(1)}</span>
-                  )}
-                </div>
-                {restaurant.description && <p class="description">{restaurant.description}</p>}
-                {restaurant.address && <p class="address">📍 {restaurant.address}</p>}
-              </div>
-            </>
-          ) : (
-            <h1>Restaurant bekijken</h1>
-          )}
-          <a href={deepLinkUrl} class="btn-primary" id="open-app-btn">Open in Tastory</a>
-          <div class="divider"><span>Heb je Tastory nog niet?</span></div>
-          <a href={appStoreUrl} class="btn-secondary" target="_blank" rel="noopener noreferrer">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>
-            Download Tastory
-          </a>
-          <p class="store-note">Beschikbaar op iOS · Binnenkort op Android</p>
-        </div>
-      </div>
-    </div>
 
+              {reviewPage === null ? (
+                <p class="muted empty">Reviews kunnen op dit moment niet geladen worden.</p>
+              ) : reviews.length === 0 ? (
+                <div class="empty-reviews">
+                  <p><strong>Nog geen reviews.</strong> Ben jij hier geweest? Deel als eerste je ervaring in de Tastory-app.</p>
+                </div>
+              ) : (
+                <>
+                  <div id="review-list">
+                    {reviews.map((review) => <ReviewCard review={review} />)}
+                  </div>
+                  {reviewPage.hasMore && (
+                    <button
+                      type="button"
+                      class="btn btn-ghost load-more"
+                      id="load-more"
+                      data-restaurant={restaurant.id}
+                      data-offset={String(reviews.length)}
+                    >
+                      Meer reviews laden
+                    </button>
+                  )}
+                </>
+              )}
+            </section>
+
+            {stories.length > 0 && (
+              <section class="block" id="stories">
+                <h2>Taste Stories</h2>
+                <p class="muted section-sub">Foto's van gasten die hier gegeten hebben.</p>
+                <div class="stories">
+                  {stories.map((story) => (
+                    <a href={`/story/${story.id}`} class="story">
+                      <img src={story.photo_url!} alt={story.caption || `Taste Story bij ${name}`} loading="lazy" decoding="async" />
+                      <span class="story-meta">
+                        <span class="story-author">{story.author.name}</span>
+                        {story.created_at && <span class="story-date">{formatReviewDate(story.created_at)}</span>}
+                      </span>
+                    </a>
+                  ))}
+                </div>
+              </section>
+            )}
+          </div>
+
+          <!-- Zijbalk -->
+          <aside class="side">
+            <div class="side-card">
+              {reserveUrl && (
+                <a class="btn btn-primary btn-block" href={reserveUrl} target="_blank" rel="noopener noreferrer">Reserveer een tafel</a>
+              )}
+
+              {mapEmbedUrl && (
+                <div class="map">
+                  <iframe src={mapEmbedUrl} title={`Kaart: ligging van ${name}`} loading="lazy" referrerpolicy="no-referrer"></iframe>
+                </div>
+              )}
+
+              <ul class="info-list">
+                {restaurant.address && (
+                  <li>
+                    <span class="info-label">Adres</span>
+                    <span>{restaurant.address}{city && !restaurant.address.toLowerCase().includes(city.toLowerCase()) ? `, ${city}` : ''}</span>
+                    {routeUrl && <a href={routeUrl} target="_blank" rel="noopener noreferrer" class="text-link">Route plannen →</a>}
+                  </li>
+                )}
+                {phone && phoneHref && (
+                  <li>
+                    <span class="info-label">Telefoon</span>
+                    <a href={phoneHref} class="text-link">{phone}</a>
+                  </li>
+                )}
+                {website && (
+                  <li>
+                    <span class="info-label">Website</span>
+                    <a href={website} target="_blank" rel="noopener noreferrer" class="text-link">{displayWebsite(website)}</a>
+                  </li>
+                )}
+                {(instagram || facebook) && (
+                  <li>
+                    <span class="info-label">Socials</span>
+                    <span class="socials">
+                      {instagram && <a href={instagram} target="_blank" rel="noopener noreferrer" class="text-link">Instagram</a>}
+                      {facebook && <a href={facebook} target="_blank" rel="noopener noreferrer" class="text-link">Facebook</a>}
+                    </span>
+                  </li>
+                )}
+              </ul>
+
+              <div class="hours">
+                <h2 class="side-title">Openingstijden</h2>
+                {hours.length > 0 ? (
+                  <table>
+                    <tbody>
+                      {hours.map((row) => (
+                        <tr class:list={{ today: row.day.toLowerCase() === today }}>
+                          <th scope="row">{row.day}</th>
+                          <td>{row.time}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                ) : (
+                  <p class="muted">Openingstijden onbekend</p>
+                )}
+              </div>
+            </div>
+
+            <div class="side-card app-card">
+              <img src="/tastory-logo-header.png" alt="" width="40" height="40" class="app-logo" />
+              <div>
+                <p class="app-title">Bewaar {name} in Tastory</p>
+                <p class="muted app-sub">Sla restaurants op, schrijf reviews en deel je Taste Stories.</p>
+                <div class="app-actions">
+                  <a href={deepLinkUrl} class="text-link" data-app-link>Open in de app</a>
+                  <a href={APP_STORE_URL} class="text-link" target="_blank" rel="noopener noreferrer">Download</a>
+                </div>
+              </div>
+            </div>
+          </aside>
+        </div>
+
+        {nearby.length > 0 && city && (
+          <section class="nearby">
+            <div class="nearby-head">
+              <h2>Meer restaurants in {city}</h2>
+              <a href={cityPath(city)} class="text-link">Alle restaurants in {city} →</a>
+            </div>
+            <div class="nearby-grid">
+              {nearby.map((r) => <RestaurantCard restaurant={r} showCity={false} />)}
+            </div>
+          </section>
+        )}
+      </div>
+
+      <!-- Mobiel: vaste actiebalk onderin -->
+      {(reserveUrl || routeUrl || phoneHref) && (
+        <div class="mobile-bar">
+          {routeUrl && <a href={routeUrl} target="_blank" rel="noopener noreferrer" class="btn btn-ghost">Route</a>}
+          {phoneHref && !reserveUrl && <a href={phoneHref} class="btn btn-ghost">Bellen</a>}
+          {reserveUrl && <a href={reserveUrl} target="_blank" rel="noopener noreferrer" class="btn btn-primary">Reserveer</a>}
+        </div>
+      )}
+
+      <!-- Fotoweergave -->
+      <dialog class="lightbox" id="lightbox" aria-label="Foto's">
+        <button type="button" class="lb-close" id="lb-close" aria-label="Sluiten">✕</button>
+        <button type="button" class="lb-nav lb-prev" id="lb-prev" aria-label="Vorige foto">‹</button>
+        <img id="lb-img" src="" alt="" />
+        <button type="button" class="lb-nav lb-next" id="lb-next" aria-label="Volgende foto">›</button>
+        <p class="lb-counter" id="lb-counter"></p>
+      </dialog>
+      <script type="application/json" id="photo-data" set:html={JSON.stringify(photos)} />
+    </div>
   )}
 </BaseLayout>
 
-<style is:global>
-  body.page-restaurant footer {
-    background: var(--beige-dark) !important;
-    color: var(--text-muted) !important;
-  }
+<script>
+  // Delen: native deelmenu op telefoon, anders link kopiëren.
+  const shareBtn = document.getElementById('share-btn');
+  const shareLabel = document.getElementById('share-label');
+  shareBtn?.addEventListener('click', async () => {
+    const url = shareBtn.dataset.url ?? location.href;
+    const title = shareBtn.dataset.title ?? document.title;
+    if (navigator.share) {
+      try {
+        await navigator.share({ title, url });
+      } catch {
+        /* geannuleerd */
+      }
+      return;
+    }
+    try {
+      await navigator.clipboard.writeText(url);
+      if (shareLabel) {
+        shareLabel.textContent = 'Link gekopieerd';
+        setTimeout(() => (shareLabel.textContent = 'Delen'), 2000);
+      }
+    } catch {
+      window.prompt('Kopieer deze link:', url);
+    }
+  });
 
-  body.page-restaurant footer a,
-  body.page-restaurant footer h4,
-  body.page-restaurant footer .footer-brand {
-    color: var(--text) !important;
-    opacity: 1 !important;
-  }
+  // "Open in de app": zonder app gebeurt er niets, dus na even wachten door
+  // naar de App Store.
+  document.querySelectorAll<HTMLAnchorElement>('[data-app-link]').forEach((link) => {
+    link.addEventListener('click', () => {
+      const timer = setTimeout(() => {
+        if (!document.hidden) location.href = 'https://apps.apple.com/nl/app/tastory/id6762256086';
+      }, 1500);
+      document.addEventListener('visibilitychange', () => clearTimeout(timer), { once: true });
+    });
+  });
 
-  body.page-restaurant footer .footer-brand-sub {
-    color: var(--text-muted) !important;
-    opacity: 1 !important;
-  }
-</style>
+  // Geluid van de video aan/uit.
+  const soundBtn = document.getElementById('sound-btn');
+  soundBtn?.addEventListener('click', () => {
+    const video = soundBtn.parentElement?.querySelector('video');
+    if (!video) return;
+    video.muted = !video.muted;
+    soundBtn.textContent = video.muted ? '🔇' : '🔊';
+    soundBtn.setAttribute('aria-pressed', String(!video.muted));
+    soundBtn.setAttribute('aria-label', video.muted ? 'Geluid aan' : 'Geluid uit');
+  });
+
+  // Meer reviews laden (HTML-fragment van /partials/reviews).
+  const loadMore = document.getElementById('load-more') as HTMLButtonElement | null;
+  const reviewList = document.getElementById('review-list');
+  loadMore?.addEventListener('click', async () => {
+    if (!reviewList) return;
+    const restaurant = loadMore.dataset.restaurant ?? '';
+    const offset = Number(loadMore.dataset.offset ?? '0');
+    loadMore.disabled = true;
+    loadMore.textContent = 'Laden…';
+    try {
+      const res = await fetch(`/partials/reviews?restaurant=${encodeURIComponent(restaurant)}&offset=${offset}`);
+      if (!res.ok) throw new Error(String(res.status));
+      const doc = new DOMParser().parseFromString(await res.text(), 'text/html');
+      const wrapper = doc.querySelector('[data-has-more]');
+      const cards = wrapper ? Array.from(wrapper.children) : [];
+      cards.forEach((card) => reviewList.appendChild(document.importNode(card, true)));
+      loadMore.dataset.offset = String(offset + cards.length);
+      if (wrapper?.getAttribute('data-has-more') !== 'true' || cards.length === 0) {
+        loadMore.remove();
+        return;
+      }
+      loadMore.textContent = 'Meer reviews laden';
+    } catch {
+      loadMore.textContent = 'Opnieuw proberen';
+    } finally {
+      loadMore.disabled = false;
+    }
+  });
+
+  // Fotoweergave met pijltjes en toetsenbord.
+  const photos: string[] = JSON.parse(document.getElementById('photo-data')?.textContent ?? '[]');
+  const lightbox = document.getElementById('lightbox') as HTMLDialogElement | null;
+  const lbImg = document.getElementById('lb-img') as HTMLImageElement | null;
+  const lbCounter = document.getElementById('lb-counter');
+  let current = 0;
+  const show = (index: number) => {
+    if (!lbImg || photos.length === 0) return;
+    current = (index + photos.length) % photos.length;
+    lbImg.src = photos[current];
+    lbImg.alt = `Foto ${current + 1} van ${photos.length}`;
+    if (lbCounter) lbCounter.textContent = `${current + 1} / ${photos.length}`;
+  };
+  document.querySelectorAll<HTMLElement>('.photo-btn').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      show(Number(btn.dataset.index ?? '0'));
+      lightbox?.showModal();
+    });
+  });
+  document.getElementById('lb-close')?.addEventListener('click', () => lightbox?.close());
+  document.getElementById('lb-prev')?.addEventListener('click', () => show(current - 1));
+  document.getElementById('lb-next')?.addEventListener('click', () => show(current + 1));
+  lightbox?.addEventListener('click', (e) => {
+    if (e.target === lightbox) lightbox.close();
+  });
+  lightbox?.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowLeft') show(current - 1);
+    if (e.key === 'ArrowRight') show(current + 1);
+  });
+</script>
 
 <style>
-  /* ── PREMIUM PAGE ─────────────────────────────────────── */
-
-  .premium-page {
-    min-height: 100vh;
-    background-color: var(--beige);
-    background-size: cover;
-    background-position: center;
-    background-attachment: fixed;
-    padding-bottom: 5rem;
+  /* global.css geeft elke <section> veel padding (voor de marketingpagina's). */
+  section {
+    padding: 0;
+    max-width: none;
+    margin: 0;
   }
-
-  .page-inner {
-    max-width: 900px;
+  .page {
+    padding: 96px 0 var(--space-3xl);
+    min-height: 70vh;
+  }
+  .page.partner {
+    background-image:
+      linear-gradient(to bottom, rgba(245, 235, 221, 0.86), var(--beige) 520px),
+      var(--partner-bg);
+    background-size: 100% auto;
+    background-repeat: no-repeat;
+  }
+  .container {
+    max-width: 1180px;
     margin: 0 auto;
-    padding: 0 var(--space-lg) var(--space-2xl);
+    padding: 0 var(--space-lg);
+  }
+  .container.narrow {
+    max-width: 640px;
+  }
+  .muted {
+    color: var(--text-muted);
   }
 
-  /* Hero */
-  .hero {
-    position: relative;
-    width: 100%;
-    height: 70vh;
-    margin-top: 90px;
-    min-height: 400px;
-    max-height: 620px;
-    overflow: hidden;
-    border-radius: 0 0 var(--radius-xl) var(--radius-xl);
-    margin-bottom: var(--space-xl);
-    box-shadow: var(--shadow-xl);
+  /* Knoppen */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.45rem;
+    font-family: var(--sans);
+    font-weight: 500;
+    font-size: var(--text-sm);
+    padding: 0.7rem 1.2rem;
+    border-radius: var(--radius-sm);
+    text-decoration: none;
+    cursor: pointer;
+    border: 1px solid transparent;
+    transition:
+      background 0.2s,
+      border-color 0.2s;
+    white-space: nowrap;
   }
-
-  .hero-media {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    display: block;
-  }
-
-  .hero-placeholder {
-    width: 100%;
-    height: 100%;
-    background: var(--brown);
-  }
-
-  .hero-overlay {
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(to bottom, rgba(0,0,0,0.05) 0%, rgba(0,0,0,0.65) 100%);
-    pointer-events: none;
-  }
-
-  .hero-content {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    padding: var(--space-2xl);
+  .btn-primary {
+    background: var(--orange);
     color: #fff;
   }
-
-  .hero-name {
-    font-family: var(--serif);
-    font-size: clamp(2.2rem, 5vw, 3.5rem);
-    font-weight: 700;
-    line-height: 1.05;
-    margin-bottom: 0.5rem;
+  .btn-primary:hover {
+    background: var(--orange-dark);
+  }
+  .btn-ghost {
+    background: var(--white);
+    color: var(--text);
+    border-color: var(--beige-deeper);
+  }
+  .btn-ghost:hover {
+    border-color: var(--brown);
+  }
+  .btn-sm {
+    padding: 0.45rem 0.85rem;
+  }
+  .btn-block {
+    width: 100%;
+  }
+  .btn:focus-visible,
+  .text-link:focus-visible,
+  .photo-btn:focus-visible {
+    outline: 3px solid var(--orange);
+    outline-offset: 2px;
+  }
+  .text-link {
+    color: var(--brown-dark);
+    font-weight: 500;
+    text-decoration: none;
+  }
+  .text-link:hover {
+    text-decoration: underline;
   }
 
-  .hero-city {
+  /* Kruimelpad */
+  .breadcrumbs ol {
+    display: flex;
+    flex-wrap: wrap;
+    list-style: none;
+    gap: 0.35rem;
+    font-size: var(--text-sm);
+    color: var(--text-muted);
+    margin-bottom: var(--space-md);
+  }
+  .breadcrumbs li + li::before {
+    content: '›';
+    margin-right: 0.35rem;
+  }
+  .breadcrumbs a {
+    color: var(--text-muted);
+    text-decoration: none;
+  }
+  .breadcrumbs a:hover {
+    color: var(--text);
+    text-decoration: underline;
+  }
+
+  /* Kop */
+  .head {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: var(--space-lg);
+    margin-bottom: var(--space-lg);
+  }
+  .name {
+    font-family: var(--serif);
+    font-size: clamp(2rem, 4vw, 2.8rem);
+    line-height: 1.1;
+    color: var(--text);
+  }
+  .head-meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 0.6rem;
+  }
+  .head-score {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    color: var(--text);
+    text-decoration: none;
+    margin-right: 0.35rem;
+  }
+  .head-score:hover .muted {
+    text-decoration: underline;
+  }
+  .tag {
+    font-size: var(--text-xs);
+    font-weight: 500;
+    background: var(--white);
+    border: 1px solid var(--beige-deeper);
+    padding: 0.25rem 0.7rem;
+    border-radius: 100px;
+  }
+  .tag-partner {
+    background: var(--orange);
+    border-color: var(--orange);
+    color: #fff;
+  }
+  .head-address {
     display: flex;
     align-items: center;
     gap: 0.35rem;
+    margin-top: 0.6rem;
+    color: var(--text-muted);
     font-size: var(--text-sm);
-    opacity: 0.85;
-    margin-bottom: var(--space-md);
   }
-
-  .hero-address { opacity: 0.7; }
-
-  .hero-city-link {
-    text-decoration: none;
-    color: inherit;
-    transition: opacity 0.2s;
-  }
-
-  .hero-city-link:hover { opacity: 0.75; }
-
-  .hero-tags {
+  .head-actions {
     display: flex;
-    flex-wrap: wrap;
-    gap: 0.4rem;
+    gap: 0.6rem;
+    flex-shrink: 0;
   }
 
-  .hero-tag {
-    font-size: var(--text-xs);
-    font-weight: 500;
-    background: rgba(255,255,255,0.2);
-    backdrop-filter: blur(4px);
-    color: #fff;
-    padding: 0.3rem 0.75rem;
-    border-radius: 100px;
-    border: 1px solid rgba(255,255,255,0.25);
-  }
-
-  .hero-tag.score {
-    background: rgba(255,142,62,0.75);
-    border-color: transparent;
-  }
-
-  /* Geluid knop */
-  .sound-btn {
-    position: absolute;
-    bottom: 1rem;
-    right: 1rem;
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    background: rgba(0,0,0,0.4);
-    backdrop-filter: blur(8px);
-    border: 1px solid rgba(255,255,255,0.2);
-    color: #fff;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: background 0.2s;
-    z-index: 2;
-  }
-
-  .sound-btn:hover { background: rgba(0,0,0,0.6); }
-
-  /* CTA grid: 3 vakken gecentreerd */
-  .cta-grid {
+  /* Media */
+  .media {
     display: grid;
-    grid-template-columns: repeat(3, minmax(0, 260px));
-    gap: 0.75rem;
-    margin-bottom: var(--space-xl);
-    justify-content: center;
-  }
-
-  .cta-block {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 0.3rem;
-    padding: var(--space-lg) var(--space-md);
-    border-radius: var(--radius-md);
-    text-decoration: none;
-    text-align: center;
-    transition: transform 0.2s, box-shadow 0.2s;
-    cursor: pointer;
-    border: none;
-  }
-
-  .cta-block:hover { transform: translateY(-2px); box-shadow: var(--shadow-lg); }
-
-  .cta-primary {
-    background: var(--orange);
-    color: #fff;
-  }
-
-  .cta-secondary {
-    background: var(--brown);
-    color: #fff;
-  }
-
-  .cta-info {
-    background: rgba(255,255,255,0.85);
-    backdrop-filter: blur(8px);
-    color: var(--text);
-  }
-
-  .cta-block-label {
-    font-family: var(--sans);
-    font-size: var(--text-sm);
-    font-weight: 700;
-    line-height: 1.2;
-  }
-
-  .cta-block-sub {
-    font-size: var(--text-xs);
-    opacity: 0.75;
-  }
-
-  /* Content secties */
-  .content-section {
-    background: rgba(255,255,255,0.85);
-    backdrop-filter: blur(8px);
+    grid-template-columns: 2fr 1fr 1fr;
+    grid-template-rows: 1fr 1fr;
+    gap: 8px;
+    height: clamp(280px, 42vw, 460px);
     border-radius: var(--radius-lg);
-    padding: var(--space-xl);
-    margin-bottom: var(--space-lg);
-    box-shadow: var(--shadow-sm);
-  }
-
-  .section-title {
-    font-family: var(--serif);
-    font-size: var(--text-xl);
-    color: var(--text);
-    margin-bottom: var(--space-md);
-    padding-bottom: var(--space-sm);
-    border-bottom: 1px solid rgba(136,101,69,0.15);
-  }
-
-  .description {
-    font-size: var(--text-base);
-    color: var(--text-muted);
-    line-height: 1.8;
-  }
-
-  .hours-text {
-    font-size: var(--text-base);
-    color: var(--text-muted);
-    line-height: 1.8;
-    white-space: pre-line;
-  }
-
-  /* Fotogalerij */
-  .gallery {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 0.5rem;
-  }
-
-  .gallery-item {
-    aspect-ratio: 4/3;
     overflow: hidden;
-    border-radius: var(--radius-sm);
-    cursor: pointer;
+    margin-bottom: var(--space-2xl);
   }
-
-  .gallery-item img {
+  .media.thumbs-0 {
+    grid-template-columns: 1fr;
+    grid-template-rows: 1fr;
+  }
+  .media.thumbs-2 {
+    grid-template-columns: 2fr 1fr;
+  }
+  .media-main {
+    grid-row: 1 / -1;
+    position: relative;
+  }
+  .photo-btn {
+    padding: 0;
+    border: 0;
+    background: var(--beige-dark);
+    cursor: zoom-in;
+    position: relative;
+    overflow: hidden;
+  }
+  .media-img {
     width: 100%;
     height: 100%;
     object-fit: cover;
-    transition: transform 0.4s ease;
     display: block;
+    transition: transform 0.4s;
   }
-
-  .gallery-item:hover img { transform: scale(1.05); }
-
-  .gallery-more {
-    aspect-ratio: 4/3;
+  .photo-btn:hover .media-img {
+    transform: scale(1.03);
+  }
+  .media-more {
+    position: absolute;
+    inset: 0;
     display: flex;
-    flex-direction: column;
     align-items: center;
     justify-content: center;
-    background: rgba(136,101,69,0.12);
-    border: none;
-    border-radius: var(--radius-sm);
+    background: rgba(26, 18, 8, 0.5);
+    color: #fff;
+    font-weight: 500;
+  }
+  .sound-btn {
+    position: absolute;
+    right: 12px;
+    bottom: 12px;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: 0;
+    background: rgba(0, 0, 0, 0.5);
+    color: #fff;
     cursor: pointer;
-    transition: background 0.2s;
-    gap: 0.25rem;
+    font-size: 1rem;
   }
 
-  .gallery-more:hover { background: rgba(136,101,69,0.2); }
-
-  .gallery-more span:first-child {
+  /* Indeling */
+  .layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 360px;
+    gap: var(--space-2xl);
+    align-items: start;
+  }
+  .block {
+    margin-bottom: var(--space-2xl);
+  }
+  .block h2,
+  .nearby h2 {
     font-family: var(--serif);
     font-size: var(--text-2xl);
-    font-weight: 700;
-    color: var(--brown);
+    color: var(--text);
+    margin-bottom: var(--space-md);
+  }
+  .subhead {
+    font-size: var(--text-base);
+    font-weight: 500;
+    margin: var(--space-lg) 0 var(--space-sm);
+  }
+  .section-sub {
+    margin: -0.5rem 0 var(--space-md);
+    font-size: var(--text-sm);
+  }
+  .description {
+    line-height: 1.75;
+    white-space: pre-line;
+  }
+  .chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.45rem;
+    list-style: none;
+  }
+  .chips li {
+    background: var(--white);
+    border: 1px solid var(--beige-deeper);
+    border-radius: 100px;
+    padding: 0.35rem 0.8rem;
+    font-size: var(--text-sm);
+  }
+  .menu-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 0.6rem;
+    margin-bottom: var(--space-md);
+  }
+  .menu-item img {
+    width: 100%;
+    aspect-ratio: 3 / 4;
+    object-fit: cover;
+    border-radius: var(--radius-sm);
+    display: block;
+    border: 1px solid var(--beige-deeper);
   }
 
-  .gallery-more-sub {
-    font-size: var(--text-xs);
+  /* Reviews */
+  .reviews-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: var(--space-md);
+  }
+  .summary {
+    display: grid;
+    grid-template-columns: auto 1fr 1fr;
+    gap: var(--space-xl);
+    background: var(--white);
+    border: 1px solid var(--beige-dark);
+    border-radius: var(--radius-md);
+    padding: var(--space-lg);
+    margin-bottom: var(--space-md);
+  }
+  .summary-score {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.35rem;
+  }
+  .big-score {
+    font-family: var(--serif);
+    font-size: 3rem;
+    line-height: 1;
+    font-weight: 600;
+  }
+  .summary-bars {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    justify-content: center;
+  }
+  .bar-row {
+    display: grid;
+    grid-template-columns: 4.8rem 1fr 2rem;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: var(--text-sm);
+  }
+  .bar {
+    height: 8px;
+    background: var(--beige-dark);
+    border-radius: 100px;
+    overflow: hidden;
+  }
+  .bar-fill {
+    display: block;
+    height: 100%;
+    background: var(--orange);
+    border-radius: 100px;
+  }
+  .bar-count {
+    text-align: right;
     color: var(--text-muted);
   }
-
-  .gallery-extra {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
+  .summary-aspects {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+    justify-content: center;
+  }
+  .aspect-row {
+    display: flex;
+    justify-content: space-between;
     gap: 0.5rem;
-    margin-top: 0.5rem;
+    font-size: var(--text-sm);
   }
-
-  /* Lightbox */
-  .lightbox {
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.92);
-    z-index: 1000;
-    display: flex;
+  .aspect-row dd {
+    display: inline-flex;
     align-items: center;
-    justify-content: center;
+    gap: 0.35rem;
+    font-weight: 500;
+  }
+  .empty,
+  .empty-reviews {
+    padding: var(--space-lg);
+    background: var(--white);
+    border-radius: var(--radius-md);
+    border: 1px dashed var(--beige-deeper);
+  }
+  .load-more {
+    margin-top: var(--space-md);
+    width: 100%;
   }
 
-  .lightbox-img {
-    max-width: 90vw;
-    max-height: 85vh;
-    object-fit: contain;
+  /* Stories */
+  .stories {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 0.6rem;
+  }
+  .story {
+    position: relative;
+    aspect-ratio: 3 / 4;
     border-radius: var(--radius-sm);
+    overflow: hidden;
+    display: block;
+    background: var(--beige-dark);
   }
-
-  .lightbox-close {
+  .story img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+  .story-meta {
     position: absolute;
-    top: 1.25rem;
-    right: 1.25rem;
-    background: rgba(255,255,255,0.15);
-    border: none;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    padding: 1.5rem 0.6rem 0.5rem;
+    background: linear-gradient(transparent, rgba(0, 0, 0, 0.65));
     color: #fff;
-    font-size: 1.25rem;
-    width: 44px;
-    height: 44px;
-    border-radius: 50%;
-    cursor: pointer;
     display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: background 0.2s;
+    flex-direction: column;
+    font-size: var(--text-xs);
+  }
+  .story-author {
+    font-weight: 500;
+  }
+  .story-date {
+    opacity: 0.8;
   }
 
-  .lightbox-close:hover { background: rgba(255,255,255,0.25); }
-
-  .lightbox-prev, .lightbox-next {
-    position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
-    background: rgba(255,255,255,0.15);
-    border: none;
-    color: #fff;
-    font-size: 2rem;
-    width: 48px;
-    height: 48px;
-    border-radius: 50%;
-    cursor: pointer;
+  /* Zijbalk */
+  .side {
+    position: sticky;
+    top: 88px;
     display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: background 0.2s;
+    flex-direction: column;
+    gap: var(--space-md);
   }
-
-  .lightbox-prev { left: 1.25rem; }
-  .lightbox-next { right: 1.25rem; }
-  .lightbox-prev:hover, .lightbox-next:hover { background: rgba(255,255,255,0.25); }
-
-  .lightbox-counter {
-    position: absolute;
-    bottom: 1.25rem;
-    left: 50%;
-    transform: translateX(-50%);
-    color: rgba(255,255,255,0.7);
+  .side-card {
+    background: var(--white);
+    border: 1px solid var(--beige-dark);
+    border-radius: var(--radius-md);
+    padding: var(--space-lg);
+    box-shadow: var(--shadow-sm);
+  }
+  .map {
+    margin-top: var(--space-md);
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+    aspect-ratio: 16 / 10;
+    background: var(--beige-dark);
+  }
+  .side-card > .btn + .map,
+  .side-card > .map:first-child {
+    margin-top: var(--space-md);
+  }
+  .side-card > .map:first-child {
+    margin-top: 0;
+  }
+  .map iframe {
+    width: 100%;
+    height: 100%;
+    border: 0;
+    display: block;
+  }
+  .info-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
+    margin-top: var(--space-lg);
+    font-size: var(--text-sm);
+  }
+  .info-list li {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+    overflow-wrap: anywhere;
+  }
+  .info-label {
+    font-size: var(--text-xs);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-muted);
+    font-weight: 500;
+  }
+  .socials {
+    display: flex;
+    gap: var(--space-md);
+  }
+  .hours {
+    margin-top: var(--space-lg);
+    padding-top: var(--space-lg);
+    border-top: 1px solid var(--beige-dark);
+  }
+  .side-title {
+    font-size: var(--text-base);
+    font-weight: 500;
+    margin-bottom: var(--space-sm);
+  }
+  .hours table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: var(--text-sm);
+  }
+  .hours th {
+    text-align: left;
+    font-weight: 400;
+    padding: 0.2rem 0.75rem 0.2rem 0;
+    white-space: nowrap;
+    vertical-align: top;
+  }
+  .hours td {
+    padding: 0.2rem 0;
+  }
+  .hours tr.today th,
+  .hours tr.today td {
+    font-weight: 600;
+    color: var(--brown-dark);
+  }
+  .app-card {
+    display: flex;
+    gap: var(--space-md);
+    align-items: flex-start;
+  }
+  .app-logo {
+    border-radius: 10px;
+    object-fit: contain;
+    background: var(--beige);
+    flex-shrink: 0;
+  }
+  .app-title {
+    font-weight: 500;
+  }
+  .app-sub {
+    font-size: var(--text-sm);
+    margin: 0.2rem 0 0.5rem;
+  }
+  .app-actions {
+    display: flex;
+    gap: var(--space-md);
     font-size: var(--text-sm);
   }
 
-  /* Mobiele sticky CTA */
-  .mobile-cta {
-    display: none;
-    position: fixed;
-    bottom: 0;
+  /* In de buurt */
+  .nearby {
+    margin-top: var(--space-2xl);
+    padding-top: var(--space-2xl);
+    border-top: 1px solid var(--beige-deeper);
+  }
+  .nearby-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: var(--space-md);
+    flex-wrap: wrap;
+    margin-bottom: var(--space-md);
+  }
+  .nearby-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: var(--space-md);
+  }
+
+  /* Fout / niet gevonden */
+  .state-card {
+    background: var(--white);
+    border-radius: var(--radius-lg);
+    padding: var(--space-2xl);
+    text-align: center;
+    box-shadow: var(--shadow-md);
+  }
+  .state-card h1 {
+    font-family: var(--serif);
+    font-size: var(--text-3xl);
+    margin-bottom: var(--space-sm);
+  }
+  .state-card p {
+    color: var(--text-muted);
+    margin-bottom: var(--space-lg);
+  }
+
+  /* Fotoweergave */
+  .lightbox {
+    border: 0;
+    padding: 0;
+    background: transparent;
+    max-width: 100vw;
+    max-height: 100vh;
+    width: 100vw;
+    height: 100vh;
+  }
+  .lightbox::backdrop {
+    background: rgba(10, 6, 2, 0.92);
+  }
+  .lightbox[open] {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .lightbox img {
+    max-width: min(92vw, 1200px);
+    max-height: 84vh;
+    object-fit: contain;
+    border-radius: var(--radius-sm);
+  }
+  .lb-close,
+  .lb-nav {
+    position: absolute;
+    background: rgba(255, 255, 255, 0.12);
+    color: #fff;
+    border: 0;
+    cursor: pointer;
+    border-radius: 50%;
+    width: 48px;
+    height: 48px;
+    font-size: 1.6rem;
+    line-height: 1;
+  }
+  .lb-close {
+    top: 16px;
+    right: 16px;
+    font-size: 1.1rem;
+  }
+  .lb-prev {
+    left: 16px;
+  }
+  .lb-next {
+    right: 16px;
+  }
+  .lb-counter {
+    position: absolute;
+    bottom: 16px;
     left: 0;
     right: 0;
-    padding: 0.75rem 1rem 1rem;
-    gap: 0.6rem;
-    z-index: 100;
-    align-items: center;
+    text-align: center;
+    color: rgba(255, 255, 255, 0.8);
+    font-size: var(--text-sm);
   }
 
-  .mobile-cta-btn {
-    flex: 1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: var(--orange);
-    color: #fff;
-    font-family: var(--sans);
-    font-size: 0.95rem;
-    font-weight: 600;
-    padding: 0.85rem 1rem;
-    border-radius: var(--radius-md);
-    text-decoration: none;
-    transition: background 0.2s;
-    box-shadow: 0 4px 16px rgba(255,142,62,0.4);
+  .mobile-bar {
+    display: none;
   }
 
-  .mobile-cta-btn:hover { background: var(--brown); }
-
-  .mobile-cta-download {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: var(--brown);
-    color: #fff;
-    font-family: var(--sans);
-    font-size: 0.9rem;
-    font-weight: 600;
-    padding: 0.85rem 1.1rem;
-    border-radius: var(--radius-md);
-    text-decoration: none;
-    white-space: nowrap;
-    box-shadow: 0 4px 12px rgba(136,101,69,0.3);
-    transition: background 0.2s;
+  @media (max-width: 1000px) {
+    .layout {
+      grid-template-columns: 1fr;
+    }
+    /* Smal scherm: praktische info (reserveren, adres, openingstijden)
+       direct onder de foto's, zoals op TripAdvisor. */
+    .side {
+      position: static;
+      order: -1;
+    }
+    .nearby-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    .summary {
+      grid-template-columns: auto 1fr;
+    }
+    .summary-aspects {
+      grid-column: 1 / -1;
+    }
   }
 
-  .mobile-cta-download:hover { background: var(--brown-dark); }
-
-  /* ── RESPONSIVE ───────────────────────────────────────── */
-
-  @media (max-width: 768px) {
-    .page-inner {
-      padding: 0 0 var(--space-2xl);
+  @media (max-width: 700px) {
+    .page {
+      padding-top: 84px;
+      padding-bottom: 96px;
     }
-
-    .hero {
-      border-radius: 0;
-      height: 60vh;
-      max-height: 480px;
-      margin-top: 64px;
-      margin-bottom: var(--space-md);
+    .container {
+      padding: 0 var(--space-md);
     }
-
-    .hero-content {
-      padding: var(--space-lg) var(--space-md);
+    .head {
+      flex-direction: column;
+      align-items: stretch;
     }
-
-    .cta-grid {
+    .head-actions .btn-primary {
       display: none;
     }
-
-    .content-section {
-      margin: 0 var(--space-md) var(--space-md);
-      padding: var(--space-lg);
-      border-radius: var(--radius-md);
+    .head-actions {
+      justify-content: flex-start;
     }
-
-    .gallery {
-      grid-template-columns: repeat(2, 1fr);
+    .media {
+      grid-template-columns: 1fr;
+      grid-template-rows: 1fr;
+      height: 260px;
+      margin-left: calc(-1 * var(--space-md));
+      margin-right: calc(-1 * var(--space-md));
+      border-radius: 0;
     }
-
-    .gallery-extra {
-      grid-template-columns: repeat(2, 1fr);
+    .media-thumb {
+      display: none;
     }
-
-    .mobile-cta { display: flex; }
+    .media-main {
+      grid-row: auto;
+    }
+    .summary {
+      grid-template-columns: 1fr;
+      gap: var(--space-lg);
+    }
+    .mobile-bar {
+      display: flex;
+      gap: 0.5rem;
+      position: fixed;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      padding: 0.75rem var(--space-md) calc(0.75rem + env(safe-area-inset-bottom));
+      background: rgba(255, 252, 248, 0.96);
+      backdrop-filter: blur(8px);
+      border-top: 1px solid var(--beige-deeper);
+      z-index: 50;
+    }
+    .mobile-bar .btn {
+      flex: 1;
+    }
+    .map {
+      display: none;
+    }
+    .side-card > .btn-primary {
+      display: none;
+    }
+    .info-list {
+      margin-top: 0;
+    }
   }
-
-  /* ── STANDAARD PAGE ───────────────────────────────────── */
-
-  .restaurant-page {
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 6rem 1.5rem 4rem;
-    background: var(--beige);
-  }
-
-  .content {
-    width: 100%;
-    max-width: 420px;
-  }
-
-  .card {
-    background: #fff;
-    border: 1px solid rgba(136,101,69,0.1);
-    border-radius: var(--radius-lg);
-    padding: 1.5rem;
-    box-shadow: var(--shadow-md);
-    text-align: center;
-  }
-
-  .photo-wrap {
-    width: 100%;
-    border-radius: 12px;
-    overflow: hidden;
-    margin-bottom: 1.25rem;
-    aspect-ratio: 4/3;
-    max-height: 280px;
-  }
-
-  .photo { width: 100%; height: 100%; object-fit: cover; display: block; }
-  .info { margin-bottom: 1.5rem; }
-
-  .name {
-    font-size: 1.4rem;
-    font-weight: 700;
-    color: var(--text);
-    margin-bottom: 0.25rem;
-    font-family: var(--serif);
-  }
-
-  .city { font-size: 0.9rem; color: var(--text-muted); margin-bottom: 0.75rem; }
-
-  .meta {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.4rem;
-    justify-content: center;
-    margin-bottom: 1rem;
-  }
-
-  .tag {
-    font-size: 0.8rem;
-    font-weight: 500;
-    color: var(--brown);
-    background: rgba(136,101,69,0.1);
-    padding: 0.3rem 0.7rem;
-    border-radius: 100px;
-  }
-
-  .tag.score { color: var(--orange); background: rgba(255,142,62,0.1); font-weight: 600; }
-  .address { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0; }
-
-  .btn-primary {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: var(--orange);
-    color: #fff;
-    padding: 1rem 1.5rem;
-    border-radius: var(--radius-md);
-    font-family: var(--sans);
-    font-size: 1rem;
-    font-weight: 600;
-    text-decoration: none;
-    transition: background 0.3s, transform 0.2s;
-    width: 100%;
-    margin-bottom: 1.25rem;
-  }
-
-  .btn-primary:hover { background: var(--brown); transform: translateY(-1px); }
-
-  .divider {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    margin-bottom: 1.25rem;
-    color: var(--text-muted);
-    font-size: 0.85rem;
-  }
-
-  .divider::before, .divider::after {
-    content: '';
-    flex: 1;
-    height: 1px;
-    background: rgba(136,101,69,0.15);
-  }
-
-  .btn-secondary {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
-    background: var(--brown);
-    color: #fff;
-    border: none;
-    padding: 1rem 1.5rem;
-    border-radius: var(--radius-md);
-    font-family: var(--sans);
-    font-size: 1rem;
-    font-weight: 600;
-    text-decoration: none;
-    transition: background 0.3s, transform 0.2s;
-    width: 100%;
-    margin-bottom: 0.75rem;
-  }
-
-  .btn-secondary:hover { background: var(--brown-dark); transform: translateY(-1px); }
-
-  .store-note { font-size: 0.8rem; color: var(--text-muted); opacity: 0.6; }
 </style>
-
-<script>
-  // Zet body class voor footer styling
-  document.body.classList.add('page-restaurant');
-
-  // Deep link handlers
-  document.getElementById('open-app-btn')?.addEventListener('click', (e) => {
-    e.preventDefault();
-    const link = (e.currentTarget as HTMLAnchorElement).href;
-    if (link) window.location.href = link;
-  });
-
-  document.getElementById('mobile-app-btn')?.addEventListener('click', (e) => {
-    e.preventDefault();
-    const link = (e.currentTarget as HTMLAnchorElement).href;
-    if (link) window.location.href = link;
-  });
-
-  // Video geluid knop
-  const video = document.getElementById('hero-video') as HTMLVideoElement | null;
-  const soundBtn = document.getElementById('sound-btn');
-  const soundOffIcon = document.getElementById('sound-off-icon');
-  const soundOnIcon = document.getElementById('sound-on-icon');
-  if (video && soundBtn) {
-    soundBtn.addEventListener('click', () => {
-      video.muted = !video.muted;
-      if (soundOffIcon) soundOffIcon.style.display = video.muted ? '' : 'none';
-      if (soundOnIcon) soundOnIcon.style.display = video.muted ? 'none' : '';
-    });
-  }
-
-  // Foto's uitklappen
-  const moreBtn = document.getElementById('gallery-more-btn');
-  const extraGallery = document.getElementById('gallery-extra');
-  if (moreBtn && extraGallery) {
-    moreBtn.addEventListener('click', () => {
-      extraGallery.style.display = 'grid';
-      moreBtn.style.display = 'none';
-    });
-  }
-
-  // Lightbox
-  const allImgs: string[] = Array.from(document.querySelectorAll('.gallery-item img'))
-    .map(img => (img as HTMLImageElement).src);
-  let current = 0;
-
-  const lightbox = document.getElementById('lightbox') as HTMLElement;
-  const lbImg = document.getElementById('lightbox-img') as HTMLImageElement;
-  const lbCounter = document.getElementById('lightbox-counter');
-
-  function openLightbox(index: number) {
-    current = index;
-    lbImg.src = allImgs[current];
-    if (lbCounter) lbCounter.textContent = `${current + 1} / ${allImgs.length}`;
-    lightbox.style.display = 'flex';
-    document.body.style.overflow = 'hidden';
-  }
-
-  function closeLightbox() {
-    lightbox.style.display = 'none';
-    document.body.style.overflow = '';
-  }
-
-  document.querySelectorAll('.gallery-item').forEach((item, i) => {
-    item.addEventListener('click', () => openLightbox(i));
-  });
-
-  document.getElementById('lightbox-close')?.addEventListener('click', closeLightbox);
-  document.getElementById('lightbox-prev')?.addEventListener('click', () => {
-    openLightbox((current - 1 + allImgs.length) % allImgs.length);
-  });
-  document.getElementById('lightbox-next')?.addEventListener('click', () => {
-    openLightbox((current + 1) % allImgs.length);
-  });
-
-  lightbox?.addEventListener('click', (e) => {
-    if (e.target === lightbox) closeLightbox();
-  });
-
-  document.addEventListener('keydown', (e) => {
-    if (lightbox.style.display === 'flex') {
-      if (e.key === 'Escape') closeLightbox();
-      if (e.key === 'ArrowLeft') openLightbox((current - 1 + allImgs.length) % allImgs.length);
-      if (e.key === 'ArrowRight') openLightbox((current + 1) % allImgs.length);
-    }
-  });
-</script>

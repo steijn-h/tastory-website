@@ -9,6 +9,8 @@ interface Props {
   title: string;
   description?: string;
   keywords?: string[];
+  /** Pagina niet laten indexeren (bijv. 404 of foutpagina). */
+  noindex?: boolean;
 }
 
 const {
@@ -16,6 +18,7 @@ const {
   description = 'De ultieme smaakvolle verbinding tussen gast en restaurant. Ontdek restaurants via kwalitatieve videocontent.',
   keywords,
   ogImage: customOgImage,
+  noindex = false,
 } = Astro.props;
 const canonicalURL = new URL(Astro.url.pathname, Astro.site);
 const defaultOgImage = new URL(`${import.meta.env.BASE_URL}/tastory-logo.png`, Astro.site);
@@ -30,6 +33,7 @@ const ogImage = customOgImage ?? defaultOgImage.toString();
     <meta name="description" content={description} />
     {keywords && keywords.length > 0 && <meta name="keywords" content={keywords.join(', ')} />}
     <meta name="theme-color" content="#F5EBDD" />
+    {noindex && <meta name="robots" content="noindex" />}
 
     <!-- Open Graph -->
     <meta property="og:title" content={title} />

@@ -7,16 +7,20 @@
     "build": "astro build",
     "preview": "astro preview",
     "lint": "prettier --check .",
-    "format": "prettier --write ."
+    "format": "prettier --write .",
+    "check": "astro check"
   },
   "dependencies": {
     "@astrojs/sitemap": "^3.3.0",
     "@astrojs/vercel": "^9.0.5",
+    "@supabase/supabase-js": "^2.118.0",
     "@vercel/analytics": "^2.0.1",
     "astro": "^5.17.1"
   },
   "devDependencies": {
+    "@astrojs/check": "^0.9.11",
     "prettier": "^3.5.3",
-    "prettier-plugin-astro": "^0.14.1"
+    "prettier-plugin-astro": "^0.14.1",
+    "typescript": "^5.9.3"
   }
 }

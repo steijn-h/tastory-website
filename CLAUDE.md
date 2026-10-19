@@ -74,10 +74,18 @@ public/           # Static assets (images, favicon, robots.txt)
 
 ## Deployment
 
-- **Platform**: GitHub Pages
-- **CI/CD**: `.github/workflows/deploy.yml` (builds on push to `main`)
-- **Base path**: `/tastory-website` — use `import.meta.env.BASE_URL` (never hardcode)
-- **Site URL**: `https://falko100.github.io`
+- **Platform**: Vercel (`@astrojs/vercel`, `output: 'server'`), live op `https://www.tastory.nl`
+- **Env vars (Vercel)**: `SUPABASE_ANON_KEY` (verplicht voor alle restaurantdata), optioneel `SUPABASE_URL`
+- Server-gerenderde pagina's zetten zelf `Cache-Control: s-maxage=300` zodat Vercel ze 5 min cachet
+
+## Restaurantpagina's (openbaar, TripAdvisor-stijl)
+
+- Data: `src/lib/restaurants.ts` (Supabase, anon key — zelfde RLS als een gast in de app)
+- `/restaurants` overzicht, `/restaurants/[stad]` stadspagina's, `/restaurant/[slug]` detail
+- `/restaurant/<uuid>` (oude deellinks uit de app) stuurt met 301 door naar de slug
+- `/partials/reviews` levert HTML voor "Meer reviews laden"
+- Reviewers tonen als `@gebruikersnaam` of alleen voornaam — nooit de volledige naam
+- Filters op reviews/stories gelijk houden aan de app (`rork-tastory-react`)
 
 ## Content
 

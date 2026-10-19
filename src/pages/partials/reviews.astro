@@ -1,0 +1,32 @@
+---
+// HTML-fragment met de volgende pagina reviews, opgehaald door de knop
+// "Meer reviews" op de restaurantpagina. Zelfde ReviewCard als de pagina zelf.
+export const prerender = false;
+export const partial = true;
+
+import ReviewCard from '../../components/ReviewCard.astro';
+import { getReviews, isUuid, REVIEWS_PAGE_SIZE } from '../../lib/restaurants';
+
+const restaurantId = Astro.url.searchParams.get('restaurant') ?? '';
+const offset = Math.max(0, Math.min(10_000, Number(Astro.url.searchParams.get('offset')) || 0));
+
+const page = isUuid(restaurantId)
+  ? await getReviews(restaurantId, offset, REVIEWS_PAGE_SIZE)
+  : null;
+
+if (!page) {
+  Astro.response.status = isUuid(restaurantId) ? 503 : 400;
+} else {
+  Astro.response.headers.set('Cache-Control', 'public, s-maxage=300, stale-while-revalidate=3600');
+}
+---
+
+{
+  page && (
+    <div data-has-more={page.hasMore ? 'true' : 'false'}>
+      {page.reviews.map((review) => (
+        <ReviewCard review={review} />
+      ))}
+    </div>
+  )
+}
