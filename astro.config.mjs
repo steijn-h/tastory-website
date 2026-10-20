@@ -9,6 +9,10 @@ export default defineConfig({
   // Eén URL per pagina (geen /contact én /contact/): anders ziet Google
   // dubbele pagina's.
   trailingSlash: 'never',
+  // Veel crawlers (ook van AI-diensten) proberen eerst /sitemap.xml.
+  redirects: {
+    '/sitemap.xml': { status: 301, destination: '/sitemap-index.xml' },
+  },
   integrations: [
     sitemap({
       // Restaurant- en stadspagina's komen uit de database (zie
