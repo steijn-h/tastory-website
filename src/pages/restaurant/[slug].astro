@@ -98,10 +98,18 @@ const routeUrl = restaurant
       ? `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(`${restaurant.address} ${restaurant.city ?? ''}`)}`
       : null
   : null;
-const mapEmbedUrl =
-  hasCoords && restaurant
-    ? `https://www.openstreetmap.org/export/embed.html?bbox=${restaurant.lng! - 0.006},${restaurant.lat! - 0.003},${restaurant.lng! + 0.006},${restaurant.lat! + 0.003}&layer=mapnik&marker=${restaurant.lat},${restaurant.lng}`
-    : null;
+// Google Maps zoekt op naam + adres, zodat het restaurant zelf als pin met
+// naam verschijnt (anders op coördinaten).
+const mapQuery = restaurant
+  ? restaurant.address
+    ? `${name}, ${restaurant.address}${city && !restaurant.address.toLowerCase().includes(city.toLowerCase()) ? `, ${city}` : ''}`
+    : hasCoords
+      ? `${restaurant.lat},${restaurant.lng}`
+      : null
+  : null;
+const mapEmbedUrl = mapQuery
+  ? `https://maps.google.com/maps?q=${encodeURIComponent(mapQuery)}&z=16&hl=nl&output=embed`
+  : null;
 const deepLinkUrl = restaurant ? `tastory://restaurant/${restaurant.id}` : 'tastory://';
 const nearby = (allRestaurants ?? [])
   .filter((r) => restaurant && r.id !== restaurant.id && city && normalizeCity(r.city) === city)
@@ -126,7 +134,8 @@ const facts = restaurant
   ? [
       restaurant.cuisine ? `keuken: ${restaurant.cuisine}` : null,
       restaurant.vibe ? `sfeer: ${restaurant.vibe.toLowerCase()}` : null,
-      restaurant.price_level ? `prijsklasse ${priceLabel(restaurant.price_level)}` : null,
+      // Woordverbinder tussen de €-tekens: "€€" niet over twee regels.
+      restaurant.price_level ? `prijsklasse ${priceLabel(restaurant.price_level).split('').join('\u2060')}` : null,
     ].filter((f): f is string => Boolean(f))
   : [];
 const summary = restaurant
@@ -329,7 +338,7 @@ const breadcrumbLd = {
           <div class="main">
             <section class="block">
               <h2>Over {name}</h2>
-              <p class="summary">{summary}</p>
+              <p class="about-summary">{summary}</p>
               {restaurant.description && <p class="description">{restaurant.description}</p>}
             </section>
 
@@ -467,8 +476,12 @@ const breadcrumbLd = {
               )}
 
               {mapEmbedUrl && (
-                <div class="map">
-                  <iframe src={mapEmbedUrl} title={`Kaart: ligging van ${name}`} loading="lazy" referrerpolicy="no-referrer"></iframe>
+                <div class="map" data-map={mapEmbedUrl} data-map-title={`Kaart: ligging van ${name}`}>
+                  <button type="button" class="map-consent" data-map-load>
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" /></svg>
+                    <span class="map-consent-title">Kaart tonen</span>
+                    <span class="map-consent-note">Laadt Google Maps (Google kan cookies plaatsen)</span>
+                  </button>
                 </div>
               )}
 
@@ -606,6 +619,36 @@ const breadcrumbLd = {
       }, 1500);
       document.addEventListener('visibilitychange', () => clearTimeout(timer), { once: true });
     });
+  });
+
+  // Google Maps pas laden na een klik (Google plaatst cookies, daar is
+  // toestemming voor nodig). De keuze wordt onthouden voor volgende pagina's.
+  const MAP_CONSENT_KEY = 'tastory_maps_consent';
+  const mapBox = document.querySelector<HTMLElement>('[data-map]');
+  const loadMap = () => {
+    if (!mapBox?.dataset.map) return;
+    const iframe = document.createElement('iframe');
+    iframe.src = mapBox.dataset.map;
+    iframe.title = mapBox.dataset.mapTitle ?? 'Kaart';
+    iframe.loading = 'lazy';
+    iframe.referrerPolicy = 'no-referrer-when-downgrade';
+    iframe.allowFullscreen = true;
+    mapBox.replaceChildren(iframe);
+  };
+  let mapConsent = false;
+  try {
+    mapConsent = localStorage.getItem(MAP_CONSENT_KEY) === '1';
+  } catch {
+    /* geen opslag beschikbaar */
+  }
+  if (mapConsent) loadMap();
+  mapBox?.querySelector('[data-map-load]')?.addEventListener('click', () => {
+    try {
+      localStorage.setItem(MAP_CONSENT_KEY, '1');
+    } catch {
+      /* geen opslag beschikbaar */
+    }
+    loadMap();
   });
 
   // Geluid van de video aan/uit.
@@ -936,7 +979,7 @@ const breadcrumbLd = {
     margin: -0.5rem 0 var(--space-md);
     font-size: var(--text-sm);
   }
-  .summary {
+  .about-summary {
     line-height: 1.65;
     font-weight: 500;
     margin-bottom: 0.75rem;
@@ -1128,6 +1171,54 @@ const breadcrumbLd = {
   }
   .side-card > .map:first-child {
     margin-top: 0;
+  }
+  .map-consent {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.3rem;
+    padding: var(--space-md);
+    border: none;
+    cursor: pointer;
+    color: var(--brown);
+    font-family: var(--sans);
+    text-align: center;
+    /* Licht stratenpatroon als achtergrond, zonder externe kaart. */
+    background:
+      linear-gradient(90deg, transparent 47%, rgba(255, 255, 255, 0.7) 47%, rgba(255, 255, 255, 0.7) 53%, transparent 53%) 0 0 / 90px 90px,
+      linear-gradient(0deg, transparent 47%, rgba(255, 255, 255, 0.7) 47%, rgba(255, 255, 255, 0.7) 53%, transparent 53%) 0 0 / 70px 70px,
+      linear-gradient(30deg, transparent 49%, rgba(255, 255, 255, 0.55) 49%, rgba(255, 255, 255, 0.55) 51%, transparent 51%) 0 0 / 160px 160px,
+      var(--beige-dark);
+  }
+  .map-consent svg {
+    color: var(--orange);
+    filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.15));
+  }
+  .map-consent-title {
+    font-weight: 600;
+    font-size: var(--text-sm);
+    color: var(--text);
+    background: var(--white);
+    padding: 0.35rem 0.8rem;
+    border-radius: 999px;
+    box-shadow: var(--shadow-sm);
+  }
+  .map-consent-note {
+    font-size: var(--text-xs);
+    color: var(--text-muted);
+    background: rgba(255, 252, 248, 0.85);
+    padding: 0.1rem 0.4rem;
+    border-radius: 4px;
+  }
+  .map-consent:hover .map-consent-title {
+    background: #fff;
+  }
+  .map-consent:focus-visible {
+    outline: 3px solid var(--orange);
+    outline-offset: -3px;
   }
   .map iframe {
     width: 100%;

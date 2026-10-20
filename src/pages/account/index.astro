@@ -212,14 +212,19 @@ const statusLabel = (status: string | null) =>
                     data-collecties={item.collecties.join(' ')}
                     data-restaurant={item.restaurant_id}
                   >
-                    <RestaurantCard restaurant={item.restaurant} />
-                    {item.notes && <p class="note">“{item.notes}”</p>}
+                    <RestaurantCard restaurant={item.restaurant}>
+                      {item.notes && <p class="note">{item.notes}</p>}
+                    </RestaurantCard>
                     <button
                       type="button"
-                      class="ui-btn-link remove"
+                      class="unsave"
                       data-remove={item.restaurant_id}
+                      aria-label={`${item.restaurant.name ?? 'Restaurant'} verwijderen uit opgeslagen`}
+                      title="Verwijderen uit opgeslagen"
                     >
-                      Verwijderen
+                      <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8l1 1.1L12 21l7.8-7.5 1-1.1a5.5 5.5 0 0 0 0-7.8z" />
+                      </svg>
                     </button>
                   </li>
                 ))}
@@ -313,17 +318,29 @@ const statusLabel = (status: string | null) =>
       const { data } = await supabase.auth.getSession();
       const userId = data.session?.user.id;
       if (!userId) return location.replace('/inloggen?next=/account');
+      const item = button.closest('li');
+      const name = item?.querySelector('h3')?.textContent?.trim() || 'dit restaurant';
+      if (!confirm(`${name} verwijderen uit je opgeslagen restaurants?`)) return;
       button.disabled = true;
-      button.textContent = 'Verwijderen…';
+      item?.classList.add('removing');
       try {
         await removeSavedRestaurant(supabase, userId, restaurantId);
-        button.closest('li')?.remove();
+        item?.remove();
+        updateSavedCount();
       } catch (e) {
         button.disabled = false;
-        button.textContent = (e as Error).message;
+        item?.classList.remove('removing');
+        alert((e as Error).message);
       }
     });
   });
+
+  function updateSavedCount() {
+    const count = document.querySelectorAll('.saved').length;
+    const label = document.querySelector('[data-tab="opgeslagen"] span');
+    if (label) label.textContent = String(count);
+    if (count === 0) location.reload();
+  }
 
   document.getElementById('logout')?.addEventListener('click', async () => {
     const supabase = getBrowserSupabase();
@@ -434,21 +451,56 @@ const statusLabel = (status: string | null) =>
     gap: var(--space-lg);
   }
   .saved {
-    display: flex;
-    flex-direction: column;
-    gap: 0.4rem;
+    position: relative;
+    transition: opacity 0.2s;
   }
   .saved[hidden] {
     display: none;
   }
-  .note {
-    font-size: var(--text-sm);
-    color: var(--text-muted);
-    font-style: italic;
+  .saved.removing {
+    opacity: 0.4;
   }
-  .remove {
-    align-self: flex-start;
-    color: var(--text-muted);
+  /* Notitie hoort bij het kaartje, onder de restaurantgegevens. */
+  .note {
+    margin-top: 0.6rem;
+    padding: 0.5rem 0.7rem;
+    background: var(--beige);
+    border-radius: var(--radius-sm);
+    font-size: var(--text-sm);
+    color: var(--text);
+    line-height: 1.45;
+  }
+  .note::before {
+    content: 'Notitie: ';
+    font-weight: 500;
+  }
+  /* Gevuld hartje op de foto, zoals in de app: tikken = verwijderen. */
+  .unsave {
+    position: absolute;
+    top: 0.6rem;
+    right: 0.6rem;
+    width: 38px;
+    height: 38px;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    border: none;
+    background: rgba(255, 252, 248, 0.92);
+    box-shadow: var(--shadow-sm);
+    cursor: pointer;
+    color: var(--orange);
+  }
+  .unsave svg path {
+    fill: currentColor;
+    stroke: currentColor;
+    stroke-width: 2;
+  }
+  .unsave:hover {
+    background: #fff;
+  }
+  .unsave:focus-visible {
+    outline: 3px solid var(--orange);
+    outline-offset: 2px;
   }
   .reviews {
     list-style: none;
