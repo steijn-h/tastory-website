@@ -11,12 +11,14 @@
     <li><a href="/restaurants">Restaurants</a></li>
     <li><a href="/oplossingen">Oplossingen</a></li>
     <li><a href="/contact">Contact</a></li>
+    <li><a href="/inloggen" data-account-link>Inloggen</a></li>
     <li>
       <a
         href="https://apps.apple.com/nl/app/tastory/id6762256086"
         target="_blank"
         rel="noopener noreferrer"
-        class="nav-cta">Download de App</a>
+        class="nav-cta">Download de App</a
+      >
     </li>
   </ul>
   <button
@@ -44,6 +46,7 @@
       <a href="/oplossingen/gebruikers" class="mobile-submenu-link">Voor gasten</a>
     </div>
     <a href="/contact">Contact</a>
+    <a href="/inloggen" data-account-link>Inloggen</a>
     <div class="mobile-menu-divider"></div>
     <a
       href="https://apps.apple.com/nl/app/tastory/id6762256086"
@@ -328,3 +331,16 @@
     }
   }
 </style>
+
+<script>
+  import { AUTH_COOKIE_NAME } from '../lib/auth-cookie';
+
+  // Pagina's worden gecachet, dus de inlogstatus komt uit de cookie in de
+  // browser (alleen voor de link; Supabase controleert de sessie zelf).
+  if (document.cookie.split(';').some((c) => c.trim().startsWith(AUTH_COOKIE_NAME))) {
+    document.querySelectorAll<HTMLAnchorElement>('[data-account-link]').forEach((link) => {
+      link.href = '/account';
+      link.textContent = 'Mijn Tastory';
+    });
+  }
+</script>

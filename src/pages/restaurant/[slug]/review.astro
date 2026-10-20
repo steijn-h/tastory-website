@@ -1,0 +1,346 @@
+---
+// Review ("ervaring") schrijven, alleen voor ingelogde gebruikers. Zelfde
+// beoordelingen en regels als ReviewSheet in de app; zie lib/review-submit.ts
+// voor het ene verschil (geen GPS check-in op de website).
+export const prerender = false;
+
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import { getRestaurant, isUuid, restaurantPath } from '../../../lib/restaurants';
+import { checkCanReview, MAX_REVIEW_LENGTH, MIN_REVIEW_LENGTH } from '../../../lib/review-submit';
+import { getServerSupabase, getServerUser } from '../../../lib/supabase-server';
+import { APP_STORE_URL } from '../../../lib/links';
+import '../../../styles/app-ui.css';
+
+Astro.response.headers.set('Cache-Control', 'private, no-store');
+
+const param = Astro.params.slug ?? '';
+const lookup = await getRestaurant(param);
+if (lookup.status === 'not-found') {
+  return new Response(null, { status: 404 });
+}
+const restaurant = lookup.status === 'ok' ? lookup.restaurant : null;
+if (restaurant && isUuid(param) && restaurant.slug) {
+  return Astro.redirect(`${restaurantPath(restaurant)}/review`, 301);
+}
+
+const supabase = getServerSupabase(Astro);
+const user = await getServerUser(supabase);
+const selfPath = restaurant ? `${restaurantPath(restaurant)}/review` : Astro.url.pathname;
+if (restaurant && !user) {
+  return Astro.redirect(`/inloggen?next=${encodeURIComponent(selfPath)}`, 303);
+}
+
+const allowed =
+  restaurant && user && supabase ? await checkCanReview(supabase, user.id, restaurant.id) : null;
+if (!restaurant) Astro.response.status = 503;
+
+const aspects = [
+  { key: 'service', label: 'Service' },
+  { key: 'quality', label: 'Kwaliteit' },
+  { key: 'speed', label: 'Snelheid' },
+  { key: 'experience', label: 'Ervaring' },
+  { key: 'price', label: 'Prijs-kwaliteit' },
+  { key: 'ambiance', label: 'Sfeer' },
+];
+const backPath = restaurant ? restaurantPath(restaurant) : '/restaurants';
+const name = restaurant?.name ?? 'Restaurant';
+---
+
+<BaseLayout title={`Review schrijven — ${name} | Tastory`} noindex>
+  <div class="ui-page">
+    <div class="ui-container ui-narrow">
+      <a class="back" href={backPath}>← Terug naar {name}</a>
+
+      {
+        !restaurant ? (
+          <div class="ui-card">
+            <h1 class="ui-title">Even geduld</h1>
+            <p class="ui-muted">
+              Dit restaurant kan nu niet geladen worden. Probeer het over een paar minuten opnieuw.
+            </p>
+          </div>
+        ) : allowed && !allowed.ok ? (
+          <div class="ui-card">
+            <h1 class="ui-title">Review schrijven</h1>
+            <p class="ui-notice">{allowed.message}</p>
+            <div class="actions">
+              <a class="ui-btn ui-btn-ghost" href={backPath}>
+                Terug naar {name}
+              </a>
+              <a
+                class="ui-btn ui-btn-primary"
+                href={APP_STORE_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Download de app
+              </a>
+            </div>
+          </div>
+        ) : (
+          <div class="ui-card">
+            <form id="review-form" data-restaurant={restaurant.id} data-back={backPath} novalidate>
+              <h1 class="ui-title">Jouw ervaring bij {name}</h1>
+              <p class="ui-muted intro">Eerlijk en concreet helpt andere gasten het meest.</p>
+
+              <fieldset class="ratings">
+                <legend class="ui-label">Beoordelingen</legend>
+                {aspects.map((aspect) => (
+                  <div class="rating-row" data-rating={aspect.key}>
+                    <span class="rating-label" id={`label-${aspect.key}`}>
+                      {aspect.label}
+                    </span>
+                    <div class="stars" role="radiogroup" aria-labelledby={`label-${aspect.key}`}>
+                      {/* Omgekeerde volgorde + row-reverse: zo kan CSS de sterren ervoor vullen. */}
+                      {[5, 4, 3, 2, 1].map((value) => (
+                        <label class="star">
+                          <input type="radio" name={aspect.key} value={value} />
+                          <svg width="28" height="28" viewBox="0 0 24 24" aria-hidden="true">
+                            <path d="M12 2.5l2.9 6 6.6.9-4.8 4.6 1.2 6.5L12 17.4l-5.9 3.1 1.2-6.5L2.5 9.4l6.6-.9z" />
+                          </svg>
+                          <span class="sr-only">
+                            {value} {value === 1 ? 'ster' : 'sterren'}
+                          </span>
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+                <p class="ui-hint">
+                  Je hoeft niet alles in te vullen. Klik nog een keer op een ster om te wissen.
+                </p>
+              </fieldset>
+
+              <div class="ui-field">
+                <label class="ui-label" for="review-text">
+                  Jouw ervaring
+                </label>
+                <textarea
+                  class="ui-input"
+                  id="review-text"
+                  name="text"
+                  rows="6"
+                  minlength={MIN_REVIEW_LENGTH}
+                  maxlength={MAX_REVIEW_LENGTH}
+                  placeholder="Wat at je, hoe was de bediening, zou je terugkomen?"
+                  required
+                />
+                <span class="ui-hint counter" id="counter" aria-live="polite">
+                  0 / {MAX_REVIEW_LENGTH}
+                </span>
+              </div>
+
+              <p class="ui-notice verify">
+                Tastory toont alleen geverifieerde ervaringen. Een review via de website wordt
+                zichtbaar zodra andere bezoekers je ervaring bevestigen. Ben je in het restaurant?
+                Met de GPS check-in in de
+                <a href={APP_STORE_URL} target="_blank" rel="noopener noreferrer">
+                  Tastory-app
+                </a>{' '}
+                telt je review meteen zwaarder mee.
+              </p>
+
+              <p class="ui-error" id="review-error" role="alert" />
+              <button class="ui-btn ui-btn-primary ui-btn-block" type="submit" id="review-submit">
+                Plaats review
+              </button>
+            </form>
+
+            <div id="review-done" hidden>
+              <h1 class="ui-title">Bedankt!</h1>
+              <p class="ui-muted intro">
+                Je ervaring is ontvangen. Hij wacht op verificatie en wordt zichtbaar zodra meerdere
+                bezoeken zijn geverifieerd. Je vindt hem terug onder{' '}
+                <a href="/account#reviews">Mijn Tastory</a>.
+              </p>
+              <a class="ui-btn ui-btn-primary" href={backPath}>
+                Terug naar {name}
+              </a>
+            </div>
+          </div>
+        )
+      }
+    </div>
+  </div>
+</BaseLayout>
+
+<script>
+  import { getBrowserSupabase } from '../../../lib/supabase-browser';
+  import { submitReview, MIN_REVIEW_LENGTH, MAX_REVIEW_LENGTH } from '../../../lib/review-submit';
+
+  const form = document.getElementById('review-form') as HTMLFormElement | null;
+  if (form) {
+    const textEl = document.getElementById('review-text') as HTMLTextAreaElement;
+    const counter = document.getElementById('counter')!;
+    const errorEl = document.getElementById('review-error')!;
+    const submit = document.getElementById('review-submit') as HTMLButtonElement;
+
+    // Nog een keer op dezelfde ster klikken wist de beoordeling (zoals de app).
+    form.querySelectorAll<HTMLInputElement>('input[type="radio"]').forEach((input) => {
+      let wasChecked = false;
+      input.addEventListener('pointerdown', () => (wasChecked = input.checked));
+      input.addEventListener('click', () => {
+        if (wasChecked) input.checked = false;
+        wasChecked = false;
+      });
+    });
+
+    textEl.addEventListener('input', () => {
+      counter.textContent = `${textEl.value.length} / ${MAX_REVIEW_LENGTH}`;
+      if (textEl.value.trim().length >= MIN_REVIEW_LENGTH) errorEl.textContent = '';
+    });
+
+    const rating = (key: string) =>
+      Number(form.querySelector<HTMLInputElement>(`input[name="${key}"]:checked`)?.value ?? 0);
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      errorEl.textContent = '';
+      const input = {
+        restaurantId: form.dataset.restaurant ?? '',
+        text: textEl.value,
+        service: rating('service'),
+        quality: rating('quality'),
+        speed: rating('speed'),
+        experience: rating('experience'),
+        price: rating('price'),
+        ambiance: rating('ambiance'),
+      };
+      if (textEl.value.trim().length < MIN_REVIEW_LENGTH) {
+        errorEl.textContent = `Schrijf minstens ${MIN_REVIEW_LENGTH} tekens over je ervaring.`;
+        textEl.focus();
+        return;
+      }
+      submit.disabled = true;
+      submit.textContent = 'Plaatsen…';
+      try {
+        const supabase = getBrowserSupabase();
+        const { data } = await supabase.auth.getUser();
+        if (!data.user) {
+          location.href = `/inloggen?next=${encodeURIComponent(location.pathname)}`;
+          return;
+        }
+        const result = await submitReview(supabase, data.user.id, input);
+        if (!result.ok) {
+          errorEl.textContent = result.message;
+          return;
+        }
+        form.hidden = true;
+        const done = document.getElementById('review-done')!;
+        done.hidden = false;
+        done.scrollIntoView({ block: 'start' });
+      } catch {
+        errorEl.textContent =
+          'Je review kon niet geplaatst worden. Controleer je verbinding en probeer het opnieuw.';
+      } finally {
+        submit.disabled = false;
+        submit.textContent = 'Plaats review';
+      }
+    });
+  }
+</script>
+
+<style>
+  .back {
+    display: inline-block;
+    color: var(--brown);
+    font-size: var(--text-sm);
+    text-decoration: none;
+    margin-bottom: var(--space-md);
+  }
+  .back:hover {
+    text-decoration: underline;
+  }
+  .intro {
+    margin-bottom: var(--space-lg);
+    line-height: 1.55;
+  }
+  .actions {
+    display: flex;
+    gap: var(--space-sm);
+    flex-wrap: wrap;
+    margin-top: var(--space-lg);
+  }
+  .ratings {
+    border: none;
+    margin-bottom: var(--space-lg);
+  }
+  .ratings legend {
+    margin-bottom: var(--space-sm);
+  }
+  .rating-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-md);
+    padding: 0.35rem 0;
+    border-bottom: 1px solid var(--beige-dark);
+  }
+  .rating-label {
+    font-size: var(--text-base);
+  }
+  .stars {
+    display: flex;
+    flex-direction: row-reverse;
+    justify-content: flex-end;
+  }
+  .star {
+    position: relative;
+    cursor: pointer;
+    padding: 2px;
+    color: var(--orange);
+  }
+  .star input {
+    position: absolute;
+    opacity: 0;
+    inset: 0;
+    margin: 0;
+    cursor: pointer;
+  }
+  .star svg path {
+    fill: transparent;
+    stroke: currentColor;
+    stroke-width: 1.5;
+    stroke-linejoin: round;
+    transition: fill 0.15s;
+  }
+  /* Gekozen ster en alle sterren ervoor vullen (volgorde is omgedraaid). */
+  .star:has(input:checked) svg path,
+  .star:has(input:checked) ~ .star svg path,
+  .stars:not(:has(input:checked)) .star:hover svg path,
+  .stars:not(:has(input:checked)) .star:hover ~ .star svg path {
+    fill: currentColor;
+  }
+  .star:has(input:focus-visible) {
+    outline: 2px solid var(--orange);
+    outline-offset: 1px;
+    border-radius: 4px;
+  }
+  .ratings .ui-hint {
+    display: block;
+    margin-top: var(--space-sm);
+  }
+  .counter {
+    align-self: flex-end;
+  }
+  .verify {
+    margin-bottom: var(--space-lg);
+  }
+  .verify a {
+    color: var(--brown);
+  }
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+  @media (max-width: 400px) {
+    .star svg {
+      width: 24px;
+      height: 24px;
+    }
+  }
+</style>

@@ -7,6 +7,7 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 import RatingStars from '../../components/RatingStars.astro';
 import ReviewCard from '../../components/ReviewCard.astro';
 import RestaurantCard from '../../components/RestaurantCard.astro';
+import SaveButton from '../../components/SaveButton.astro';
 import {
   cityPath,
   getAllRestaurants,
@@ -260,6 +261,12 @@ const breadcrumbLd = {
             )}
           </div>
           <div class="head-actions">
+            <SaveButton
+              restaurantId={restaurant.id}
+              restaurantName={name}
+              cuisine={restaurant.cuisine}
+              returnPath={canonicalPath}
+            />
             <button type="button" class="btn btn-ghost" id="share-btn" data-title={name} data-url={`${SITE_URL}${canonicalPath}`}>
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8" /><path d="m16 6-4-4-4 4" /><path d="M12 2v13" /></svg>
               <span id="share-label">Delen</span>
@@ -345,7 +352,7 @@ const breadcrumbLd = {
             <section class="block" id="reviews">
               <div class="reviews-head">
                 <h2>Reviews{reviewCount > 0 ? ` (${reviewCount})` : ''}</h2>
-                <a class="btn btn-ghost btn-sm" href={deepLinkUrl} data-app-link>Schrijf een review</a>
+                <a class="btn btn-ghost btn-sm" href={`${canonicalPath}/review`} rel="nofollow">Schrijf een review</a>
               </div>
 
               {stats && stats.count > 0 && (
@@ -391,7 +398,7 @@ const breadcrumbLd = {
                 <p class="muted empty">Reviews kunnen op dit moment niet geladen worden.</p>
               ) : reviews.length === 0 ? (
                 <div class="empty-reviews">
-                  <p><strong>Nog geen reviews.</strong> Ben jij hier geweest? Deel als eerste je ervaring in de Tastory-app.</p>
+                  <p><strong>Nog geen reviews.</strong> Ben jij hier geweest? <a href={`${canonicalPath}/review`} rel="nofollow">Deel als eerste je ervaring.</a></p>
                 </div>
               ) : (
                 <>

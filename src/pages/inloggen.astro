@@ -1,0 +1,475 @@
+---
+// Inloggen met hetzelfde account als de app: e-mailadres + 8-cijferige code
+// (zelfde methode als het inlogscherm van de app). Nieuwe e-mailadressen
+// krijgen automatisch een account, net als in de app.
+export const prerender = false;
+
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { ENABLED_OAUTH_PROVIDERS, safeNextPath } from '../lib/auth-cookie';
+import { getServerSupabase, getServerUser } from '../lib/supabase-server';
+import '../styles/app-ui.css';
+
+const next = safeNextPath(Astro.url.searchParams.get('next'));
+// Na Google/Apple (via /auth/callback) is de gebruiker al ingelogd, maar moet
+// het profiel nog gecontroleerd worden.
+const resume = Astro.url.searchParams.get('vervolg') === '1';
+const callbackError = Astro.url.searchParams.get('fout') === '1';
+
+Astro.response.headers.set('Cache-Control', 'private, no-store');
+
+if (!resume) {
+  const user = await getServerUser(getServerSupabase(Astro));
+  if (user) return Astro.redirect(next, 303);
+}
+---
+
+<BaseLayout title="Inloggen | Tastory" description="Log in met je Tastory-account." noindex>
+  <div class="ui-page">
+    <div class="ui-container ui-narrow">
+      <div class="ui-card" id="auth" data-next={next} data-resume={resume ? 'true' : 'false'}>
+        <!-- Stap 1: e-mailadres -->
+        <form id="step-email" class="step" novalidate>
+          <h1 class="ui-title">Inloggen bij Tastory</h1>
+          <p class="ui-muted intro">
+            Gebruik hetzelfde account als in de app. Nog geen account? Dan maken we er meteen een
+            voor je aan.
+          </p>
+          {
+            ENABLED_OAUTH_PROVIDERS.length > 0 && (
+              <>
+                <div class="oauth">
+                  {ENABLED_OAUTH_PROVIDERS.includes('apple') && (
+                    <a
+                      class="ui-btn ui-btn-ghost ui-btn-block"
+                      href={`/auth/oauth?provider=apple&next=${encodeURIComponent(next)}`}
+                    >
+                      Doorgaan met Apple
+                    </a>
+                  )}
+                  {ENABLED_OAUTH_PROVIDERS.includes('google') && (
+                    <a
+                      class="ui-btn ui-btn-ghost ui-btn-block"
+                      href={`/auth/oauth?provider=google&next=${encodeURIComponent(next)}`}
+                    >
+                      Doorgaan met Google
+                    </a>
+                  )}
+                </div>
+                <p class="divider">
+                  <span>of met je e-mailadres</span>
+                </p>
+              </>
+            )
+          }
+          <p class="ui-error" id="email-error" role="alert">
+            {callbackError ? 'Inloggen is niet gelukt. Probeer het opnieuw.' : ''}
+          </p>
+          <div class="ui-field">
+            <label class="ui-label" for="email">E-mailadres</label>
+            <input
+              class="ui-input"
+              id="email"
+              name="email"
+              type="email"
+              autocomplete="email"
+              inputmode="email"
+              required
+              placeholder="naam@voorbeeld.nl"
+            />
+          </div>
+          <button class="ui-btn ui-btn-primary ui-btn-block" type="submit" id="email-submit"
+            >Stuur mij een code</button
+          >
+        </form>
+
+        <!-- Stap 2: code uit de e-mail -->
+        <form id="step-code" class="step" hidden novalidate>
+          <h1 class="ui-title">Check je e-mail</h1>
+          <p class="ui-muted intro">
+            We hebben een code van 8 cijfers gestuurd naar <strong id="sent-to"></strong>. Geen
+            e-mail? Kijk ook in je spam.
+          </p>
+          <p class="ui-error" id="code-error" role="alert"></p>
+          <div class="ui-field">
+            <label class="ui-label" for="code">Code</label>
+            <input
+              class="ui-input code-input"
+              id="code"
+              name="code"
+              type="text"
+              inputmode="numeric"
+              autocomplete="one-time-code"
+              maxlength="8"
+              pattern="[0-9]{8}"
+              required
+              placeholder="12345678"
+            />
+          </div>
+          <button class="ui-btn ui-btn-primary ui-btn-block" type="submit" id="code-submit"
+            >Inloggen</button
+          >
+          <div class="code-actions">
+            <button type="button" class="ui-btn-link" id="resend">Nieuwe code sturen</button>
+            <button type="button" class="ui-btn-link" id="change-email">Ander e-mailadres</button>
+          </div>
+        </form>
+
+        <!-- Stap 3: naam (alleen als die nog ontbreekt, bijv. nieuw account) -->
+        <form id="step-name" class="step" hidden novalidate>
+          <h1 class="ui-title">Welkom bij Tastory</h1>
+          <p class="ui-muted intro">
+            Hoe mogen we je noemen? Bij je reviews tonen we je gebruikersnaam, nooit je volledige
+            naam.
+          </p>
+          <p class="ui-error" id="name-error" role="alert"></p>
+          <div class="ui-field">
+            <label class="ui-label" for="full-name">Naam</label>
+            <input
+              class="ui-input"
+              id="full-name"
+              type="text"
+              autocomplete="name"
+              maxlength="60"
+              required
+            />
+          </div>
+          <div class="ui-field">
+            <label class="ui-label" for="username">Gebruikersnaam</label>
+            <div class="username-wrap">
+              <span aria-hidden="true">@</span>
+              <input
+                class="ui-input"
+                id="username"
+                type="text"
+                autocomplete="username"
+                autocapitalize="none"
+                spellcheck="false"
+                maxlength="30"
+                required
+              />
+            </div>
+            <span class="ui-hint">Letters, cijfers, punt, streepje of underscore.</span>
+          </div>
+          <button class="ui-btn ui-btn-primary ui-btn-block" type="submit" id="name-submit"
+            >Verder</button
+          >
+        </form>
+
+        <!-- Melding (geblokkeerd account / fout) -->
+        <div id="step-message" class="step" hidden>
+          <h1 class="ui-title" id="message-title"></h1>
+          <p class="ui-muted intro" id="message-body"></p>
+          <a class="ui-btn ui-btn-ghost" href="/">Naar de homepage</a>
+        </div>
+
+        <p class="legal ui-muted" id="legal">
+          Door in te loggen ga je akkoord met onze
+          <a href="/privacy">privacy- en gebruikersvoorwaarden</a>.
+        </p>
+      </div>
+    </div>
+  </div>
+</BaseLayout>
+
+<script>
+  import { getBrowserSupabase } from '../lib/supabase-browser';
+  import {
+    loadOwnProfile,
+    profileNeedsName,
+    sanitizeUsername,
+    saveName,
+    type OwnProfile,
+  } from '../lib/account';
+
+  const root = document.getElementById('auth')!;
+  const next = root.dataset.next || '/account';
+  const steps = {
+    email: document.getElementById('step-email') as HTMLFormElement,
+    code: document.getElementById('step-code') as HTMLFormElement,
+    name: document.getElementById('step-name') as HTMLFormElement,
+    message: document.getElementById('step-message') as HTMLElement,
+  };
+  const $ = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
+  const emailInput = $<HTMLInputElement>('email');
+  const codeInput = $<HTMLInputElement>('code');
+  const nameInput = $<HTMLInputElement>('full-name');
+  const usernameInput = $<HTMLInputElement>('username');
+
+  let email = '';
+  let profile: OwnProfile | null = null;
+
+  function show(step: keyof typeof steps) {
+    for (const [key, el] of Object.entries(steps)) el.hidden = key !== step;
+    $('legal').hidden = step !== 'email';
+    const focusTarget = { email: emailInput, code: codeInput, name: nameInput, message: null }[
+      step
+    ];
+    focusTarget?.focus();
+  }
+
+  function busy(button: HTMLButtonElement, isBusy: boolean, label: string) {
+    button.disabled = isBusy;
+    button.textContent = label;
+  }
+
+  function showMessage(title: string, body: string) {
+    $('message-title').textContent = title;
+    $('message-body').textContent = body;
+    show('message');
+  }
+
+  // Zelfde vertalingen als toNlAuthError in de app.
+  function authError(e: unknown): string {
+    const err = e as { message?: string; status?: number; code?: string };
+    const msg = (err?.message ?? '').toLowerCase();
+    if (
+      err?.status === 429 ||
+      err?.code === 'over_email_send_rate_limit' ||
+      msg.includes('rate limit')
+    ) {
+      return 'Je hebt te vaak een code aangevraagd. Wacht even en probeer het opnieuw.';
+    }
+    if (msg.includes('expired') || (msg.includes('otp') && msg.includes('invalid'))) {
+      return 'Ongeldige of verlopen code. Controleer je e-mail of vraag een nieuwe code aan.';
+    }
+    if (
+      msg.includes('unable to validate') ||
+      msg.includes('invalid email') ||
+      msg.includes('invalid format')
+    ) {
+      return 'Ongeldig e-mailadres. Controleer je invoer.';
+    }
+    if (msg.includes('failed to fetch') || msg.includes('network')) {
+      return 'Geen verbinding. Controleer je internet en probeer het opnieuw.';
+    }
+    return 'Er ging iets mis. Probeer het opnieuw.';
+  }
+
+  async function sendCode(): Promise<string | null> {
+    try {
+      const supabase = getBrowserSupabase();
+      const { error } = await supabase.auth.signInWithOtp({
+        email,
+        options: { shouldCreateUser: true },
+      });
+      return error ? authError(error) : null;
+    } catch (e) {
+      return authError(e);
+    }
+  }
+
+  // Na inloggen: profiel controleren (geblokkeerd? naam bekend?) en door.
+  async function afterSignIn() {
+    const supabase = getBrowserSupabase();
+    const { data } = await supabase.auth.getUser();
+    if (!data.user) {
+      show('email');
+      return;
+    }
+    const result = await loadOwnProfile(supabase, data.user);
+    if (result.status === 'banned') {
+      showMessage(
+        'Je account is geblokkeerd',
+        `Neem contact op via info@tastory.nl.${result.reason ? ` Reden: ${result.reason}` : ''}`,
+      );
+      return;
+    }
+    if (result.status === 'error') {
+      showMessage(
+        'Profiel laden duurt lang',
+        'Je bent ingelogd, maar je profiel kon niet geladen worden. Ververs de pagina.',
+      );
+      return;
+    }
+    profile = result.profile;
+    if (profileNeedsName(profile)) {
+      const name = profile.full_name?.trim() ?? '';
+      nameInput.value = name === 'Foodie' || name.toLowerCase() === 'user' ? '' : name;
+      usernameInput.value = profile.username ?? '';
+      show('name');
+      return;
+    }
+    location.replace(next);
+  }
+
+  steps.email.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const button = $<HTMLButtonElement>('email-submit');
+    const errorEl = $('email-error');
+    email = emailInput.value.trim().toLowerCase();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      errorEl.textContent = 'Vul een geldig e-mailadres in.';
+      return;
+    }
+    errorEl.textContent = '';
+    busy(button, true, 'Code versturen…');
+    const error = await sendCode();
+    busy(button, false, 'Stuur mij een code');
+    if (error) {
+      errorEl.textContent = error;
+      return;
+    }
+    $('sent-to').textContent = email;
+    startCooldown();
+    codeInput.value = '';
+    $('code-error').textContent = '';
+    show('code');
+  });
+
+  codeInput.addEventListener('input', () => {
+    codeInput.value = codeInput.value.replace(/\D/g, '').slice(0, 8);
+    if (codeInput.value.length === 8) steps.code.requestSubmit();
+  });
+
+  let verifying = false;
+  steps.code.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    if (verifying) return;
+    const button = $<HTMLButtonElement>('code-submit');
+    const errorEl = $('code-error');
+    const token = codeInput.value.trim();
+    if (token.length !== 8) {
+      errorEl.textContent = 'Voer de code van 8 cijfers in.';
+      return;
+    }
+    verifying = true;
+    errorEl.textContent = '';
+    busy(button, true, 'Inloggen…');
+    try {
+      const supabase = getBrowserSupabase();
+      const { error } = await supabase.auth.verifyOtp({ email, token, type: 'email' });
+      if (error) throw error;
+      await afterSignIn();
+    } catch (err) {
+      errorEl.textContent = authError(err);
+      busy(button, false, 'Inloggen');
+    } finally {
+      verifying = false;
+    }
+  });
+
+  // Opnieuw versturen kan pas na 60 seconden (Supabase-limiet).
+  const resend = $<HTMLButtonElement>('resend');
+  let cooldownTimer: ReturnType<typeof setInterval> | undefined;
+  function startCooldown() {
+    let seconds = 60;
+    resend.disabled = true;
+    resend.textContent = `Nieuwe code sturen (${seconds})`;
+    clearInterval(cooldownTimer);
+    cooldownTimer = setInterval(() => {
+      seconds -= 1;
+      if (seconds <= 0) {
+        clearInterval(cooldownTimer);
+        resend.disabled = false;
+        resend.textContent = 'Nieuwe code sturen';
+        return;
+      }
+      resend.textContent = `Nieuwe code sturen (${seconds})`;
+    }, 1000);
+  }
+  resend.addEventListener('click', async () => {
+    const errorEl = $('code-error');
+    errorEl.textContent = '';
+    resend.disabled = true;
+    const error = await sendCode();
+    if (error) {
+      errorEl.textContent = error;
+      resend.disabled = false;
+      return;
+    }
+    startCooldown();
+  });
+
+  $('change-email').addEventListener('click', () => show('email'));
+
+  usernameInput.addEventListener('input', () => {
+    const clean = sanitizeUsername(usernameInput.value);
+    if (clean !== usernameInput.value) usernameInput.value = clean;
+  });
+
+  steps.name.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    if (!profile) return;
+    const button = $<HTMLButtonElement>('name-submit');
+    const errorEl = $('name-error');
+    const fullName = nameInput.value.trim();
+    const username = sanitizeUsername(usernameInput.value.trim());
+    if (fullName.length < 2) {
+      errorEl.textContent = 'Vul je naam in.';
+      return;
+    }
+    if (username.length < 3) {
+      errorEl.textContent = 'Kies een gebruikersnaam van minstens 3 tekens.';
+      return;
+    }
+    errorEl.textContent = '';
+    busy(button, true, 'Opslaan…');
+    const error = await saveName(getBrowserSupabase(), profile.id, fullName, username);
+    if (error) {
+      errorEl.textContent = error;
+      busy(button, false, 'Verder');
+      return;
+    }
+    location.replace(next);
+  });
+
+  if (root.dataset.resume === 'true') {
+    void afterSignIn();
+  }
+</script>
+
+<style>
+  .step[hidden] {
+    display: none;
+  }
+  .intro {
+    margin-bottom: var(--space-lg);
+    line-height: 1.55;
+  }
+  .oauth {
+    display: grid;
+    gap: var(--space-sm);
+  }
+  .divider {
+    display: flex;
+    align-items: center;
+    gap: var(--space-md);
+    color: var(--text-muted);
+    font-size: var(--text-sm);
+    margin: var(--space-lg) 0;
+  }
+  .divider::before,
+  .divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--beige-deeper);
+  }
+  .code-input {
+    font-size: var(--text-2xl);
+    letter-spacing: 0.3em;
+    text-align: center;
+    font-variant-numeric: tabular-nums;
+  }
+  .code-actions {
+    display: flex;
+    justify-content: space-between;
+    gap: var(--space-md);
+    margin-top: var(--space-md);
+    flex-wrap: wrap;
+  }
+  .username-wrap {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    color: var(--text-muted);
+  }
+  .legal {
+    margin-top: var(--space-lg);
+    font-size: var(--text-xs);
+    line-height: 1.5;
+  }
+  .legal a {
+    color: inherit;
+  }
+</style>

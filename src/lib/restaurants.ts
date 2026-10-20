@@ -156,6 +156,19 @@ export async function getAllRestaurants(): Promise<RestaurantListItem[] | null> 
   return rows;
 }
 
+/** Lichte gegevens voor een lijst id's (bijv. opgeslagen restaurants). */
+export async function getRestaurantsByIds(ids: string[]): Promise<RestaurantListItem[]> {
+  const unique = [...new Set(ids)].filter(isUuid);
+  const supabase = getSupabase();
+  if (!supabase || unique.length === 0) return [];
+  const { data, error } = await supabase.from('restaurants').select(LIST_COLUMNS).in('id', unique);
+  if (error) {
+    console.error('[restaurants] getRestaurantsByIds', error.message);
+    return [];
+  }
+  return (data ?? []) as unknown as RestaurantListItem[];
+}
+
 export interface CityGroup {
   name: string;
   slug: string;
