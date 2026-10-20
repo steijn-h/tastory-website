@@ -8,19 +8,17 @@ import { SITE_URL } from '../lib/links';
 // Alle restaurantpagina's en stadspagina's, zodat Google ze kan vinden.
 export const GET: APIRoute = async () => {
   const restaurants = (await getAllRestaurants()) ?? [];
-  const today = new Date().toISOString().split('T')[0];
-
-  const entry = (path: string, priority: string) => `  <url>
+  // Geen <lastmod>: zonder echte wijzigingsdatum negeert Google hem (of gaat
+  // hij de sitemap wantrouwen). changefreq/priority gebruikt Google niet.
+  const entry = (path: string) => `  <url>
     <loc>${escapeXml(`${SITE_URL}${path}`)}</loc>
-    <lastmod>${today}</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>${priority}</priority>
   </url>`;
 
   const urls = [
-    entry('/restaurants', '0.9'),
-    ...groupByCity(restaurants).map((c) => entry(`/restaurants/${c.slug}`, '0.8')),
-    ...restaurants.map((r) => entry(restaurantPath(r), '0.8')),
+    ...groupByCity(restaurants).map((c) => entry(`/restaurants/${c.slug}`)),
+    // Alleen restaurants met een slug: een id-URL stuurt door (301) en hoort
+    // niet in een sitemap.
+    ...restaurants.filter((r) => r.slug).map((r) => entry(restaurantPath(r))),
   ].join('\n');
 
   const xml = `<?xml version="1.0" encoding="UTF-8"?>

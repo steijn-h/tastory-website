@@ -119,10 +119,31 @@ const canonicalPath = restaurant ? restaurantPath(restaurant) : `/restaurant/${p
 const title = restaurant
   ? `${name}${city ? `, ${city}` : ''} — reviews, foto's & menu | Tastory`
   : 'Restaurant niet gevonden | Tastory';
-const description = restaurant
-  ? (restaurant.description?.trim().slice(0, 155) ||
-      `${name}${city ? ` in ${city}` : ''}${restaurant.cuisine ? ` (${restaurant.cuisine})` : ''}: bekijk ${reviewCount > 0 ? `${reviewCount} reviews, ` : ''}foto's, openingstijden en reserveer direct via Tastory.`)
-  : 'Dit restaurant staat niet (meer) op Tastory.';
+// Eigen, feitelijke samenvatting: de beschrijving komt vaak letterlijk van de
+// site van het restaurant (dubbele content voor Google). Deze zin is per
+// pagina uniek en makkelijk te citeren door zoekmachines en AI-assistenten.
+const facts = restaurant
+  ? [
+      restaurant.cuisine ? `keuken: ${restaurant.cuisine}` : null,
+      restaurant.vibe ? `sfeer: ${restaurant.vibe.toLowerCase()}` : null,
+      restaurant.price_level ? `prijsklasse ${priceLabel(restaurant.price_level)}` : null,
+    ].filter((f): f is string => Boolean(f))
+  : [];
+const summary = restaurant
+  ? `${name} is een restaurant${city ? ` in ${city}` : ''}${restaurant.address ? ` (${restaurant.address})` : ''}${
+      facts.length > 0 ? `, ${facts.join(', ')}` : ''
+    }.${
+      score !== null && reviewCount > 0
+        ? ` Tastory-gasten geven het gemiddeld een ${formatScore(score)} uit 5 (${reviewCount === 1 ? '1 review' : `${reviewCount} reviews`}).`
+        : ''
+    }`
+  : '';
+const metaLead = restaurant
+  ? `${name}${city ? ` in ${city}` : ''}${restaurant.cuisine || restaurant.price_level ? ` (${[restaurant.cuisine, restaurant.price_level ? priceLabel(restaurant.price_level) : null].filter(Boolean).join(', ')})` : ''}${
+      score !== null && reviewCount > 0 ? `: ${formatScore(score)}/5 uit ${reviewCount === 1 ? '1 review' : `${reviewCount} reviews`}` : ''
+    }. Bekijk foto's, menu, openingstijden en adres op Tastory.`
+  : '';
+const description = restaurant ? metaLead : 'Dit restaurant staat niet (meer) op Tastory.';
 const keywords = restaurant
   ? [name, city, restaurant.cuisine, restaurant.vibe, city ? `restaurant ${city}` : null, 'reviews', 'Tastory'].filter(
       (k): k is string => Boolean(k),
@@ -136,7 +157,7 @@ const jsonLd = restaurant
       '@id': `${SITE_URL}${canonicalPath}#restaurant`,
       name,
       url: `${SITE_URL}${canonicalPath}`,
-      description: restaurant.description ?? undefined,
+      description: restaurant.description?.trim() || summary,
       image: photos.length > 0 ? photos.slice(0, 6) : undefined,
       servesCuisine: restaurant.cuisine ?? undefined,
       priceRange: restaurant.price_level ? priceLabel(restaurant.price_level) : undefined,
@@ -306,12 +327,11 @@ const breadcrumbLd = {
         <div class="layout">
           <!-- Hoofdkolom -->
           <div class="main">
-            {restaurant.description && (
-              <section class="block">
-                <h2>Over {name}</h2>
-                <p class="description">{restaurant.description}</p>
-              </section>
-            )}
+            <section class="block">
+              <h2>Over {name}</h2>
+              <p class="summary">{summary}</p>
+              {restaurant.description && <p class="description">{restaurant.description}</p>}
+            </section>
 
             {(menuImages.length > 0 || menuLink) && (
               <section class="block" id="menu">
@@ -915,6 +935,11 @@ const breadcrumbLd = {
   .section-sub {
     margin: -0.5rem 0 var(--space-md);
     font-size: var(--text-sm);
+  }
+  .summary {
+    line-height: 1.65;
+    font-weight: 500;
+    margin-bottom: 0.75rem;
   }
   .description {
     line-height: 1.75;
