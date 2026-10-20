@@ -1,4 +1,11 @@
+# Zoekmachines én AI-zoekdiensten (Google, Bing, ChatGPT, Perplexity, Claude)
+# mogen alle openbare pagina's lezen. Alleen persoonlijke pagina's niet.
 User-agent: *
 Allow: /
+Disallow: /account
+Disallow: /inloggen
+Disallow: /auth/
+Disallow: /partials/
+Disallow: /restaurant/*/review
 
 Sitemap: https://www.tastory.nl/sitemap-index.xml

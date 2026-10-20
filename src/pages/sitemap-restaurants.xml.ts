@@ -1,46 +1,25 @@
 export const prerender = false;
 
 import type { APIRoute } from 'astro';
+import { getAllRestaurants, groupByCity, restaurantPath } from '../lib/restaurants';
+import { escapeXml } from '../lib/format';
+import { SITE_URL } from '../lib/links';
 
+// Alle restaurantpagina's en stadspagina's, zodat Google ze kan vinden.
 export const GET: APIRoute = async () => {
-  const supabaseUrl = 'https://vyqpdtjpocndgdqylzeo.supabase.co';
-  const supabaseAnonKey = import.meta.env.SUPABASE_ANON_KEY ?? '';
+  const restaurants = (await getAllRestaurants()) ?? [];
+  // Geen <lastmod>: zonder echte wijzigingsdatum negeert Google hem (of gaat
+  // hij de sitemap wantrouwen). changefreq/priority gebruikt Google niet.
+  const entry = (path: string) => `  <url>
+    <loc>${escapeXml(`${SITE_URL}${path}`)}</loc>
+  </url>`;
 
-  let slugs: string[] = [];
-
-  if (supabaseAnonKey) {
-    try {
-      const res = await fetch(
-        `${supabaseUrl}/rest/v1/restaurants?select=slug&not.slug.is=null&order=weighted_score.desc.nullslast&limit=1000`,
-        {
-          headers: {
-            apikey: supabaseAnonKey,
-            Authorization: `Bearer ${supabaseAnonKey}`,
-          },
-        },
-      );
-      if (res.ok) {
-        const rows: { slug: string }[] = await res.json();
-        slugs = rows.map((r) => r.slug).filter(Boolean);
-      }
-    } catch {
-      // return empty sitemap on error
-    }
-  }
-
-  const baseUrl = 'https://www.tastory.nl';
-  const today = new Date().toISOString().split('T')[0];
-
-  const urls = slugs
-    .map(
-      (slug) => `  <url>
-    <loc>${baseUrl}/restaurant/${slug}</loc>
-    <lastmod>${today}</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>`,
-    )
-    .join('\n');
+  const urls = [
+    ...groupByCity(restaurants).map((c) => entry(`/restaurants/${c.slug}`)),
+    // Alleen restaurants met een slug: een id-URL stuurt door (301) en hoort
+    // niet in een sitemap.
+    ...restaurants.filter((r) => r.slug).map((r) => entry(restaurantPath(r))),
+  ].join('\n');
 
   const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">

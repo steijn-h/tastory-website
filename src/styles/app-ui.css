@@ -1,0 +1,155 @@
+/*
+ * Gedeelde bouwstenen voor het ingelogde deel (inloggen, account, review
+ * schrijven, opslaan). Alleen geïmporteerd door die pagina's/componenten.
+ * Klassen beginnen met `ui-` zodat ze niet botsen met de marketingpagina's.
+ */
+.ui-page {
+  padding: 112px 0 var(--space-3xl);
+  min-height: 75vh;
+}
+.ui-container {
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 0 var(--space-lg);
+}
+.ui-container.ui-narrow {
+  max-width: 560px;
+}
+.ui-card {
+  background: var(--white);
+  border: 1px solid var(--beige-deeper);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-md);
+  padding: var(--space-xl);
+}
+.ui-title {
+  font-family: var(--serif);
+  font-weight: 500;
+  font-size: var(--text-3xl);
+  color: var(--text);
+  line-height: 1.15;
+  margin-bottom: var(--space-sm);
+}
+.ui-muted {
+  color: var(--text-muted);
+}
+.ui-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  font-family: var(--sans);
+  font-weight: 500;
+  font-size: var(--text-sm);
+  line-height: 1.2;
+  padding: 0.75rem 1.2rem;
+  border-radius: var(--radius-sm);
+  text-decoration: none;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition:
+    background 0.2s,
+    border-color 0.2s,
+    opacity 0.2s;
+}
+.ui-btn:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+.ui-btn-primary {
+  background: var(--orange);
+  color: #fff;
+}
+.ui-btn-primary:hover:not(:disabled) {
+  background: var(--orange-dark);
+}
+.ui-btn-ghost {
+  background: var(--white);
+  color: var(--text);
+  border-color: var(--beige-deeper);
+}
+.ui-btn-ghost:hover:not(:disabled) {
+  border-color: var(--brown);
+}
+.ui-btn-link {
+  background: none;
+  border: none;
+  padding: 0;
+  color: var(--brown);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  font-size: var(--text-sm);
+  cursor: pointer;
+}
+.ui-btn-block {
+  width: 100%;
+}
+.ui-btn:focus-visible,
+.ui-btn-link:focus-visible,
+.ui-input:focus-visible {
+  outline: 3px solid var(--orange);
+  outline-offset: 2px;
+}
+.ui-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  margin-bottom: var(--space-md);
+}
+.ui-label {
+  font-size: var(--text-sm);
+  font-weight: 500;
+  color: var(--text);
+}
+.ui-hint {
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+}
+.ui-input {
+  font: inherit;
+  font-size: var(--text-base);
+  color: var(--text);
+  background: #fff;
+  border: 1px solid var(--beige-deeper);
+  border-radius: var(--radius-sm);
+  padding: 0.75rem 0.9rem;
+  width: 100%;
+}
+.ui-input:focus {
+  border-color: var(--brown);
+}
+textarea.ui-input {
+  resize: vertical;
+  min-height: 7rem;
+  line-height: 1.5;
+}
+.ui-error {
+  color: #b3261e;
+  font-size: var(--text-sm);
+  margin: 0 0 var(--space-md);
+}
+.ui-error:empty {
+  display: none;
+}
+.ui-notice {
+  background: var(--beige);
+  border-radius: var(--radius-sm);
+  padding: var(--space-md);
+  font-size: var(--text-sm);
+  color: var(--text);
+  line-height: 1.5;
+}
+@media (max-width: 640px) {
+  .ui-page {
+    padding-top: 96px;
+  }
+  .ui-container {
+    padding: 0 var(--space-md);
+  }
+  .ui-card {
+    padding: var(--space-lg);
+  }
+  .ui-title {
+    font-size: var(--text-2xl);
+  }
+}

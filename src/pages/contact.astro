@@ -76,6 +76,16 @@ import PageHero from '../components/PageHero.astro';
           <h3>Zakelijk</h3>
           <p>KVK: 98537733<br />BTW: NL868537883B01</p>
         </div>
+        <div class="info-card info-card--danger">
+          <h3>Account verwijderen</h3>
+          <p>
+            Wil je jouw Tastory-account verwijderen? Dien je verzoek in en wij verwerken het zo snel
+            mogelijk.
+          </p>
+          <a href={`${import.meta.env.BASE_URL}account-verwijderen`} class="btn-secondary"
+            >Account verwijderen</a
+          >
+        </div>
       </div>
     </div>
   </section>
@@ -150,7 +160,8 @@ import PageHero from '../components/PageHero.astro';
       feedback.className = 'contact-feedback contact-feedback--success';
       form.reset();
     } catch {
-      feedback.textContent = 'Er ging iets mis. Probeer het later opnieuw of mail ons op info@tastory.nl.';
+      feedback.textContent =
+        'Er ging iets mis. Probeer het later opnieuw of mail ons op info@tastory.nl.';
       feedback.className = 'contact-feedback contact-feedback--error';
     }
 
@@ -270,6 +281,12 @@ import PageHero from '../components/PageHero.astro';
 
   .info-card a:hover {
     color: var(--orange);
+  }
+
+  .info-card--danger .btn-secondary {
+    margin-top: var(--space-sm);
+    padding: 0.7rem 1.6rem;
+    font-size: var(--text-sm);
   }
 
   @media (max-width: 768px) {

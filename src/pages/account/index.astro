@@ -1,0 +1,569 @@
+---
+// Mijn Tastory: opgeslagen restaurants (met collecties) en eigen reviews.
+// Dezelfde gegevens als het profiel in de app. Nooit cachen.
+export const prerender = false;
+
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import RatingStars from '../../components/RatingStars.astro';
+import RestaurantCard from '../../components/RestaurantCard.astro';
+import {
+  getRestaurantsByIds,
+  restaurantPath,
+  type RestaurantListItem,
+} from '../../lib/restaurants';
+import { formatReviewDate } from '../../lib/format';
+import { getServerSupabase, getServerUser } from '../../lib/supabase-server';
+import '../../styles/app-ui.css';
+
+Astro.response.headers.set('Cache-Control', 'private, no-store');
+
+const supabase = getServerSupabase(Astro);
+const user = await getServerUser(supabase);
+if (!supabase || !user) {
+  return Astro.redirect('/inloggen?next=/account', 303);
+}
+
+interface SavedRow {
+  restaurant_id: string;
+  notes: string | null;
+}
+interface CollectieRow {
+  id: string;
+  naam: string | null;
+  kleur: string | null;
+}
+interface LinkRow {
+  collectie_id: string;
+  restaurant_id: string;
+}
+interface OwnReview {
+  id: string;
+  restaurant_id: string;
+  rating: number | null;
+  text: string | null;
+  status: string | null;
+  created_at: string | null;
+}
+
+const [profileRes, savedRes, collectiesRes, linksRes, reviewsRes] = await Promise.all([
+  supabase
+    .from('profiles')
+    .select('username, full_name, avatar_url, is_banned')
+    .eq('id', user.id)
+    .maybeSingle(),
+  supabase.from('saved_restaurants').select('restaurant_id, notes').eq('user_id', user.id),
+  supabase
+    .from('collecties')
+    .select('id, naam, kleur')
+    .eq('user_id', user.id)
+    .order('created_at', { ascending: false }),
+  supabase
+    .from('collectie_restaurants')
+    .select('collectie_id, restaurant_id')
+    .eq('user_id', user.id),
+  supabase
+    .from('reviews')
+    .select('id, restaurant_id, rating, text, status, created_at')
+    .eq('user_id', user.id)
+    .order('created_at', { ascending: false })
+    .limit(100),
+]);
+
+for (const [label, res] of Object.entries({
+  profile: profileRes,
+  saved: savedRes,
+  collecties: collectiesRes,
+  links: linksRes,
+  reviews: reviewsRes,
+})) {
+  if (res.error) console.error('[account]', label, res.error.code, res.error.message);
+}
+
+const profile = profileRes.data as {
+  username: string | null;
+  full_name: string | null;
+  avatar_url: string | null;
+  is_banned: boolean | null;
+} | null;
+if (profile?.is_banned) {
+  await supabase.auth.signOut();
+  return Astro.redirect('/inloggen', 303);
+}
+
+const saved = (savedRes.data ?? []) as SavedRow[];
+const collecties = (collectiesRes.data ?? []) as CollectieRow[];
+const links = (linksRes.data ?? []) as LinkRow[];
+const ownReviews = (reviewsRes.data ?? []) as OwnReview[];
+const loadFailed = Boolean(savedRes.error || reviewsRes.error);
+
+const restaurants = await getRestaurantsByIds([
+  ...saved.map((s) => s.restaurant_id),
+  ...ownReviews.map((r) => r.restaurant_id),
+]);
+const byId = new Map<string, RestaurantListItem>(restaurants.map((r) => [r.id, r]));
+
+const savedIds = new Set(saved.map((s) => s.restaurant_id));
+const collectiesFor = new Map<string, string[]>();
+for (const link of links) {
+  if (!savedIds.has(link.restaurant_id)) continue;
+  collectiesFor.set(link.restaurant_id, [
+    ...(collectiesFor.get(link.restaurant_id) ?? []),
+    link.collectie_id,
+  ]);
+}
+const savedItems = saved
+  .map((s) => ({
+    ...s,
+    restaurant: byId.get(s.restaurant_id),
+    collecties: collectiesFor.get(s.restaurant_id) ?? [],
+  }))
+  .filter((s): s is typeof s & { restaurant: RestaurantListItem } => Boolean(s.restaurant))
+  .sort((a, b) => (a.restaurant.name ?? '').localeCompare(b.restaurant.name ?? '', 'nl'));
+const collectieCounts = new Map(
+  collecties.map((c) => [c.id, savedItems.filter((s) => s.collecties.includes(c.id)).length]),
+);
+
+const displayName = profile?.full_name?.trim() || profile?.username || user.email || 'Tastory-gast';
+const initial = displayName.charAt(0).toUpperCase();
+
+const statusLabel = (status: string | null) =>
+  status === 'published'
+    ? { text: 'Zichtbaar', tone: 'ok' }
+    : status === 'pending'
+      ? { text: 'Wacht op verificatie', tone: 'wait' }
+      : { text: 'Wordt verwerkt', tone: 'muted' };
+---
+
+<BaseLayout title="Mijn Tastory | Tastory" noindex>
+  <div class="ui-page">
+    <div class="ui-container">
+      <header class="profile">
+        {
+          profile?.avatar_url ? (
+            <img class="avatar" src={profile.avatar_url} alt="" width="72" height="72" />
+          ) : (
+            <span class="avatar avatar-initial" aria-hidden="true">
+              {initial}
+            </span>
+          )
+        }
+        <div class="profile-text">
+          <h1 class="ui-title">{displayName}</h1>
+          <p class="ui-muted">{profile?.username ? `@${profile.username}` : user.email}</p>
+        </div>
+        <button type="button" class="ui-btn ui-btn-ghost logout" id="logout">Uitloggen</button>
+      </header>
+
+      {
+        loadFailed && (
+          <p class="ui-notice">
+            Niet alles kon geladen worden. Ververs de pagina om het opnieuw te proberen.
+          </p>
+        )
+      }
+
+      <nav class="tabs" aria-label="Onderdelen">
+        <a href="#opgeslagen" class="tab" data-tab="opgeslagen"
+          >Opgeslagen <span>{savedItems.length}</span></a
+        >
+        <a href="#reviews" class="tab" data-tab="reviews"
+          >Mijn reviews <span>{ownReviews.length}</span></a
+        >
+      </nav>
+
+      <div class="panel" id="opgeslagen" data-panel="opgeslagen">
+        {
+          savedItems.length === 0 ? (
+            <div class="empty">
+              <p>
+                <strong>Nog niets opgeslagen.</strong> Tik op <em>Opslaan</em> bij een restaurant om
+                het hier te bewaren.
+              </p>
+              <a class="ui-btn ui-btn-primary" href="/restaurants">
+                Ontdek restaurants
+              </a>
+            </div>
+          ) : (
+            <>
+              {collecties.length > 0 && (
+                <div class="chips" role="group" aria-label="Filter op collectie">
+                  <button type="button" class="chip" data-filter="" aria-pressed="true">
+                    Alles ({savedItems.length})
+                  </button>
+                  {collecties.map((c) => (
+                    <button type="button" class="chip" data-filter={c.id} aria-pressed="false">
+                      <span
+                        class="dot"
+                        style={`background:${c.kleur || '#E8612A'}`}
+                        aria-hidden="true"
+                      />
+                      {c.naam || 'Collectie'} ({collectieCounts.get(c.id) ?? 0})
+                    </button>
+                  ))}
+                </div>
+              )}
+              <p class="ui-muted filter-empty" hidden>
+                Deze collectie is nog leeg.
+              </p>
+              <ul class="grid">
+                {savedItems.map((item) => (
+                  <li
+                    class="saved"
+                    data-collecties={item.collecties.join(' ')}
+                    data-restaurant={item.restaurant_id}
+                  >
+                    <RestaurantCard restaurant={item.restaurant}>
+                      {item.notes && <p class="note">{item.notes}</p>}
+                    </RestaurantCard>
+                    <button
+                      type="button"
+                      class="unsave"
+                      data-remove={item.restaurant_id}
+                      aria-label={`${item.restaurant.name ?? 'Restaurant'} verwijderen uit opgeslagen`}
+                      title="Verwijderen uit opgeslagen"
+                    >
+                      <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8l1 1.1L12 21l7.8-7.5 1-1.1a5.5 5.5 0 0 0 0-7.8z" />
+                      </svg>
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </>
+          )
+        }
+      </div>
+
+      <div class="panel" id="reviews" data-panel="reviews" hidden>
+        {
+          ownReviews.length === 0 ? (
+            <div class="empty">
+              <p>
+                <strong>Je hebt nog geen reviews geschreven.</strong> Ga naar een restaurant waar je
+                hebt gegeten en kies <em>Schrijf een review</em>.
+              </p>
+            </div>
+          ) : (
+            <ul class="reviews">
+              {ownReviews.map((review) => {
+                const r = byId.get(review.restaurant_id);
+                const status = statusLabel(review.status);
+                return (
+                  <li class="review">
+                    <div class="review-head">
+                      {r ? <a href={restaurantPath(r)}>{r.name}</a> : <span>Restaurant</span>}
+                      <span class:list={['badge', `badge-${status.tone}`]}>{status.text}</span>
+                    </div>
+                    <div class="review-meta">
+                      <RatingStars rating={review.rating} size={14} />
+                      <span class="ui-muted">{formatReviewDate(review.created_at)}</span>
+                    </div>
+                    {review.text && <p class="review-text">{review.text}</p>}
+                  </li>
+                );
+              })}
+            </ul>
+          )
+        }
+      </div>
+    </div>
+  </div>
+</BaseLayout>
+
+<script>
+  import { getBrowserSupabase } from '../../lib/supabase-browser';
+  import { removeSavedRestaurant } from '../../lib/account';
+
+  // Tabbladen via de #hash, zodat /account#reviews direct werkt.
+  const tabs = document.querySelectorAll<HTMLAnchorElement>('[data-tab]');
+  const panels = document.querySelectorAll<HTMLElement>('[data-panel]');
+  function showTab(name: string) {
+    const target = name === 'reviews' ? 'reviews' : 'opgeslagen';
+    panels.forEach((p) => (p.hidden = p.dataset.panel !== target));
+    tabs.forEach((t) => t.setAttribute('aria-current', String(t.dataset.tab === target)));
+  }
+  tabs.forEach((tab) =>
+    tab.addEventListener('click', (e) => {
+      e.preventDefault();
+      history.replaceState(null, '', `#${tab.dataset.tab}`);
+      showTab(tab.dataset.tab ?? '');
+    }),
+  );
+  showTab(location.hash.slice(1));
+
+  // Filter op collectie.
+  const items = document.querySelectorAll<HTMLElement>('.saved');
+  const filterEmpty = document.querySelector<HTMLElement>('.filter-empty');
+  document.querySelectorAll<HTMLButtonElement>('[data-filter]').forEach((chip) => {
+    chip.addEventListener('click', () => {
+      const id = chip.dataset.filter ?? '';
+      document
+        .querySelectorAll('[data-filter]')
+        .forEach((c) => c.setAttribute('aria-pressed', String(c === chip)));
+      let visible = 0;
+      items.forEach((item) => {
+        const show = !id || (item.dataset.collecties ?? '').split(' ').includes(id);
+        item.hidden = !show;
+        if (show) visible += 1;
+      });
+      if (filterEmpty) filterEmpty.hidden = visible > 0;
+    });
+  });
+
+  // Verwijderen uit opgeslagen.
+  document.querySelectorAll<HTMLButtonElement>('[data-remove]').forEach((button) => {
+    button.addEventListener('click', async () => {
+      const restaurantId = button.dataset.remove ?? '';
+      const supabase = getBrowserSupabase();
+      const { data } = await supabase.auth.getSession();
+      const userId = data.session?.user.id;
+      if (!userId) return location.replace('/inloggen?next=/account');
+      const item = button.closest('li');
+      const name = item?.querySelector('h3')?.textContent?.trim() || 'dit restaurant';
+      if (!confirm(`${name} verwijderen uit je opgeslagen restaurants?`)) return;
+      button.disabled = true;
+      item?.classList.add('removing');
+      try {
+        await removeSavedRestaurant(supabase, userId, restaurantId);
+        item?.remove();
+        updateSavedCount();
+      } catch (e) {
+        button.disabled = false;
+        item?.classList.remove('removing');
+        alert((e as Error).message);
+      }
+    });
+  });
+
+  function updateSavedCount() {
+    const count = document.querySelectorAll('.saved').length;
+    const label = document.querySelector('[data-tab="opgeslagen"] span');
+    if (label) label.textContent = String(count);
+    if (count === 0) location.reload();
+  }
+
+  document.getElementById('logout')?.addEventListener('click', async () => {
+    const supabase = getBrowserSupabase();
+    // Alleen op dit apparaat uitloggen; de app blijft ingelogd.
+    await supabase.auth.signOut({ scope: 'local' });
+    location.replace('/');
+  });
+</script>
+
+<style>
+  .profile {
+    display: flex;
+    align-items: center;
+    gap: var(--space-lg);
+    margin-bottom: var(--space-xl);
+  }
+  .avatar {
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    object-fit: cover;
+    flex-shrink: 0;
+  }
+  .avatar-initial {
+    display: grid;
+    place-items: center;
+    background: var(--orange);
+    color: #fff;
+    font-family: var(--serif);
+    font-size: var(--text-3xl);
+  }
+  .profile-text {
+    flex: 1;
+    min-width: 0;
+  }
+  .profile-text .ui-title {
+    margin-bottom: 0.15rem;
+    overflow-wrap: anywhere;
+  }
+  .tabs {
+    display: flex;
+    gap: var(--space-lg);
+    border-bottom: 1px solid var(--beige-deeper);
+    margin: var(--space-lg) 0;
+  }
+  .tab {
+    padding: 0.7rem 0;
+    color: var(--text-muted);
+    text-decoration: none;
+    font-weight: 500;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -1px;
+  }
+  .tab span {
+    font-weight: 400;
+    margin-left: 0.2rem;
+  }
+  .tab[aria-current='true'] {
+    color: var(--text);
+    border-bottom-color: var(--orange);
+  }
+  .empty {
+    background: var(--white);
+    border: 1px dashed var(--beige-deeper);
+    border-radius: var(--radius-md);
+    padding: var(--space-xl);
+    display: grid;
+    gap: var(--space-md);
+    justify-items: start;
+    line-height: 1.55;
+  }
+  .chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: var(--space-lg);
+  }
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.45rem 0.85rem;
+    border-radius: 999px;
+    border: 1px solid var(--beige-deeper);
+    background: var(--white);
+    font: inherit;
+    font-size: var(--text-sm);
+    color: var(--text);
+    cursor: pointer;
+  }
+  .chip[aria-pressed='true'] {
+    background: var(--text);
+    border-color: var(--text);
+    color: #fff;
+  }
+  .dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+  }
+  .filter-empty {
+    margin-bottom: var(--space-md);
+  }
+  .grid {
+    list-style: none;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+    gap: var(--space-lg);
+  }
+  .saved {
+    position: relative;
+    transition: opacity 0.2s;
+  }
+  .saved[hidden] {
+    display: none;
+  }
+  .saved.removing {
+    opacity: 0.4;
+  }
+  /* Notitie hoort bij het kaartje, onder de restaurantgegevens. */
+  .note {
+    margin-top: 0.6rem;
+    padding: 0.5rem 0.7rem;
+    background: var(--beige);
+    border-radius: var(--radius-sm);
+    font-size: var(--text-sm);
+    color: var(--text);
+    line-height: 1.45;
+  }
+  .note::before {
+    content: 'Notitie: ';
+    font-weight: 500;
+  }
+  /* Gevuld hartje op de foto, zoals in de app: tikken = verwijderen. */
+  .unsave {
+    position: absolute;
+    top: 0.6rem;
+    right: 0.6rem;
+    width: 38px;
+    height: 38px;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    border: none;
+    background: rgba(255, 252, 248, 0.92);
+    box-shadow: var(--shadow-sm);
+    cursor: pointer;
+    color: var(--orange);
+  }
+  .unsave svg path {
+    fill: currentColor;
+    stroke: currentColor;
+    stroke-width: 2;
+  }
+  .unsave:hover {
+    background: #fff;
+  }
+  .unsave:focus-visible {
+    outline: 3px solid var(--orange);
+    outline-offset: 2px;
+  }
+  .reviews {
+    list-style: none;
+    display: grid;
+    gap: var(--space-md);
+  }
+  .review {
+    background: var(--white);
+    border: 1px solid var(--beige-deeper);
+    border-radius: var(--radius-md);
+    padding: var(--space-lg);
+  }
+  .review-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: var(--space-md);
+    flex-wrap: wrap;
+    font-weight: 500;
+  }
+  .review-head a {
+    color: var(--text);
+  }
+  .review-meta {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    margin: 0.4rem 0;
+    font-size: var(--text-sm);
+  }
+  .review-text {
+    line-height: 1.55;
+    white-space: pre-line;
+  }
+  .badge {
+    font-size: var(--text-xs);
+    font-weight: 500;
+    padding: 0.25rem 0.6rem;
+    border-radius: 999px;
+  }
+  .badge-ok {
+    background: #e3f1e8;
+    color: #22603d;
+  }
+  .badge-wait {
+    background: #fdf0e1;
+    color: #8a5310;
+  }
+  .badge-muted {
+    background: var(--beige);
+    color: var(--text-muted);
+  }
+  @media (max-width: 640px) {
+    .profile {
+      flex-wrap: wrap;
+      gap: var(--space-md);
+    }
+    .avatar {
+      width: 56px;
+      height: 56px;
+    }
+    .logout {
+      width: 100%;
+    }
+  }
+</style>

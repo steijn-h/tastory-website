@@ -1,0 +1,57 @@
+---
+// Vijf sterren met gedeeltelijke vulling (bijv. 4,3 = 4 hele + 30% ster).
+interface Props {
+  rating: number | null | undefined;
+  size?: number;
+  label?: string;
+}
+const { rating, size = 16, label } = Astro.props;
+const value = Math.max(0, Math.min(5, Number(rating) || 0));
+const ariaLabel =
+  label ?? `${value.toLocaleString('nl-NL', { maximumFractionDigits: 1 })} van 5 sterren`;
+const fills = [0, 1, 2, 3, 4].map((i) => Math.round(Math.max(0, Math.min(1, value - i)) * 100));
+const star = 'M12 2.5l2.9 6.1 6.6.8-4.9 4.6 1.3 6.6L12 17.3l-5.9 3.3 1.3-6.6-4.9-4.6 6.6-.8z';
+---
+
+<span class="stars" role="img" aria-label={ariaLabel}>
+  {
+    fills.map((fill) => (
+      <span class="star" style={`width:${size}px;height:${size}px`}>
+        <svg viewBox="0 0 24 24" width={size} height={size} aria-hidden="true">
+          <path d={star} class="star-empty" />
+        </svg>
+        <span class="star-fill" style={`width:${fill}%`}>
+          <svg viewBox="0 0 24 24" width={size} height={size} aria-hidden="true">
+            <path d={star} class="star-full" />
+          </svg>
+        </span>
+      </span>
+    ))
+  }
+</span>
+
+<style>
+  .stars {
+    display: inline-flex;
+    gap: 2px;
+    vertical-align: middle;
+  }
+  .star {
+    position: relative;
+    display: inline-block;
+  }
+  .star svg {
+    display: block;
+  }
+  .star-fill {
+    position: absolute;
+    inset: 0 auto 0 0;
+    overflow: hidden;
+  }
+  .star-empty {
+    fill: var(--beige-deeper);
+  }
+  .star-full {
+    fill: #f5a623;
+  }
+</style>

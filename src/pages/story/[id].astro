@@ -1,6 +1,7 @@
 ---
 export const prerender = false;
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import { APP_STORE_URL } from '../../lib/links';
 
 const { id } = Astro.params;
 
@@ -23,7 +24,7 @@ const description = story
   ? `Bekijk de Taste Story van ${story.user_name} bij ${story.restaurant_name} op Tastory.`
   : 'Bekijk deze Taste Story op Tastory.';
 const ogImage = story?.photo_url ?? 'https://tastory.nl/og-image.png';
-const appStoreUrl = 'https://apps.apple.com/nl/app/tastory/id6744042066';
+const appStoreUrl = APP_STORE_URL;
 const deepLinkUrl = `tastory://story/${id}`;
 ---
 
