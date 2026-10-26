@@ -10,9 +10,12 @@ import { SITE_URL } from '../../lib/links';
 
 const restaurants = await getAllRestaurants();
 const initialQuery = Astro.url.searchParams.get('q') ?? '';
+// Op alfabet; in de browser eerst 5 tonen (zie script), alle links staan wel in
+// de HTML voor zoekmachines.
 const cities = restaurants
-  ? groupByCity(restaurants).sort((a, b) => b.restaurants.length - a.restaurants.length)
+  ? groupByCity(restaurants).sort((a, b) => a.name.localeCompare(b.name, 'nl'))
   : [];
+const CITIES_STEP = 5;
 
 if (restaurants) {
   Astro.response.headers.set('Cache-Control', 'public, s-maxage=300, stale-while-revalidate=86400');
@@ -64,17 +67,37 @@ if (restaurants) {
 
       {
         cities.length > 0 && (
-          <nav class="cities" aria-label="Restaurants per stad">
-            <h2>Kies een stad</h2>
+          <nav class="cities" aria-label="Restaurants per stad" data-cities data-step={CITIES_STEP}>
+            <div class="cities-head">
+              <h2>Kies een stad</h2>
+              {cities.length > CITIES_STEP && (
+                <input
+                  type="search"
+                  class="city-search"
+                  placeholder="Zoek een stad…"
+                  aria-label="Zoek een stad"
+                  autocomplete="off"
+                  data-city-search
+                />
+              )}
+            </div>
             <ul>
-              {cities.map((c) => (
-                <li>
+              {cities.map((c, i) => (
+                <li data-name={c.name.toLowerCase()} hidden={i >= CITIES_STEP}>
                   <a href={`/restaurants/${c.slug}`}>
                     {c.name} <span>{c.restaurants.length}</span>
                   </a>
                 </li>
               ))}
             </ul>
+            <p class="city-empty" data-city-empty hidden>
+              Geen stad gevonden.
+            </p>
+            {cities.length > CITIES_STEP && (
+              <button type="button" class="city-more" data-city-more>
+                Meer steden
+              </button>
+            )}
           </nav>
         )
       }
@@ -94,6 +117,35 @@ if (restaurants) {
     </div>
   </div>
 </BaseLayout>
+
+<script>
+  // Steden per 5 tonen, met zoeken. Zonder JavaScript staan de eerste 5 er.
+  const nav = document.querySelector<HTMLElement>('[data-cities]');
+  if (nav) {
+    const step = Number(nav.dataset.step) || 5;
+    const items = [...nav.querySelectorAll<HTMLLIElement>('li[data-name]')];
+    const search = nav.querySelector<HTMLInputElement>('[data-city-search]');
+    const more = nav.querySelector<HTMLButtonElement>('[data-city-more]');
+    const empty = nav.querySelector<HTMLElement>('[data-city-empty]')!;
+    let shown = step;
+    const render = () => {
+      const q = (search?.value ?? '').trim().toLowerCase();
+      let visible = 0;
+      items.forEach((li, i) => {
+        li.hidden = q ? !li.dataset.name!.includes(q) : i >= shown;
+        if (!li.hidden) visible++;
+      });
+      empty.hidden = visible > 0;
+      if (more) more.hidden = Boolean(q) || shown >= items.length;
+    };
+    more?.addEventListener('click', () => {
+      shown += step;
+      render();
+    });
+    search?.addEventListener('input', render);
+    render();
+  }
+</script>
 
 <style>
   .page {
@@ -142,10 +194,49 @@ if (restaurants) {
   .cities {
     margin: var(--space-xl) 0;
   }
+  .cities-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-sm) var(--space-md);
+    margin-bottom: var(--space-sm);
+  }
   .cities h2 {
     font-size: var(--text-base);
     font-weight: 500;
-    margin-bottom: var(--space-sm);
+  }
+  .city-search {
+    width: 220px;
+    max-width: 100%;
+    padding: 0.45rem 0.9rem;
+    border: 1px solid var(--beige-deeper);
+    border-radius: 100px;
+    background: var(--white);
+    font: inherit;
+    font-size: var(--text-sm);
+    color: var(--text);
+  }
+  .city-search:focus {
+    outline: none;
+    border-color: var(--brown);
+  }
+  .city-empty {
+    color: var(--text-muted);
+    font-size: var(--text-sm);
+  }
+  .city-more {
+    margin-top: var(--space-sm);
+    padding: 0;
+    border: 0;
+    background: none;
+    font: inherit;
+    font-size: var(--text-sm);
+    font-weight: 500;
+    color: var(--brown);
+    cursor: pointer;
+    text-decoration: underline;
+    text-underline-offset: 3px;
   }
   .cities ul {
     list-style: none;
@@ -184,6 +275,9 @@ if (restaurants) {
     }
     .container {
       padding: 0 var(--space-md);
+    }
+    .city-search {
+      width: 100%;
     }
   }
 </style>

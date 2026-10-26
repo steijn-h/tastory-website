@@ -1548,10 +1548,13 @@ const breadcrumbLd = {
       text-align: left;
       max-width: none;
     }
-    .media {
+    /* .media.thumbs-2 mee, anders wint die regel en blijft er een lege kolom over. */
+    .media,
+    .media.thumbs-2 {
       grid-template-columns: 1fr;
       grid-template-rows: 1fr;
       height: 260px;
+      margin-bottom: var(--space-lg);
       margin-left: calc(-1 * var(--space-md));
       margin-right: calc(-1 * var(--space-md));
       border-radius: 0;
