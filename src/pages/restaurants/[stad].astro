@@ -7,6 +7,7 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 import RestaurantGrid from '../../components/RestaurantGrid.astro';
 import { getAllRestaurants, groupByCity, restaurantPath } from '../../lib/restaurants';
 import { SITE_URL } from '../../lib/links';
+import { groupByCuisine, MIN_RESTAURANTS_PER_CUISINE_PAGE } from '../../lib/cuisine';
 
 const stad = (Astro.params.stad ?? '').toLowerCase();
 const all = await getAllRestaurants();
@@ -27,6 +28,9 @@ const rated = restaurants.filter((r) => (r.weighted_score ?? 0) > 0);
 const intro = `${restaurants.length} ${restaurants.length === 1 ? 'restaurant' : 'restaurants'} in ${name}${
   rated.length > 0 ? `, waarvan ${rated.length} beoordeeld door Tastory-gasten` : ''
 }. Gesorteerd op beoordeling.`;
+const cuisineLinks = groupByCuisine(restaurants).filter(
+  (c) => c.restaurants.length >= MIN_RESTAURANTS_PER_CUISINE_PAGE,
+);
 const otherCities = cities
   .filter((c) => c.slug !== stad)
   .sort((a, b) => b.restaurants.length - a.restaurants.length)
@@ -114,6 +118,20 @@ const breadcrumbLd = group
               <h1>Restaurants in {name}</h1>
               <p>{intro}</p>
             </header>
+            {cuisineLinks.length > 0 && (
+              <nav class="cuisines" aria-label={`Restaurants in ${name} per keuken`}>
+                <h2>Per keuken</h2>
+                <ul>
+                  {cuisineLinks.map((c) => (
+                    <li>
+                      <a href={`/restaurants/${group.slug}/${c.slug}`}>
+                        {c.name} <span>{c.restaurants.length}</span>
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </nav>
+            )}
             <RestaurantGrid
               restaurants={restaurants}
               showCity={false}
@@ -185,6 +203,39 @@ const breadcrumbLd = group
   .state a {
     color: var(--brown-dark);
     font-weight: 500;
+  }
+  .cuisines {
+    margin-bottom: var(--space-lg);
+  }
+  .cuisines h2 {
+    font-size: var(--text-base);
+    font-weight: 500;
+    margin-bottom: var(--space-sm);
+  }
+  .cuisines ul {
+    list-style: none;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+  .cuisines a {
+    display: inline-flex;
+    gap: 0.4rem;
+    align-items: center;
+    padding: 0.45rem 0.9rem;
+    background: var(--white);
+    border: 1px solid var(--beige-deeper);
+    border-radius: 100px;
+    text-decoration: none;
+    color: var(--text);
+    font-size: var(--text-sm);
+    transition: border-color 0.2s;
+  }
+  .cuisines a:hover {
+    border-color: var(--brown);
+  }
+  .cuisines a span {
+    color: var(--text-muted);
   }
   .others {
     margin-top: var(--space-3xl);

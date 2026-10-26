@@ -206,6 +206,24 @@ const jsonLd = restaurant
     }
   : null;
 
+// Video-gegevens voor Google (kan een video-resultaat opleveren). Google eist
+// een uploaddatum en een miniatuur; de uploaddatum van de video zelf staat
+// niet in de database, dus we gebruiken de datum waarop het restaurant op
+// Tastory kwam.
+const videoLd =
+  restaurant && videoUrl && photos[0] && restaurant.created_at
+    ? {
+        '@context': 'https://schema.org',
+        '@type': 'VideoObject',
+        name: `Video van ${name}${city ? ` in ${city}` : ''}`,
+        description: summary,
+        thumbnailUrl: [photos[0]],
+        uploadDate: restaurant.created_at,
+        contentUrl: videoUrl,
+        publisher: { '@type': 'Organization', name: 'Tastory', url: SITE_URL },
+      }
+    : null;
+
 const breadcrumbs = [
   { name: 'Home', path: '/' },
   { name: 'Restaurants', path: '/restaurants' },
@@ -233,6 +251,7 @@ const breadcrumbLd = {
 >
   {jsonLd && <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />}
   {restaurant && <script type="application/ld+json" set:html={JSON.stringify(breadcrumbLd)} />}
+  {videoLd && <script type="application/ld+json" set:html={JSON.stringify(videoLd)} />}
 
   {!restaurant ? (
     <div class="page">

@@ -2,25 +2,30 @@
 // Raster met restaurantkaarten plus zoeken/filteren/sorteren in de browser.
 // Gebruikt op /restaurants en op de stadspagina's.
 import RestaurantCard from './RestaurantCard.astro';
-import type { RestaurantListItem } from '../lib/restaurants';
+import { hasVideo, type RestaurantListItem } from '../lib/restaurants';
 import { normalizeCity, priceLabel } from '../lib/format';
+import { splitCuisines } from '../lib/cuisine';
 
 interface Props {
   restaurants: RestaurantListItem[];
   showCity?: boolean;
   initialQuery?: string;
   searchPlaceholder?: string;
+  showCuisineFilter?: boolean;
 }
 const {
   restaurants,
   showCity = true,
   initialQuery = '',
   searchPlaceholder = 'Zoek op naam, stad of keuken…',
+  showCuisineFilter = true,
 } = Astro.props;
 
-const cuisines = [
-  ...new Set(restaurants.map((r) => r.cuisine?.trim()).filter((c): c is string => Boolean(c))),
-].sort((a, b) => a.localeCompare(b, 'nl'));
+// "Internationaal, Japans" telt als twee keukens (niet als eigen optie).
+const cuisines = [...new Set(restaurants.flatMap((r) => splitCuisines(r.cuisine)))].sort((a, b) =>
+  a.localeCompare(b, 'nl'),
+);
+const videoCount = restaurants.filter(hasVideo).length;
 const prices = [
   ...new Set(
     restaurants
@@ -53,7 +58,7 @@ const prices = [
       />
     </label>
     {
-      cuisines.length > 1 && (
+      showCuisineFilter && cuisines.length > 1 && (
         <label class="select">
           <span class="sr-only">Keuken</span>
           <select data-cuisine>
@@ -78,6 +83,14 @@ const prices = [
         </label>
       )
     }
+    {
+      videoCount > 0 && (
+        <label class="toggle">
+          <input type="checkbox" data-video-only />
+          <span>Met video ({videoCount})</span>
+        </label>
+      )
+    }
     <label class="select">
       <span class="sr-only">Sorteren</span>
       <select data-sort>
@@ -96,7 +109,10 @@ const prices = [
         <li
           data-name={(r.name ?? '').toLowerCase()}
           data-city={(normalizeCity(r.city) ?? '').toLowerCase()}
-          data-cuisine={(r.cuisine ?? '').trim().toLowerCase()}
+          data-cuisine={splitCuisines(r.cuisine)
+            .map((c) => c.toLowerCase())
+            .join('|')}
+          data-video={hasVideo(r) ? '1' : undefined}
           data-price={String(r.price_level ?? '')}
           data-score={String(r.weighted_score ?? 0)}
           data-reviews={String(r.published_review_count ?? 0)}
@@ -117,6 +133,7 @@ const prices = [
     const search = root.querySelector<HTMLInputElement>('[data-search]');
     const cuisine = root.querySelector<HTMLSelectElement>('[data-cuisine]');
     const price = root.querySelector<HTMLSelectElement>('[data-price]');
+    const videoOnly = root.querySelector<HTMLInputElement>('[data-video-only]');
     const sort = root.querySelector<HTMLSelectElement>('[data-sort]');
     const list = root.querySelector<HTMLElement>('[data-list]');
     const count = root.querySelector<HTMLElement>('[data-count]');
@@ -128,6 +145,7 @@ const prices = [
       const q = (search?.value ?? '').trim().toLowerCase();
       const c = cuisine?.value ?? '';
       const p = price?.value ?? '';
+      const v = videoOnly?.checked ?? false;
       let visible = 0;
       for (const item of items) {
         const d = item.dataset;
@@ -136,8 +154,9 @@ const prices = [
             (d.name ?? '').includes(q) ||
             (d.city ?? '').includes(q) ||
             (d.cuisine ?? '').includes(q)) &&
-          (!c || d.cuisine === c) &&
-          (!p || d.price === p);
+          (!c || (d.cuisine ?? '').split('|').includes(c)) &&
+          (!p || d.price === p) &&
+          (!v || d.video === '1');
         item.hidden = !show;
         if (show) visible++;
       }
@@ -156,6 +175,7 @@ const prices = [
     search?.addEventListener('input', apply);
     cuisine?.addEventListener('change', apply);
     price?.addEventListener('change', apply);
+    videoOnly?.addEventListener('change', apply);
     sort?.addEventListener('change', apply);
     if (search?.value) apply();
   });
@@ -191,6 +211,26 @@ const prices = [
     color: var(--text);
     outline: none;
     min-width: 0;
+  }
+  .toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    padding: 0 0.9rem;
+    background: var(--white);
+    border: 1px solid var(--beige-deeper);
+    border-radius: var(--radius-sm);
+    font-size: var(--text-sm);
+    color: var(--text);
+    cursor: pointer;
+  }
+  .toggle input {
+    accent-color: var(--orange);
+    width: 16px;
+    height: 16px;
+  }
+  .toggle:has(input:checked) {
+    border-color: var(--orange);
   }
   .select select {
     appearance: none;

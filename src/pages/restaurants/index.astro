@@ -4,6 +4,7 @@ export const prerender = false;
 
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import RestaurantGrid from '../../components/RestaurantGrid.astro';
+import VideoShowcase from '../../components/VideoShowcase.astro';
 import { getAllRestaurants, groupByCity } from '../../lib/restaurants';
 import { SITE_URL } from '../../lib/links';
 
@@ -58,6 +59,8 @@ if (restaurants) {
           eten.
         </p>
       </header>
+
+      {restaurants && <VideoShowcase restaurants={restaurants} />}
 
       {
         cities.length > 0 && (

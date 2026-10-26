@@ -2,7 +2,7 @@
 // die van de app (rork-tastory-react), zodat gasten op de website precies zien
 // wat ze in de app als gast ook zien.
 import { getSupabase } from './supabase';
-import { normalizeCity, slugify } from './format';
+import { normalizeCity, safeHttpsUrl, slugify } from './format';
 
 export interface Restaurant {
   id: string;
@@ -100,6 +100,14 @@ export function isUuid(value: string): boolean {
 /** Partner = heeft video of eigen achtergrond (zelfde regel als de app). */
 export function isPartnerRestaurant(r: Pick<Restaurant, 'video_url' | 'background_url'>): boolean {
   return Boolean(r.video_url || r.background_url);
+}
+
+/**
+ * Geldige video (https-link). Zelfde idee als de video-sectie in de app, maar
+ * strenger: een mapnaam of kapotte waarde in video_url telt niet mee.
+ */
+export function hasVideo(r: Pick<Restaurant, 'video_url'>): boolean {
+  return safeHttpsUrl(r.video_url) !== null;
 }
 
 export function restaurantPath(r: Pick<Restaurant, 'id' | 'slug'>): string {

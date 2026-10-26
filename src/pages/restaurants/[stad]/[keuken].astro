@@ -1,0 +1,336 @@
+---
+// Pagina per stad en keuken, bijv. /restaurants/enschede/italiaans — voor
+// zoekopdrachten als "Italiaans restaurant Enschede". Alleen combinaties met
+// genoeg restaurants worden gelinkt en in de sitemap gezet; kleinere bestaan
+// wel (oude links) maar met noindex.
+export const prerender = false;
+
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import RestaurantGrid from '../../../components/RestaurantGrid.astro';
+import { getAllRestaurants, groupByCity, restaurantPath } from '../../../lib/restaurants';
+import {
+  cuisineRestaurantsLabel,
+  groupByCuisine,
+  MIN_RESTAURANTS_PER_CUISINE_PAGE,
+} from '../../../lib/cuisine';
+import { priceLabel } from '../../../lib/format';
+import { SITE_URL } from '../../../lib/links';
+
+const stad = (Astro.params.stad ?? '').toLowerCase();
+const keuken = (Astro.params.keuken ?? '').toLowerCase();
+const all = await getAllRestaurants();
+const cities = all ? groupByCity(all) : [];
+const city = cities.find((c) => c.slug === stad) ?? null;
+const cityCuisines = city ? groupByCuisine(city.restaurants) : [];
+const group = cityCuisines.find((c) => c.slug === keuken) ?? null;
+
+if (all === null) {
+  Astro.response.status = 503;
+  Astro.response.headers.set('Retry-After', '120');
+} else if (!city || !group) {
+  Astro.response.status = 404;
+} else {
+  Astro.response.headers.set('Cache-Control', 'public, s-maxage=300, stale-while-revalidate=86400');
+}
+
+const cityName = city?.name ?? '';
+const restaurants = group?.restaurants ?? [];
+const label = group ? cuisineRestaurantsLabel(group.name) : 'Restaurants';
+const thin = restaurants.length < MIN_RESTAURANTS_PER_CUISINE_PAGE;
+
+// Korte, feitelijke inleiding met namen en prijsklassen: uniek per pagina en
+// makkelijk te citeren door zoekmachines en AI-assistenten.
+const prices = restaurants
+  .map((r) => r.price_level)
+  .filter((p): p is number => typeof p === 'number' && p > 0);
+const priceRange =
+  prices.length > 0
+    ? Math.min(...prices) === Math.max(...prices)
+      ? `prijsklasse ${priceLabel(Math.min(...prices))}`
+      : `prijsklasse ${priceLabel(Math.min(...prices))} tot ${priceLabel(Math.max(...prices))}`
+    : null;
+const examples = restaurants
+  .slice(0, 3)
+  .map((r) => r.name)
+  .filter(Boolean);
+const exampleText =
+  examples.length > 1
+    ? `${examples.slice(0, -1).join(', ')} en ${examples[examples.length - 1]}`
+    : (examples[0] ?? '');
+// "5 Italiaanse restaurants" / "3 restaurants met fusion keuken" (hoofdletter
+// bij landen blijft staan).
+const countLabel = (n: number) => {
+  const text = label.startsWith('Restaurants met') ? `r${label.slice(1)}` : label;
+  return `${n} ${n === 1 ? text.replace('restaurants', 'restaurant') : text}`;
+};
+const intro = group
+  ? `${countLabel(restaurants.length)} in ${cityName} op Tastory${exampleText ? `, waaronder ${exampleText}` : ''}${
+      priceRange ? ` (${priceRange})` : ''
+    }. Gesorteerd op beoordeling van gasten.`
+  : '';
+
+const otherCuisines = cityCuisines
+  .filter((c) => c.slug !== keuken && c.restaurants.length >= MIN_RESTAURANTS_PER_CUISINE_PAGE)
+  .slice(0, 12);
+const sameCuisineElsewhere = group
+  ? cities
+      .filter((c) => c.slug !== stad)
+      .map((c) => ({
+        city: c,
+        match: groupByCuisine(c.restaurants).find((g) => g.slug === keuken),
+      }))
+      .filter(
+        (x): x is { city: typeof x.city; match: NonNullable<typeof x.match> } =>
+          Boolean(x.match) && x.match!.restaurants.length >= MIN_RESTAURANTS_PER_CUISINE_PAGE,
+      )
+      .sort((a, b) => b.match.restaurants.length - a.match.restaurants.length)
+      .slice(0, 12)
+  : [];
+
+const path = `/restaurants/${stad}/${keuken}`;
+const title = group
+  ? `${label} in ${cityName} (${restaurants.length}) — reviews & menu's | Tastory`
+  : 'Niet gevonden | Tastory';
+const description = group
+  ? `${label} in ${cityName}: ${countLabel(restaurants.length)} op Tastory${
+      exampleText ? `, waaronder ${exampleText}` : ''
+    }. Bekijk foto's, menukaarten en reviews van gasten.`
+  : 'Deze combinatie van stad en keuken staat (nog) niet op Tastory.';
+
+const itemList = group
+  ? {
+      '@context': 'https://schema.org',
+      '@type': 'ItemList',
+      name: `${label} in ${cityName}`,
+      numberOfItems: restaurants.length,
+      itemListElement: restaurants.slice(0, 30).map((r, i) => ({
+        '@type': 'ListItem',
+        position: i + 1,
+        url: `${SITE_URL}${restaurantPath(r)}`,
+        name: r.name ?? undefined,
+      })),
+    }
+  : null;
+const breadcrumbLd =
+  city && group
+    ? {
+        '@context': 'https://schema.org',
+        '@type': 'BreadcrumbList',
+        itemListElement: [
+          { '@type': 'ListItem', position: 1, name: 'Home', item: `${SITE_URL}/` },
+          {
+            '@type': 'ListItem',
+            position: 2,
+            name: 'Restaurants',
+            item: `${SITE_URL}/restaurants`,
+          },
+          {
+            '@type': 'ListItem',
+            position: 3,
+            name: cityName,
+            item: `${SITE_URL}/restaurants/${stad}`,
+          },
+          { '@type': 'ListItem', position: 4, name: group.name, item: `${SITE_URL}${path}` },
+        ],
+      }
+    : null;
+---
+
+<BaseLayout
+  title={title}
+  description={description}
+  keywords={group
+    ? [
+        `${group.name.toLowerCase()} restaurant ${cityName}`,
+        `${label.toLowerCase()} ${cityName}`,
+        `${group.name.toLowerCase()} eten ${cityName}`,
+        'Tastory',
+      ]
+    : []}
+  noindex={!group || thin}
+>
+  {itemList && <script type="application/ld+json" set:html={JSON.stringify(itemList)} />}
+  {breadcrumbLd && <script type="application/ld+json" set:html={JSON.stringify(breadcrumbLd)} />}
+
+  <div class="page">
+    <div class="container">
+      <nav class="breadcrumbs" aria-label="Kruimelpad">
+        <a href="/">Home</a> › <a href="/restaurants">Restaurants</a>
+        {
+          city && (
+            <>
+              {' '}
+              › <a href={`/restaurants/${stad}`}>{cityName}</a>
+            </>
+          )
+        }
+        {
+          group && (
+            <>
+              {' '}
+              › <span aria-current="page">{group.name}</span>
+            </>
+          )
+        }
+      </nav>
+
+      {
+        all === null ? (
+          <p class="state">
+            Restaurants kunnen op dit moment niet geladen worden. Probeer het over een paar minuten
+            opnieuw.
+          </p>
+        ) : !group ? (
+          <div class="state">
+            <h1>Niet gevonden</h1>
+            <p>
+              {city ? (
+                <a href={`/restaurants/${stad}`}>Bekijk alle restaurants in {cityName} →</a>
+              ) : (
+                <a href="/restaurants">Bekijk alle restaurants →</a>
+              )}
+            </p>
+          </div>
+        ) : (
+          <>
+            <header class="head">
+              <h1>
+                {label} in {cityName}
+              </h1>
+              <p>{intro}</p>
+            </header>
+            <RestaurantGrid
+              restaurants={restaurants}
+              showCity={false}
+              showCuisineFilter={false}
+              searchPlaceholder={`Zoek in ${cityName}…`}
+            />
+          </>
+        )
+      }
+
+      {
+        otherCuisines.length > 0 && (
+          <nav class="others" aria-label={`Andere keukens in ${cityName}`}>
+            <h2>Andere keukens in {cityName}</h2>
+            <ul>
+              {otherCuisines.map((c) => (
+                <li>
+                  <a href={`/restaurants/${stad}/${c.slug}`}>
+                    {c.name} <span>{c.restaurants.length}</span>
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </nav>
+        )
+      }
+
+      {
+        group && sameCuisineElsewhere.length > 0 && (
+          <nav class="others" aria-label={`${label} in andere steden`}>
+            <h2>{label} in andere steden</h2>
+            <ul>
+              {sameCuisineElsewhere.map(({ city: c, match }) => (
+                <li>
+                  <a href={`/restaurants/${c.slug}/${keuken}`}>
+                    {c.name} <span>{match.restaurants.length}</span>
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </nav>
+        )
+      }
+    </div>
+  </div>
+</BaseLayout>
+
+<style>
+  .page {
+    padding: 110px 0 var(--space-3xl);
+    min-height: 80vh;
+  }
+  .container {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 0 var(--space-lg);
+  }
+  .breadcrumbs {
+    font-size: var(--text-sm);
+    color: var(--text-muted);
+    margin-bottom: var(--space-md);
+  }
+  .breadcrumbs a {
+    color: inherit;
+    text-decoration: none;
+  }
+  .breadcrumbs a:hover {
+    color: var(--brown);
+    text-decoration: underline;
+  }
+  .head {
+    margin-bottom: var(--space-lg);
+  }
+  .head h1 {
+    font-family: var(--serif);
+    font-size: clamp(2rem, 4.5vw, 3rem);
+    line-height: 1.1;
+  }
+  .head p {
+    color: var(--text-muted);
+    margin-top: 0.5rem;
+    max-width: 70ch;
+    line-height: 1.6;
+  }
+  .state {
+    padding: var(--space-2xl) 0;
+  }
+  .state h1 {
+    font-family: var(--serif);
+    margin-bottom: var(--space-sm);
+  }
+  .others {
+    margin-top: var(--space-2xl);
+    padding-top: var(--space-xl);
+    border-top: 1px solid var(--beige-deeper);
+  }
+  .others h2 {
+    font-size: var(--text-base);
+    font-weight: 500;
+    margin-bottom: var(--space-sm);
+  }
+  .others ul {
+    list-style: none;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+  .others a {
+    display: inline-flex;
+    gap: 0.4rem;
+    align-items: center;
+    padding: 0.45rem 0.9rem;
+    background: var(--white);
+    border: 1px solid var(--beige-deeper);
+    border-radius: 100px;
+    text-decoration: none;
+    color: var(--text);
+    font-size: var(--text-sm);
+    transition: border-color 0.2s;
+  }
+  .others a:hover {
+    border-color: var(--brown);
+  }
+  .others a span {
+    color: var(--text-muted);
+  }
+  @media (max-width: 640px) {
+    .page {
+      padding-top: 90px;
+    }
+    .container {
+      padding: 0 var(--space-md);
+    }
+  }
+</style>
