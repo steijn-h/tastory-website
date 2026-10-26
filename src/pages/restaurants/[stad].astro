@@ -5,6 +5,7 @@ export const prerender = false;
 
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import RestaurantGrid from '../../components/RestaurantGrid.astro';
+import BackLink from '../../components/BackLink.astro';
 import { getAllRestaurants, groupByCity, restaurantPath } from '../../lib/restaurants';
 import { SITE_URL } from '../../lib/links';
 import { groupByCuisine, MIN_RESTAURANTS_PER_CUISINE_PAGE } from '../../lib/cuisine';
@@ -88,6 +89,7 @@ const breadcrumbLd = group
 
   <div class="page">
     <div class="container">
+      <BackLink href="/restaurants" label="Alle restaurants" />
       <nav class="breadcrumbs" aria-label="Kruimelpad">
         <a href="/">Home</a> › <a href="/restaurants">Restaurants</a>{
           group && (

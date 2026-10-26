@@ -7,6 +7,7 @@ export const prerender = false;
 
 import BaseLayout from '../../../layouts/BaseLayout.astro';
 import RestaurantGrid from '../../../components/RestaurantGrid.astro';
+import BackLink from '../../../components/BackLink.astro';
 import { getAllRestaurants, groupByCity, restaurantPath } from '../../../lib/restaurants';
 import {
   cuisineRestaurantsLabel,
@@ -154,6 +155,10 @@ const breadcrumbLd =
 
   <div class="page">
     <div class="container">
+      <BackLink
+        href={city ? `/restaurants/${stad}` : '/restaurants'}
+        label={city ? `Restaurants in ${cityName}` : 'Alle restaurants'}
+      />
       <nav class="breadcrumbs" aria-label="Kruimelpad">
         <a href="/">Home</a> › <a href="/restaurants">Restaurants</a>
         {

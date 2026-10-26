@@ -8,6 +8,7 @@ import RatingStars from '../../components/RatingStars.astro';
 import ReviewCard from '../../components/ReviewCard.astro';
 import RestaurantCard from '../../components/RestaurantCard.astro';
 import SaveButton from '../../components/SaveButton.astro';
+import BackLink from '../../components/BackLink.astro';
 import {
   cityPath,
   getAllRestaurants,
@@ -278,6 +279,10 @@ const breadcrumbLd = {
   ) : (
     <div class:list={['page', { partner: isPartner && backgroundUrl }]} style={isPartner && backgroundUrl ? `--partner-bg: url('${backgroundUrl}')` : undefined}>
       <div class="container">
+        <BackLink
+          href={city ? cityPath(city) : '/restaurants'}
+          label={city ? `Restaurants in ${city}` : 'Alle restaurants'}
+        />
         <nav class="breadcrumbs" aria-label="Kruimelpad">
           <ol>
             {breadcrumbs.map((b, i) => (
@@ -333,9 +338,17 @@ const breadcrumbLd = {
         {(videoUrl || photos.length > 0) && (
           <section class:list={['media', `thumbs-${thumbs.length}`]} aria-label="Foto's">
             {videoUrl ? (
-              <div class="media-main">
-                <video src={videoUrl} poster={photos[0]} autoplay muted loop playsinline preload="metadata" class="media-img" aria-label={`Video van ${name}`} />
-                <button type="button" class="sound-btn" id="sound-btn" aria-label="Geluid aan" aria-pressed="false">🔇</button>
+              <div class="media-main video-wrap" data-video-wrap>
+                <video src={videoUrl} poster={photos[0]} autoplay muted loop playsinline preload="metadata" class="media-img video" aria-label={`Video van ${name}, klik voor volledig scherm`} />
+                <div class="video-controls">
+                  <button type="button" class="video-btn" data-video-sound aria-label="Geluid aan" aria-pressed="false">
+                    <svg class="icon-muted" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 5 6 9H2v6h4l5 4V5z" /><line x1="22" y1="9" x2="16" y2="15" /><line x1="16" y1="9" x2="22" y2="15" /></svg>
+                    <svg class="icon-sound" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 5 6 9H2v6h4l5 4V5z" /><path d="M15.5 8.5a5 5 0 0 1 0 7" /><path d="M19 5a10 10 0 0 1 0 14" /></svg>
+                  </button>
+                  <button type="button" class="video-btn" data-video-fullscreen aria-label="Volledig scherm">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 3H5a2 2 0 0 0-2 2v3" /><path d="M21 8V5a2 2 0 0 0-2-2h-3" /><path d="M3 16v3a2 2 0 0 0 2 2h3" /><path d="M16 21h3a2 2 0 0 0 2-2v-3" /></svg>
+                  </button>
+                </div>
               </div>
             ) : (
               <button type="button" class="media-main photo-btn" data-index="0" aria-label="Foto 1 vergroten">
@@ -675,16 +688,55 @@ const breadcrumbLd = {
     loadMap();
   });
 
-  // Geluid van de video aan/uit.
-  const soundBtn = document.getElementById('sound-btn');
-  soundBtn?.addEventListener('click', () => {
-    const video = soundBtn.parentElement?.querySelector('video');
-    if (!video) return;
-    video.muted = !video.muted;
-    soundBtn.textContent = video.muted ? '🔇' : '🔊';
+  // Restaurantvideo: geluid aan/uit, en klikken = volledig scherm met geluid
+  // en de normale bediening (zoals in de app). iPhone kent alleen
+  // webkitEnterFullscreen op de video zelf.
+  const videoWrap = document.querySelector<HTMLElement>('[data-video-wrap]');
+  const video = videoWrap?.querySelector('video') as
+    | (HTMLVideoElement & { webkitEnterFullscreen?: () => void })
+    | null;
+  const soundBtn = videoWrap?.querySelector<HTMLButtonElement>('[data-video-sound]');
+  const setSoundState = () => {
+    if (!video || !soundBtn) return;
+    videoWrap!.classList.toggle('sound-on', !video.muted);
     soundBtn.setAttribute('aria-pressed', String(!video.muted));
     soundBtn.setAttribute('aria-label', video.muted ? 'Geluid aan' : 'Geluid uit');
+  };
+  soundBtn?.addEventListener('click', () => {
+    if (!video) return;
+    video.muted = !video.muted;
+    if (!video.muted) void video.play().catch(() => {});
+    setSoundState();
   });
+
+  let mutedBeforeFullscreen = true;
+  const openFullscreen = () => {
+    if (!video) return;
+    mutedBeforeFullscreen = video.muted;
+    video.muted = false;
+    video.controls = true;
+    void video.play().catch(() => {});
+    if (video.requestFullscreen) {
+      video.requestFullscreen().catch(() => {
+        video.webkitEnterFullscreen?.();
+      });
+    } else {
+      video.webkitEnterFullscreen?.();
+    }
+  };
+  const closedFullscreen = () => {
+    if (!video) return;
+    video.controls = false;
+    video.muted = mutedBeforeFullscreen;
+    void video.play().catch(() => {});
+    setSoundState();
+  };
+  video?.addEventListener('click', openFullscreen);
+  videoWrap?.querySelector('[data-video-fullscreen]')?.addEventListener('click', openFullscreen);
+  document.addEventListener('fullscreenchange', () => {
+    if (!document.fullscreenElement) closedFullscreen();
+  });
+  video?.addEventListener('webkitendfullscreen', closedFullscreen);
 
   // Meer reviews laden (HTML-fragment van /partials/reviews).
   const loadMore = document.getElementById('load-more') as HTMLButtonElement | null;
@@ -963,18 +1015,42 @@ const breadcrumbLd = {
     color: #fff;
     font-weight: 500;
   }
-  .sound-btn {
+  .video {
+    cursor: zoom-in;
+  }
+  .video-controls {
     position: absolute;
     right: 12px;
     bottom: 12px;
-    width: 40px;
-    height: 40px;
+    display: flex;
+    gap: 8px;
+  }
+  .video-btn {
+    width: 42px;
+    height: 42px;
+    display: grid;
+    place-items: center;
     border-radius: 50%;
-    border: 0;
-    background: rgba(0, 0, 0, 0.5);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    background: rgba(20, 14, 8, 0.55);
+    backdrop-filter: blur(6px);
     color: #fff;
     cursor: pointer;
-    font-size: 1rem;
+    transition: background 0.2s;
+  }
+  .video-btn:hover {
+    background: rgba(20, 14, 8, 0.75);
+  }
+  .video-btn:focus-visible {
+    outline: 3px solid var(--orange);
+    outline-offset: 2px;
+  }
+  .icon-sound,
+  .video-wrap.sound-on .icon-muted {
+    display: none;
+  }
+  .video-wrap.sound-on .icon-sound {
+    display: block;
   }
 
   /* Indeling */
