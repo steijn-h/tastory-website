@@ -1,0 +1,105 @@
+---
+// Links naar de stadspagina's vanaf de homepage: de homepage is de sterkste
+// pagina van de site, en Google gebruikt interne links om te bepalen welke
+// pagina's belangrijk zijn.
+import SectionHeader from './SectionHeader.astro';
+import { cityPath, getAllRestaurants, groupByCity } from '../lib/restaurants';
+
+const all = await getAllRestaurants();
+const cities = all
+  ? groupByCity(all)
+      .sort((a, b) => b.restaurants.length - a.restaurants.length)
+      .slice(0, 12)
+  : [];
+const total = all?.length ?? 0;
+---
+
+{
+  cities.length > 0 && (
+    <section class="cities">
+      <div class="reveal">
+        <SectionHeader
+          tag="Restaurants ontdekken"
+          title="Restaurants <em>per stad</em>"
+          description={`Bekijk ${total} restaurants op Tastory, met foto's, menukaarten en reviews van gasten.`}
+          center
+        />
+      </div>
+      <ul class="city-list reveal">
+        {cities.map((c) => (
+          <li>
+            <a href={cityPath(c.name)}>
+              <span class="city-name">Restaurants in {c.name}</span>
+              <span class="city-count">{c.restaurants.length}</span>
+            </a>
+          </li>
+        ))}
+      </ul>
+      <p class="all reveal">
+        <a href="/restaurants">Alle restaurants bekijken →</a>
+      </p>
+    </section>
+  )
+}
+
+<style>
+  .cities {
+    padding-top: var(--space-3xl);
+    padding-bottom: var(--space-3xl);
+  }
+  /* De omschrijving van SectionHeader heeft een max-breedte; centreren. */
+  .cities :global(.section-desc) {
+    margin-left: auto;
+    margin-right: auto;
+  }
+  .city-list {
+    list-style: none;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: var(--space-sm);
+    max-width: 980px;
+    margin: var(--space-xl) auto 0;
+  }
+  .city-list li {
+    flex: 0 1 230px;
+  }
+  .city-list a {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: var(--space-sm);
+    padding: 0.85rem 1.1rem;
+    background: var(--white);
+    border: 1px solid var(--beige-deeper);
+    border-radius: var(--radius-sm);
+    color: var(--text);
+    text-decoration: none;
+    transition:
+      border-color 0.2s,
+      transform 0.2s;
+  }
+  .city-list a:hover {
+    border-color: var(--orange);
+    transform: translateY(-2px);
+  }
+  .city-list a:focus-visible {
+    outline: 3px solid var(--orange);
+    outline-offset: 2px;
+  }
+  .city-name {
+    font-weight: 500;
+  }
+  .city-count {
+    font-size: var(--text-sm);
+    color: var(--text-muted);
+  }
+  .all {
+    text-align: center;
+    margin-top: var(--space-lg);
+  }
+  .all a {
+    color: var(--brown);
+    font-weight: 500;
+  }
+</style>

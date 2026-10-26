@@ -4,6 +4,7 @@ import type { APIRoute } from 'astro';
 import { getAllRestaurants, groupByCity, restaurantPath } from '../lib/restaurants';
 import { escapeXml } from '../lib/format';
 import { SITE_URL } from '../lib/links';
+import { groupByCuisine, MIN_RESTAURANTS_PER_CUISINE_PAGE } from '../lib/cuisine';
 
 // Alle restaurantpagina's en stadspagina's, zodat Google ze kan vinden.
 export const GET: APIRoute = async () => {
@@ -15,7 +16,13 @@ export const GET: APIRoute = async () => {
   </url>`;
 
   const urls = [
-    ...groupByCity(restaurants).map((c) => entry(`/restaurants/${c.slug}`)),
+    ...groupByCity(restaurants).flatMap((c) => [
+      entry(`/restaurants/${c.slug}`),
+      // Pagina's per keuken, alleen als ze genoeg restaurants hebben.
+      ...groupByCuisine(c.restaurants)
+        .filter((k) => k.restaurants.length >= MIN_RESTAURANTS_PER_CUISINE_PAGE)
+        .map((k) => entry(`/restaurants/${c.slug}/${k.slug}`)),
+    ]),
     // Alleen restaurants met een slug: een id-URL stuurt door (301) en hoort
     // niet in een sitemap.
     ...restaurants.filter((r) => r.slug).map((r) => entry(restaurantPath(r))),

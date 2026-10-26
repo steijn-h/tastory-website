@@ -3,12 +3,16 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 import PageHero from '../../components/PageHero.astro';
 import { getCollection } from 'astro:content';
 import { formatDate } from '../../utils/format';
+import { cacheStaticPage } from '../../lib/cache';
 
 const posts = (await getCollection('blog')).sort(
   (a, b) => b.data.date.valueOf() - a.data.date.valueOf(),
 );
 
 const base = import.meta.env.BASE_URL;
+
+cacheStaticPage(Astro);
+
 ---
 
 <BaseLayout

@@ -1,6 +1,10 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import PageHero from '../../components/PageHero.astro';
+import { cacheStaticPage } from '../../lib/cache';
+
+cacheStaticPage(Astro);
+
 ---
 
 <BaseLayout

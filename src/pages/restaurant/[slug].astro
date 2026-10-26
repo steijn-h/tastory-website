@@ -8,6 +8,7 @@ import RatingStars from '../../components/RatingStars.astro';
 import ReviewCard from '../../components/ReviewCard.astro';
 import RestaurantCard from '../../components/RestaurantCard.astro';
 import SaveButton from '../../components/SaveButton.astro';
+import BackLink from '../../components/BackLink.astro';
 import {
   cityPath,
   getAllRestaurants,
@@ -23,6 +24,7 @@ import {
 import {
   capitalize,
   displayWebsite,
+  escapeXml,
   formatReviewDate,
   isImageUrl,
   normalizeCity,
@@ -34,6 +36,7 @@ import {
   todayDutch,
 } from '../../lib/format';
 import { APP_STORE_URL, SITE_URL } from '../../lib/links';
+import { describeRestaurant, describeRestaurantShort } from '../../lib/restaurant-text';
 
 const param = Astro.params.slug ?? '';
 const lookup = await getRestaurant(param);
@@ -62,7 +65,7 @@ if (lookup.status === 'not-found') {
   Astro.response.headers.set('Retry-After', '120');
 } else {
   // Vercel bewaart de pagina 5 minuten aan de rand van het netwerk.
-  Astro.response.headers.set('Cache-Control', 'public, s-maxage=300, stale-while-revalidate=3600');
+  Astro.response.headers.set('Cache-Control', 'public, s-maxage=300, stale-while-revalidate=86400');
 }
 
 // ── Afgeleide gegevens ─────────────────────────────────────────────────────
@@ -130,27 +133,28 @@ const title = restaurant
 // Eigen, feitelijke samenvatting: de beschrijving komt vaak letterlijk van de
 // site van het restaurant (dubbele content voor Google). Deze zin is per
 // pagina uniek en makkelijk te citeren door zoekmachines en AI-assistenten.
-const facts = restaurant
-  ? [
-      restaurant.cuisine ? `keuken: ${restaurant.cuisine}` : null,
-      restaurant.vibe ? `sfeer: ${restaurant.vibe.toLowerCase()}` : null,
-      // Woordverbinder tussen de €-tekens: "€€" niet over twee regels.
-      restaurant.price_level ? `prijsklasse ${priceLabel(restaurant.price_level).split('').join('\u2060')}` : null,
-    ].filter((f): f is string => Boolean(f))
-  : [];
-const summary = restaurant
-  ? `${name} is een restaurant${city ? ` in ${city}` : ''}${restaurant.address ? ` (${restaurant.address})` : ''}${
-      facts.length > 0 ? `, ${facts.join(', ')}` : ''
-    }.${
+const textInput = restaurant
+  ? {
+      name,
+      city,
+      address: restaurant.address,
+      cuisine: restaurant.cuisine,
+      vibe: restaurant.vibe,
+      priceLevel: restaurant.price_level,
+      score,
+      reviewCount,
+    }
+  : null;
+const summary = textInput ? describeRestaurant(textInput) : '';
+// In de pagina: "€€€" niet over twee regels breken (alleen opmaak, de tekst
+// zelf blijft schoon voor Google en kopiëren).
+const summaryHtml = escapeXml(summary).replace(/€+/g, (m) => `<span style="white-space:nowrap">${m}</span>`);
+const metaLead = textInput
+  ? `${describeRestaurantShort(textInput)}${
       score !== null && reviewCount > 0
-        ? ` Tastory-gasten geven het gemiddeld een ${formatScore(score)} uit 5 (${reviewCount === 1 ? '1 review' : `${reviewCount} reviews`}).`
+        ? ` ${formatScore(score)}/5 uit ${reviewCount === 1 ? '1 review' : `${reviewCount} reviews`}.`
         : ''
-    }`
-  : '';
-const metaLead = restaurant
-  ? `${name}${city ? ` in ${city}` : ''}${restaurant.cuisine || restaurant.price_level ? ` (${[restaurant.cuisine, restaurant.price_level ? priceLabel(restaurant.price_level) : null].filter(Boolean).join(', ')})` : ''}${
-      score !== null && reviewCount > 0 ? `: ${formatScore(score)}/5 uit ${reviewCount === 1 ? '1 review' : `${reviewCount} reviews`}` : ''
-    }. Bekijk foto's, menu, openingstijden en adres op Tastory.`
+    } Bekijk foto's, menu en openingstijden op Tastory.`
   : '';
 const description = restaurant ? metaLead : 'Dit restaurant staat niet (meer) op Tastory.';
 const keywords = restaurant
@@ -166,7 +170,7 @@ const jsonLd = restaurant
       '@id': `${SITE_URL}${canonicalPath}#restaurant`,
       name,
       url: `${SITE_URL}${canonicalPath}`,
-      description: restaurant.description?.trim() || summary,
+      description: restaurant.description?.trim() || summary || undefined,
       image: photos.length > 0 ? photos.slice(0, 6) : undefined,
       servesCuisine: restaurant.cuisine ?? undefined,
       priceRange: restaurant.price_level ? priceLabel(restaurant.price_level) : undefined,
@@ -206,6 +210,24 @@ const jsonLd = restaurant
     }
   : null;
 
+// Video-gegevens voor Google (kan een video-resultaat opleveren). Google eist
+// een uploaddatum en een miniatuur; de uploaddatum van de video zelf staat
+// niet in de database, dus we gebruiken de datum waarop het restaurant op
+// Tastory kwam.
+const videoLd =
+  restaurant && videoUrl && photos[0] && restaurant.created_at
+    ? {
+        '@context': 'https://schema.org',
+        '@type': 'VideoObject',
+        name: `Video van ${name}${city ? ` in ${city}` : ''}`,
+        description: summary || `Video van ${name} op Tastory.`,
+        thumbnailUrl: [photos[0]],
+        uploadDate: restaurant.created_at,
+        contentUrl: videoUrl,
+        publisher: { '@type': 'Organization', name: 'Tastory', url: SITE_URL },
+      }
+    : null;
+
 const breadcrumbs = [
   { name: 'Home', path: '/' },
   { name: 'Restaurants', path: '/restaurants' },
@@ -233,6 +255,7 @@ const breadcrumbLd = {
 >
   {jsonLd && <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />}
   {restaurant && <script type="application/ld+json" set:html={JSON.stringify(breadcrumbLd)} />}
+  {videoLd && <script type="application/ld+json" set:html={JSON.stringify(videoLd)} />}
 
   {!restaurant ? (
     <div class="page">
@@ -256,6 +279,10 @@ const breadcrumbLd = {
   ) : (
     <div class:list={['page', { partner: isPartner && backgroundUrl }]} style={isPartner && backgroundUrl ? `--partner-bg: url('${backgroundUrl}')` : undefined}>
       <div class="container">
+        <BackLink
+          href={city ? cityPath(city) : '/restaurants'}
+          label={city ? `Restaurants in ${city}` : 'Alle restaurants'}
+        />
         <nav class="breadcrumbs" aria-label="Kruimelpad">
           <ol>
             {breadcrumbs.map((b, i) => (
@@ -311,9 +338,17 @@ const breadcrumbLd = {
         {(videoUrl || photos.length > 0) && (
           <section class:list={['media', `thumbs-${thumbs.length}`]} aria-label="Foto's">
             {videoUrl ? (
-              <div class="media-main">
-                <video src={videoUrl} poster={photos[0]} autoplay muted loop playsinline preload="metadata" class="media-img" aria-label={`Video van ${name}`} />
-                <button type="button" class="sound-btn" id="sound-btn" aria-label="Geluid aan" aria-pressed="false">🔇</button>
+              <div class="media-main video-wrap" data-video-wrap>
+                <video src={videoUrl} poster={photos[0]} autoplay muted loop playsinline preload="metadata" class="media-img video" aria-label={`Video van ${name}, klik voor volledig scherm`} />
+                <div class="video-controls">
+                  <button type="button" class="video-btn" data-video-sound aria-label="Geluid aan" aria-pressed="false">
+                    <svg class="icon-muted" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 5 6 9H2v6h4l5 4V5z" /><line x1="22" y1="9" x2="16" y2="15" /><line x1="16" y1="9" x2="22" y2="15" /></svg>
+                    <svg class="icon-sound" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 5 6 9H2v6h4l5 4V5z" /><path d="M15.5 8.5a5 5 0 0 1 0 7" /><path d="M19 5a10 10 0 0 1 0 14" /></svg>
+                  </button>
+                  <button type="button" class="video-btn" data-video-fullscreen aria-label="Volledig scherm">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 3H5a2 2 0 0 0-2 2v3" /><path d="M21 8V5a2 2 0 0 0-2-2h-3" /><path d="M3 16v3a2 2 0 0 0 2 2h3" /><path d="M16 21h3a2 2 0 0 0 2-2v-3" /></svg>
+                  </button>
+                </div>
               </div>
             ) : (
               <button type="button" class="media-main photo-btn" data-index="0" aria-label="Foto 1 vergroten">
@@ -336,11 +371,13 @@ const breadcrumbLd = {
         <div class="layout">
           <!-- Hoofdkolom -->
           <div class="main">
-            <section class="block">
-              <h2>Over {name}</h2>
-              <p class="about-summary">{summary}</p>
-              {restaurant.description && <p class="description">{restaurant.description}</p>}
-            </section>
+            {(summary || restaurant.description) && (
+              <section class="block">
+                <h2>Over {name}</h2>
+                {summary && <p class="about-summary" set:html={summaryHtml} />}
+                {restaurant.description && <p class="description">{restaurant.description}</p>}
+              </section>
+            )}
 
             {(menuImages.length > 0 || menuLink) && (
               <section class="block" id="menu">
@@ -651,16 +688,55 @@ const breadcrumbLd = {
     loadMap();
   });
 
-  // Geluid van de video aan/uit.
-  const soundBtn = document.getElementById('sound-btn');
-  soundBtn?.addEventListener('click', () => {
-    const video = soundBtn.parentElement?.querySelector('video');
-    if (!video) return;
-    video.muted = !video.muted;
-    soundBtn.textContent = video.muted ? '🔇' : '🔊';
+  // Restaurantvideo: geluid aan/uit, en klikken = volledig scherm met geluid
+  // en de normale bediening (zoals in de app). iPhone kent alleen
+  // webkitEnterFullscreen op de video zelf.
+  const videoWrap = document.querySelector<HTMLElement>('[data-video-wrap]');
+  const video = videoWrap?.querySelector('video') as
+    | (HTMLVideoElement & { webkitEnterFullscreen?: () => void })
+    | null;
+  const soundBtn = videoWrap?.querySelector<HTMLButtonElement>('[data-video-sound]');
+  const setSoundState = () => {
+    if (!video || !soundBtn) return;
+    videoWrap!.classList.toggle('sound-on', !video.muted);
     soundBtn.setAttribute('aria-pressed', String(!video.muted));
     soundBtn.setAttribute('aria-label', video.muted ? 'Geluid aan' : 'Geluid uit');
+  };
+  soundBtn?.addEventListener('click', () => {
+    if (!video) return;
+    video.muted = !video.muted;
+    if (!video.muted) void video.play().catch(() => {});
+    setSoundState();
   });
+
+  let mutedBeforeFullscreen = true;
+  const openFullscreen = () => {
+    if (!video) return;
+    mutedBeforeFullscreen = video.muted;
+    video.muted = false;
+    video.controls = true;
+    void video.play().catch(() => {});
+    if (video.requestFullscreen) {
+      video.requestFullscreen().catch(() => {
+        video.webkitEnterFullscreen?.();
+      });
+    } else {
+      video.webkitEnterFullscreen?.();
+    }
+  };
+  const closedFullscreen = () => {
+    if (!video) return;
+    video.controls = false;
+    video.muted = mutedBeforeFullscreen;
+    void video.play().catch(() => {});
+    setSoundState();
+  };
+  video?.addEventListener('click', openFullscreen);
+  videoWrap?.querySelector('[data-video-fullscreen]')?.addEventListener('click', openFullscreen);
+  document.addEventListener('fullscreenchange', () => {
+    if (!document.fullscreenElement) closedFullscreen();
+  });
+  video?.addEventListener('webkitendfullscreen', closedFullscreen);
 
   // Meer reviews laden (HTML-fragment van /partials/reviews).
   const loadMore = document.getElementById('load-more') as HTMLButtonElement | null;
@@ -939,18 +1015,42 @@ const breadcrumbLd = {
     color: #fff;
     font-weight: 500;
   }
-  .sound-btn {
+  .video {
+    cursor: zoom-in;
+  }
+  .video-controls {
     position: absolute;
     right: 12px;
     bottom: 12px;
-    width: 40px;
-    height: 40px;
+    display: flex;
+    gap: 8px;
+  }
+  .video-btn {
+    width: 42px;
+    height: 42px;
+    display: grid;
+    place-items: center;
     border-radius: 50%;
-    border: 0;
-    background: rgba(0, 0, 0, 0.5);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    background: rgba(20, 14, 8, 0.55);
+    backdrop-filter: blur(6px);
     color: #fff;
     cursor: pointer;
-    font-size: 1rem;
+    transition: background 0.2s;
+  }
+  .video-btn:hover {
+    background: rgba(20, 14, 8, 0.75);
+  }
+  .video-btn:focus-visible {
+    outline: 3px solid var(--orange);
+    outline-offset: 2px;
+  }
+  .icon-sound,
+  .video-wrap.sound-on .icon-muted {
+    display: none;
+  }
+  .video-wrap.sound-on .icon-sound {
+    display: block;
   }
 
   /* Indeling */

@@ -6,7 +6,12 @@ import ProblemSolution from '../components/ProblemSolution.astro';
 import Features from '../components/Features.astro';
 import Testimonials from '../components/Testimonials.astro';
 import Cta from '../components/Cta.astro';
+import HomeCities from '../components/HomeCities.astro';
 import { stats, features, testimonials } from '../data/home';
+import { cacheStaticPage } from '../lib/cache';
+
+cacheStaticPage(Astro);
+
 ---
 
 <BaseLayout
@@ -18,6 +23,7 @@ import { stats, features, testimonials } from '../data/home';
   <ProblemSolution />
   <Features features={features} />
   <Testimonials testimonials={testimonials} />
+  <HomeCities />
   <Cta />
   <script
     type="application/ld+json"

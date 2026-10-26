@@ -1,8 +1,12 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import { APP_STORE_URL } from '../lib/links';
+import { cacheStaticPage } from '../lib/cache';
 
 const appStoreUrl = APP_STORE_URL;
+
+cacheStaticPage(Astro);
+
 ---
 
 <BaseLayout
