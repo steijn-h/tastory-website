@@ -1,18 +1,27 @@
 ---
-import RatingStars from './RatingStars.astro';
+// Restaurantkaartje voor overzichten. Luxe maar rustig: een duidelijk kaartje
+// met de foto in een smalle rand (passe-partout), de stad als kleine kop, de
+// naam in de sierletter en keuken/prijs gedempt. Score en video als label op
+// de foto, zoals in de app.
 import { hasVideo, restaurantPath, type RestaurantListItem } from '../lib/restaurants';
 import { normalizeCity, priceLabel, splitUrls } from '../lib/format';
 
 interface Props {
   restaurant: RestaurantListItem;
-  showCity?: boolean;
 }
-const { restaurant: r, showCity = true } = Astro.props;
+const { restaurant: r } = Astro.props;
 const photo = splitUrls(r.photo_url)[0] ?? null;
 const city = normalizeCity(r.city);
 const score = r.weighted_score && r.weighted_score > 0 ? Number(r.weighted_score) : null;
 const reviewCount = r.published_review_count ?? 0;
 const video = hasVideo(r);
+const details = [r.cuisine, r.price_level ? priceLabel(r.price_level) : null]
+  .filter(Boolean)
+  .join(' · ');
+const formattedScore = score?.toLocaleString('nl-NL', {
+  minimumFractionDigits: 1,
+  maximumFractionDigits: 1,
+});
 ---
 
 <a href={restaurantPath(r)} class="card">
@@ -25,9 +34,23 @@ const video = hasVideo(r);
       )
     }
     {
-      video && (
-        <span class="video-badge">
+      score !== null && (
+        <span
+          class="badge score"
+          aria-label={`Beoordeling ${formattedScore} van 5, ${reviewCount} reviews`}
+        >
           <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <path d="M12 2.5l2.9 6.1 6.6.8-4.9 4.6 1.3 6.6L12 17.3l-5.9 3.3 1.3-6.6-4.9-4.6 6.6-.8z" />
+          </svg>
+          {formattedScore}
+          {reviewCount > 0 && <span class="count">({reviewCount})</span>}
+        </span>
+      )
+    }
+    {
+      video && (
+        <span class="badge video">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
             <path d="M8 5v14l11-7z" />
           </svg>
           Video
@@ -36,52 +59,56 @@ const video = hasVideo(r);
     }
   </div>
   <div class="body">
-    <h3 class="name">{r.name}</h3>
     {
-      score !== null && (
-        <div class="score">
-          <RatingStars rating={score} size={13} />
-          <span class="score-value">
-            {score.toLocaleString('nl-NL', { minimumFractionDigits: 1, maximumFractionDigits: 1 })}
-          </span>
-          {reviewCount > 0 && <span class="count">({reviewCount})</span>}
-        </div>
+      city && (
+        <p class="city">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" />
+          </svg>
+          {city}
+        </p>
       )
     }
-    <p class="tags">
-      {
-        [r.cuisine, r.price_level ? priceLabel(r.price_level) : null, showCity ? city : null]
-          .filter(Boolean)
-          .join(' · ')
-      }
-    </p>
+    <h3 class="name">{r.name}</h3>
+    {details && <p class="details">{details}</p>}
     <slot />
   </div>
 </a>
 
 <style>
-  /*
-   * Rustig en luxe: geen kader, rand of schaduw; een grote foto met afgeronde
-   * hoeken en de tekst er los onder. Beweging alleen in de foto.
-   */
   .card {
     display: flex;
     flex-direction: column;
+    height: 100%;
+    padding: 10px;
+    background: var(--white);
+    border: 1px solid rgba(136, 101, 69, 0.1);
+    border-radius: 20px;
+    box-shadow:
+      0 1px 2px rgba(58, 46, 34, 0.04),
+      0 10px 28px rgba(58, 46, 34, 0.06);
     text-decoration: none;
     color: inherit;
-    height: 100%;
+    transition:
+      box-shadow 0.35s ease,
+      border-color 0.35s ease;
+  }
+  .card:hover {
+    border-color: rgba(136, 101, 69, 0.18);
+    box-shadow:
+      0 1px 2px rgba(58, 46, 34, 0.05),
+      0 16px 40px rgba(58, 46, 34, 0.1);
   }
   .card:focus-visible {
     outline: 3px solid var(--orange);
-    outline-offset: 4px;
-    border-radius: var(--radius-md);
+    outline-offset: 3px;
   }
   .photo {
     position: relative;
     aspect-ratio: 4 / 3;
     /* Zonder dit rekt een staande foto het vak op (ongelijke kaartjes). */
     overflow: hidden;
-    border-radius: var(--radius-md);
+    border-radius: 12px;
     background: var(--beige-dark);
   }
   .photo img,
@@ -97,50 +124,62 @@ const video = hasVideo(r);
   .card:hover .photo img {
     transform: scale(1.04);
   }
-  /* Zelfde idee als de afspeelknop op kaarten in de app. */
-  .video-badge {
+  .badge {
     position: absolute;
-    top: 0.75rem;
-    left: 0.75rem;
     display: inline-flex;
     align-items: center;
     gap: 0.3rem;
-    padding: 0.3rem 0.65rem 0.3rem 0.5rem;
+    padding: 0.3rem 0.6rem;
     border-radius: 999px;
-    background: rgba(20, 14, 8, 0.5);
-    color: #fff;
     font-size: var(--text-xs);
     font-weight: 500;
-    letter-spacing: 0.02em;
+    line-height: 1;
+  }
+  .score {
+    top: 0.65rem;
+    left: 0.65rem;
+    background: rgba(255, 252, 248, 0.94);
+    color: var(--text);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  }
+  .score svg {
+    color: var(--orange);
+  }
+  .count {
+    color: var(--text-muted);
+    font-weight: 400;
+  }
+  .video {
+    bottom: 0.65rem;
+    left: 0.65rem;
+    background: rgba(20, 14, 8, 0.55);
+    color: #fff;
     backdrop-filter: blur(6px);
   }
   .body {
-    padding: 0.9rem 0.15rem 0;
+    padding: 0.95rem 0.5rem 0.45rem;
+  }
+  .city {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    font-size: 0.7rem;
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--brown);
   }
   .name {
+    margin-top: 0.3rem;
     font-family: var(--serif);
-    font-size: 1.3rem;
+    font-size: 1.25rem;
     font-weight: 500;
     line-height: 1.25;
     color: var(--text);
   }
-  .score {
-    display: flex;
-    align-items: center;
-    gap: 0.35rem;
+  .details {
     margin-top: 0.3rem;
     font-size: var(--text-sm);
-  }
-  .score-value {
-    font-weight: 500;
-  }
-  .count {
     color: var(--text-muted);
-  }
-  .tags {
-    margin-top: 0.25rem;
-    font-size: var(--text-sm);
-    color: var(--text-muted);
-    letter-spacing: 0.01em;
   }
 </style>

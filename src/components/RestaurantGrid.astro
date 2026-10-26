@@ -8,14 +8,12 @@ import { splitCuisines } from '../lib/cuisine';
 
 interface Props {
   restaurants: RestaurantListItem[];
-  showCity?: boolean;
   initialQuery?: string;
   searchPlaceholder?: string;
   showCuisineFilter?: boolean;
 }
 const {
   restaurants,
-  showCity = true,
   initialQuery = '',
   searchPlaceholder = 'Zoek op naam, stad of keuken…',
   showCuisineFilter = true,
@@ -118,7 +116,7 @@ const prices = [
           data-reviews={String(r.published_review_count ?? 0)}
           data-index={String(i)}
         >
-          <RestaurantCard restaurant={r} showCity={showCity} />
+          <RestaurantCard restaurant={r} />
         </li>
       ))
     }
@@ -273,7 +271,7 @@ const prices = [
     list-style: none;
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: var(--space-2xl) var(--space-xl);
+    gap: var(--space-xl);
   }
   .grid li[hidden],
   .empty[hidden] {

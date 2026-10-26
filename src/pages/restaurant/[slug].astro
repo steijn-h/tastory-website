@@ -593,7 +593,7 @@ const breadcrumbLd = {
               <a href={cityPath(city)} class="text-link">Alle restaurants in {city} →</a>
             </div>
             <div class="nearby-grid">
-              {nearby.map((r) => <RestaurantCard restaurant={r} showCity={false} />)}
+              {nearby.map((r) => <RestaurantCard restaurant={r} />)}
             </div>
           </section>
         )}
