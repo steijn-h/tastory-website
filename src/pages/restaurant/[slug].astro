@@ -37,6 +37,7 @@ import {
 } from '../../lib/format';
 import { APP_STORE_URL, SITE_URL } from '../../lib/links';
 import { describeRestaurant, describeRestaurantShort } from '../../lib/restaurant-text';
+import { imageSrcset, imageUrl } from '../../lib/image';
 
 const param = Astro.params.slug ?? '';
 const lookup = await getRestaurant(param);
@@ -250,7 +251,8 @@ const breadcrumbLd = {
   title={title}
   description={description}
   keywords={keywords}
-  ogImage={photos[0]}
+  ogImage={restaurant?.slug && photos[0] ? `${SITE_URL}/og/restaurant/${restaurant.slug}.jpg` : undefined}
+  ogImageIsWide={Boolean(restaurant?.slug && photos[0])}
   noindex={!restaurant}
 >
   {jsonLd && <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />}
@@ -339,7 +341,7 @@ const breadcrumbLd = {
           <section class:list={['media', `thumbs-${thumbs.length}`]} aria-label="Foto's">
             {videoUrl ? (
               <div class="media-main video-wrap" data-video-wrap>
-                <video src={videoUrl} poster={photos[0]} autoplay muted loop playsinline preload="metadata" class="media-img video" aria-label={`Video van ${name}, klik voor volledig scherm`} />
+                <video src={videoUrl} poster={photos[0] ? imageUrl(photos[0], 1280) : undefined} autoplay muted loop playsinline preload="metadata" class="media-img video" aria-label={`Video van ${name}, klik voor volledig scherm`} />
                 <div class="video-controls">
                   <button type="button" class="video-btn" data-video-sound aria-label="Geluid aan" aria-pressed="false">
                     <svg class="icon-muted" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 5 6 9H2v6h4l5 4V5z" /><line x1="22" y1="9" x2="16" y2="15" /><line x1="16" y1="9" x2="22" y2="15" /></svg>
@@ -352,7 +354,7 @@ const breadcrumbLd = {
               </div>
             ) : (
               <button type="button" class="media-main photo-btn" data-index="0" aria-label="Foto 1 vergroten">
-                <img src={photos[0]} alt={`${name} — foto 1`} class="media-img" fetchpriority="high" />
+                <img src={imageUrl(photos[0], 1280)} srcset={imageSrcset(photos[0], [640, 960, 1280, 1600])} sizes="(max-width: 900px) 100vw, 66vw" alt={`${name} — foto 1`} class="media-img" fetchpriority="high" />
               </button>
             )}
             {thumbs.map((src, i) => {
@@ -360,7 +362,7 @@ const breadcrumbLd = {
               const isLast = i === thumbs.length - 1 && photos.length > thumbs.length + thumbOffset;
               return (
                 <button type="button" class="media-thumb photo-btn" data-index={index} aria-label={`Foto ${index + 1} vergroten`}>
-                  <img src={src} alt={`${name} — foto ${index + 1}`} loading="lazy" decoding="async" class="media-img" />
+                  <img src={imageUrl(src, 640)} srcset={imageSrcset(src, [320, 480, 640])} sizes="(max-width: 900px) 50vw, 22vw" alt={`${name} — foto ${index + 1}`} loading="lazy" decoding="async" class="media-img" />
                   {isLast && <span class="media-more">Alle {photos.length} foto's</span>}
                 </button>
               );
@@ -386,7 +388,7 @@ const breadcrumbLd = {
                   <div class="menu-grid">
                     {menuImages.map((src, i) => (
                       <a href={src} target="_blank" rel="noopener noreferrer" class="menu-item">
-                        <img src={src} alt={`Menukaart ${name} — pagina ${i + 1}`} loading="lazy" decoding="async" />
+                        <img src={imageUrl(src, 640)} alt={`Menukaart ${name} — pagina ${i + 1}`} loading="lazy" decoding="async" />
                       </a>
                     ))}
                   </div>
@@ -493,7 +495,7 @@ const breadcrumbLd = {
                 <div class="stories">
                   {stories.map((story) => (
                     <a href={`/story/${story.id}`} class="story">
-                      <img src={story.photo_url!} alt={story.caption || `Taste Story bij ${name}`} loading="lazy" decoding="async" />
+                      <img src={imageUrl(story.photo_url!, 480)} alt={story.caption || `Taste Story bij ${name}`} loading="lazy" decoding="async" />
                       <span class="story-meta">
                         <span class="story-author">{story.author.name}</span>
                         {story.created_at && <span class="story-date">{formatReviewDate(story.created_at)}</span>}
@@ -616,7 +618,7 @@ const breadcrumbLd = {
         <button type="button" class="lb-nav lb-next" id="lb-next" aria-label="Volgende foto">›</button>
         <p class="lb-counter" id="lb-counter"></p>
       </dialog>
-      <script type="application/json" id="photo-data" set:html={JSON.stringify(photos)} />
+      <script type="application/json" id="photo-data" set:html={JSON.stringify(photos.map((p) => imageUrl(p, 1600, 80)))} />
     </div>
   )}
 </BaseLayout>

@@ -5,6 +5,7 @@
 // de foto, zoals in de app.
 import { hasVideo, restaurantPath, type RestaurantListItem } from '../lib/restaurants';
 import { normalizeCity, priceLabel, safeHttpsUrl, splitUrls } from '../lib/format';
+import { imageSrcset, imageUrl } from '../lib/image';
 
 interface Props {
   restaurant: RestaurantListItem;
@@ -33,7 +34,14 @@ const formattedScore = score?.toLocaleString('nl-NL', {
   <div class="photo">
     {
       photo ? (
-        <img src={photo} alt={r.name ?? ''} loading="lazy" decoding="async" />
+        <img
+          src={imageUrl(photo, 640)}
+          srcset={imageSrcset(photo, [320, 480, 640, 960])}
+          sizes="(max-width: 520px) 50vw, (max-width: 1100px) 50vw, 380px"
+          alt={r.name ?? ''}
+          loading="lazy"
+          decoding="async"
+        />
       ) : (
         <div class="placeholder" />
       )

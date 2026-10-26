@@ -5,7 +5,16 @@ import vercel from '@astrojs/vercel';
 export default defineConfig({
   site: 'https://www.tastory.nl',
   output: 'server',
-  adapter: vercel(),
+  adapter: vercel({
+    // Vercel maakt van de (grote) restaurantfoto's in Supabase kleine,
+    // moderne versies op de maat die nodig is: zie src/lib/image.ts.
+    imagesConfig: {
+      sizes: [320, 480, 640, 960, 1280, 1600],
+      domains: ['vyqpdtjpocndgdqylzeo.supabase.co'],
+      formats: ['image/avif', 'image/webp'],
+      minimumCacheTTL: 60 * 60 * 24 * 30,
+    },
+  }),
   // Eén URL per pagina (geen /contact én /contact/): anders ziet Google
   // dubbele pagina's.
   trailingSlash: 'never',
