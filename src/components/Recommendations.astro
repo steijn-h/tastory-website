@@ -1,0 +1,97 @@
+---
+// "Aanbevolen voor jou" voor ingelogde gebruikers. Op gecachete pagina's staat
+// alleen een lege plek; de browser haalt de aanbevelingen op bij
+// /partials/recommendations (privé, nooit gecachet) en zet ze hier neer. Zo
+// krijgt nooit iemand de aanbevelingen van een ander te zien.
+import RestaurantCard from './RestaurantCard.astro';
+import type { RestaurantListItem } from '../lib/restaurants';
+
+interface Props {
+  /** Leeg laten op de pagina zelf; gevuld door de partial. */
+  items?: RestaurantListItem[];
+  center?: boolean;
+}
+const { items, center = false } = Astro.props;
+---
+
+{
+  items && items.length > 0 ? (
+    <section class:list={['recs', { center }]} aria-labelledby="recs-title" data-recs-filled>
+      <h2 id="recs-title">Aanbevolen voor jou</h2>
+      <p class="sub">Op basis van wat je in de app en op de site bekijkt, opslaat en beoordeelt.</p>
+      <ul class="row">
+        {items.map((r) => (
+          <li>
+            <RestaurantCard restaurant={r} />
+          </li>
+        ))}
+      </ul>
+    </section>
+  ) : (
+    <div data-recs-slot hidden />
+  )
+}
+
+<script>
+  import { AUTH_COOKIE_NAME } from '../lib/auth-cookie';
+
+  // Alleen met een sessie-cookie; gasten doen geen extra verzoek.
+  const slot = document.querySelector<HTMLElement>('[data-recs-slot]');
+  if (slot && document.cookie.split(';').some((c) => c.trim().startsWith(AUTH_COOKIE_NAME))) {
+    const center = slot.closest('[data-recs-center]') ? '1' : '0';
+    fetch(`/partials/recommendations?center=${center}`, { credentials: 'same-origin' })
+      .then((res) => (res.ok && res.status !== 204 ? res.text() : ''))
+      .then((html) => {
+        if (!html.trim()) return;
+        const doc = new DOMParser().parseFromString(html, 'text/html');
+        const section = doc.querySelector('[data-recs-filled]');
+        if (section) slot.replaceWith(document.importNode(section, true));
+      })
+      .catch(() => {});
+  }
+</script>
+
+<style>
+  /* global.css geeft elke <section> veel padding (marketingpagina's). */
+  .recs {
+    padding: 0;
+    max-width: none;
+    margin: var(--space-lg) 0 var(--space-2xl);
+  }
+  h2 {
+    font-family: var(--serif);
+    font-size: var(--text-xl);
+    font-weight: 500;
+    color: var(--text);
+  }
+  .sub {
+    font-size: var(--text-sm);
+    color: var(--text-muted);
+    margin: 0.2rem 0 var(--space-md);
+  }
+  .center h2,
+  .center .sub {
+    text-align: center;
+  }
+  .row {
+    list-style: none;
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(260px, calc((100% - 2 * var(--space-xl)) / 3));
+    gap: var(--space-xl);
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    /* Ruimte voor de schaduw van de kaartjes (overflow knipt anders af). */
+    padding: 6px 14px 32px;
+    margin: -6px -14px -20px;
+  }
+  .row li {
+    scroll-snap-align: start;
+  }
+  @media (max-width: 520px) {
+    .row {
+      grid-auto-columns: calc((100% - 12px) / 2.2);
+      gap: 12px;
+    }
+  }
+</style>

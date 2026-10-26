@@ -53,6 +53,7 @@ export type RestaurantListItem = Pick<
   | 'lng'
   | 'video_url'
   | 'background_url'
+  | 'facilities'
 >;
 
 // Zelfde kolommen als de detailquery in de app (RestaurantDetailScreen).
@@ -89,7 +90,7 @@ const DETAIL_COLUMNS = [
 ].join(',');
 
 const LIST_COLUMNS =
-  'id,name,slug,photo_url,city,cuisine,vibe,price_level,weighted_score,published_review_count,lat,lng,video_url,background_url';
+  'id,name,slug,photo_url,city,cuisine,vibe,price_level,weighted_score,published_review_count,lat,lng,video_url,background_url,facilities';
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 

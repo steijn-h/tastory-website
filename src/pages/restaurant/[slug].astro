@@ -275,7 +275,7 @@ const breadcrumbLd = {
       </div>
     </div>
   ) : (
-    <div class:list={['page', { partner: isPartner && backgroundUrl }]} style={isPartner && backgroundUrl ? `--partner-bg: url('${backgroundUrl}')` : undefined}>
+    <div class:list={['page', { partner: isPartner && backgroundUrl }]} style={isPartner && backgroundUrl ? `--partner-bg: url('${backgroundUrl}')` : undefined} data-restaurant-id={restaurant.id} data-restaurant-cuisine={restaurant.cuisine ?? ''}>
       <div class="container">
         <BackLink
           href={city ? cityPath(city) : '/restaurants'}
@@ -322,12 +322,12 @@ const breadcrumbLd = {
               cuisine={restaurant.cuisine}
               returnPath={canonicalPath}
             />
-            <button type="button" class="btn btn-ghost" id="share-btn" data-title={name} data-url={`${SITE_URL}${canonicalPath}`}>
+            <button type="button" class="btn btn-ghost" id="share-btn" data-track="share_restaurant" data-title={name} data-url={`${SITE_URL}${canonicalPath}`}>
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8" /><path d="m16 6-4-4-4 4" /><path d="M12 2v13" /></svg>
               <span id="share-label">Delen</span>
             </button>
             {reserveUrl && (
-              <a class="btn btn-primary" href={reserveUrl} target="_blank" rel="noopener noreferrer">Reserveer</a>
+              <a class="btn btn-primary" href={reserveUrl} data-track="make_reservation" target="_blank" rel="noopener noreferrer">Reserveer</a>
             )}
           </div>
         </header>
@@ -382,14 +382,14 @@ const breadcrumbLd = {
                 {menuImages.length > 0 && (
                   <div class="menu-grid">
                     {menuImages.map((src, i) => (
-                      <a href={src} target="_blank" rel="noopener noreferrer" class="menu-item">
+                      <a href={src} data-track="open_menu" target="_blank" rel="noopener noreferrer" class="menu-item">
                         <img src={imageUrl(src, 480)} alt={`Menukaart ${name} — pagina ${i + 1}`} loading="lazy" decoding="async" />
                       </a>
                     ))}
                   </div>
                 )}
                 {menuLink && (
-                  <a href={menuLink} class="text-link" target="_blank" rel="noopener noreferrer">Bekijk de menukaart op de website van {name} →</a>
+                  <a href={menuLink} data-track="open_menu" class="text-link" target="_blank" rel="noopener noreferrer">Bekijk de menukaart op de website van {name} →</a>
                 )}
               </section>
             )}
@@ -506,7 +506,7 @@ const breadcrumbLd = {
           <aside class="side">
             <div class="side-card">
               {reserveUrl && (
-                <a class="btn btn-primary btn-block" href={reserveUrl} target="_blank" rel="noopener noreferrer">Reserveer een tafel</a>
+                <a class="btn btn-primary btn-block" href={reserveUrl} data-track="make_reservation" target="_blank" rel="noopener noreferrer">Reserveer een tafel</a>
               )}
 
               {mapEmbedUrl && (
@@ -536,7 +536,7 @@ const breadcrumbLd = {
                 {website && (
                   <li>
                     <span class="info-label">Website</span>
-                    <a href={website} target="_blank" rel="noopener noreferrer" class="text-link">{displayWebsite(website)}</a>
+                    <a href={website} data-track="open_website" target="_blank" rel="noopener noreferrer" class="text-link">{displayWebsite(website)}</a>
                   </li>
                 )}
                 {(instagram || facebook) && (
@@ -601,7 +601,7 @@ const breadcrumbLd = {
         <div class="mobile-bar">
           {routeUrl && <a href={routeUrl} target="_blank" rel="noopener noreferrer" class="btn btn-ghost">Route</a>}
           {phoneHref && !reserveUrl && <a href={phoneHref} class="btn btn-ghost">Bellen</a>}
-          {reserveUrl && <a href={reserveUrl} target="_blank" rel="noopener noreferrer" class="btn btn-primary">Reserveer</a>}
+          {reserveUrl && <a href={reserveUrl} data-track="make_reservation" target="_blank" rel="noopener noreferrer" class="btn btn-primary">Reserveer</a>}
         </div>
       )}
 
@@ -619,6 +619,39 @@ const breadcrumbLd = {
 </BaseLayout>
 
 <script>
+  // Gedrag voor aanbevelingen (alleen ingelogd en niet uitgezet), zoals de
+  // app: bekeken, hoe lang, en klikken op menu, website, reserveren, delen.
+  import { trackEvent, trackEventOnLeave, upsertRecentView } from '../../lib/tracking';
+
+  const pageEl = document.querySelector<HTMLElement>('[data-restaurant-id]');
+  const trackedId = pageEl?.dataset.restaurantId;
+  if (trackedId) {
+    const cuisine = pageEl!.dataset.restaurantCuisine || null;
+    const startedAt = Date.now();
+    trackEvent({ event: 'view_restaurant', restaurantId: trackedId, cuisine });
+    upsertRecentView(trackedId);
+    let durationSent = false;
+    const sendDuration = () => {
+      if (durationSent) return;
+      durationSent = true;
+      trackEventOnLeave({
+        event: 'view_restaurant_duration',
+        restaurantId: trackedId,
+        cuisine,
+        durationSeconds: Math.round((Date.now() - startedAt) / 1000),
+      });
+    };
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'hidden') sendDuration();
+    });
+    window.addEventListener('pagehide', sendDuration);
+    document.querySelectorAll<HTMLElement>('[data-track]').forEach((el) => {
+      el.addEventListener('click', () =>
+        trackEvent({ event: el.dataset.track!, restaurantId: trackedId, cuisine }),
+      );
+    });
+  }
+
   // Delen: native deelmenu op telefoon, anders link kopiëren.
   const shareBtn = document.getElementById('share-btn');
   const shareLabel = document.getElementById('share-label');

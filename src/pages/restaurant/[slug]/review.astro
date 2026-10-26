@@ -167,6 +167,7 @@ const name = restaurant?.name ?? 'Restaurant';
 <script>
   import { getBrowserSupabase } from '../../../lib/supabase-browser';
   import { submitReview, MIN_REVIEW_LENGTH, MAX_REVIEW_LENGTH } from '../../../lib/review-submit';
+  import { trackEvent } from '../../../lib/tracking';
 
   const form = document.getElementById('review-form') as HTMLFormElement | null;
   if (form) {
@@ -225,6 +226,7 @@ const name = restaurant?.name ?? 'Restaurant';
           errorEl.textContent = result.message;
           return;
         }
+        trackEvent({ event: 'write_review', restaurantId: input.restaurantId });
         form.hidden = true;
         const done = document.getElementById('review-done')!;
         done.hidden = false;

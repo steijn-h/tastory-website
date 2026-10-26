@@ -162,6 +162,14 @@ const statusLabel = (status: string | null) =>
         )
       }
 
+      <label class="personal">
+        <input type="checkbox" id="personalize" checked />
+        <span>
+          Gebruik wat ik op de website bekijk en opsla voor persoonlijke aanbevelingen
+          <span class="ui-muted">(alleen in deze browser; in de app stel je dit apart in)</span>
+        </span>
+      </label>
+
       <nav class="tabs" aria-label="Onderdelen">
         <a href="#opgeslagen" class="tab" data-tab="opgeslagen"
           >Opgeslagen <span>{savedItems.length}</span></a
@@ -273,6 +281,7 @@ const statusLabel = (status: string | null) =>
 <script>
   import { getBrowserSupabase } from '../../lib/supabase-browser';
   import { removeSavedRestaurant } from '../../lib/account';
+  import { setTrackingOptOut, trackingOptedOut } from '../../lib/tracking';
 
   // Tabbladen via de #hash, zodat /account#reviews direct werkt.
   const tabs = document.querySelectorAll<HTMLAnchorElement>('[data-tab]');
@@ -342,6 +351,13 @@ const statusLabel = (status: string | null) =>
     if (count === 0) location.reload();
   }
 
+  // Aanbevelingen: gedrag wel/niet opslaan (per browser, zoals de app per toestel).
+  const personalize = document.getElementById('personalize') as HTMLInputElement | null;
+  if (personalize) {
+    personalize.checked = !trackingOptedOut();
+    personalize.addEventListener('change', () => setTrackingOptOut(!personalize.checked));
+  }
+
   document.getElementById('logout')?.addEventListener('click', async () => {
     const supabase = getBrowserSupabase();
     // Alleen op dit apparaat uitloggen; de app blijft ingelogd.
@@ -379,6 +395,22 @@ const statusLabel = (status: string | null) =>
   .profile-text .ui-title {
     margin-bottom: 0.15rem;
     overflow-wrap: anywhere;
+  }
+  .personal {
+    display: flex;
+    gap: 0.6rem;
+    align-items: flex-start;
+    font-size: var(--text-sm);
+    line-height: 1.45;
+    margin-bottom: var(--space-md);
+    cursor: pointer;
+  }
+  .personal input {
+    accent-color: var(--orange);
+    width: 18px;
+    height: 18px;
+    margin-top: 1px;
+    flex-shrink: 0;
   }
   .tabs {
     display: flex;
