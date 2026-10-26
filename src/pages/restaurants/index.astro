@@ -53,6 +53,10 @@ if (restaurants) {
     <div class="container">
       <header class="head">
         <h1>Restaurants</h1>
+        <div class="suggest">
+          <p>Staat jouw favoriete restaurant er niet tussen?</p>
+          <a class="suggest-btn" href="/restaurant-aanmelden">Meld het aan</a>
+        </div>
       </header>
 
       {
@@ -103,10 +107,34 @@ if (restaurants) {
     font-size: clamp(2.2rem, 5vw, 3.2rem);
     line-height: 1.1;
   }
-  .head p {
+  .suggest {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.6rem 1rem;
+    margin-top: 0.6rem;
+  }
+  .suggest p {
     color: var(--text-muted);
-    margin-top: 0.4rem;
-    max-width: 60ch;
+  }
+  .suggest-btn {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.5rem 1.1rem;
+    border-radius: 999px;
+    background: var(--orange);
+    color: #fff;
+    font-size: var(--text-sm);
+    font-weight: 500;
+    text-decoration: none;
+    transition: background 0.2s;
+  }
+  .suggest-btn:hover {
+    background: var(--orange-dark);
+  }
+  .suggest-btn:focus-visible {
+    outline: 3px solid var(--orange);
+    outline-offset: 2px;
   }
   .cities {
     margin: var(--space-xl) 0;
