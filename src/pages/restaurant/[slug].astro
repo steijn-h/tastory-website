@@ -24,7 +24,6 @@ import {
 import {
   capitalize,
   displayWebsite,
-  escapeXml,
   formatReviewDate,
   isImageUrl,
   normalizeCity,
@@ -147,9 +146,6 @@ const textInput = restaurant
     }
   : null;
 const summary = textInput ? describeRestaurant(textInput) : '';
-// In de pagina: "€€€" niet over twee regels breken (alleen opmaak, de tekst
-// zelf blijft schoon voor Google en kopiëren).
-const summaryHtml = escapeXml(summary).replace(/€+/g, (m) => `<span style="white-space:nowrap">${m}</span>`);
 const metaLead = textInput
   ? `${describeRestaurantShort(textInput)}${
       score !== null && reviewCount > 0
@@ -373,11 +369,10 @@ const breadcrumbLd = {
         <div class="layout">
           <!-- Hoofdkolom -->
           <div class="main">
-            {(summary || restaurant.description) && (
+            {restaurant.description && (
               <section class="block">
                 <h2>Over {name}</h2>
-                {summary && <p class="about-summary" set:html={summaryHtml} />}
-                {restaurant.description && <p class="description">{restaurant.description}</p>}
+                <p class="description">{restaurant.description}</p>
               </section>
             )}
 
@@ -1080,11 +1075,6 @@ const breadcrumbLd = {
   .section-sub {
     margin: -0.5rem 0 var(--space-md);
     font-size: var(--text-sm);
-  }
-  .about-summary {
-    line-height: 1.65;
-    font-weight: 500;
-    margin-bottom: 0.75rem;
   }
   .description {
     line-height: 1.75;
