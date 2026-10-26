@@ -1,11 +1,11 @@
 // Geoptimaliseerde foto's via Vercel Image Optimization. De restaurantfoto's
 // in Supabase zijn volledige foto's (80–300 KB); een kaartje heeft maar een
-// fractie nodig. Vercel schaalt en levert AVIF/WebP, en bewaart het resultaat.
+// fractie nodig. Vercel schaalt, levert WebP en bewaart het resultaat.
 // Alleen in productie (op Vercel) en alleen voor Supabase-foto's; lokaal en
 // voor andere bronnen blijft de originele URL.
 
 // Gelijk houden met imagesConfig.sizes in astro.config.mjs.
-const SIZES = [320, 480, 640, 960, 1280, 1600];
+const SIZES = [480, 640, 1280];
 const OPTIMIZABLE_HOST = 'vyqpdtjpocndgdqylzeo.supabase.co';
 
 function optimizable(src: string): boolean {

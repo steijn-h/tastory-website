@@ -354,7 +354,7 @@ const breadcrumbLd = {
               </div>
             ) : (
               <button type="button" class="media-main photo-btn" data-index="0" aria-label="Foto 1 vergroten">
-                <img src={imageUrl(photos[0], 1280)} srcset={imageSrcset(photos[0], [640, 960, 1280, 1600])} sizes="(max-width: 900px) 100vw, 66vw" alt={`${name} — foto 1`} class="media-img" fetchpriority="high" />
+                <img src={imageUrl(photos[0], 1280)} srcset={imageSrcset(photos[0], [640, 1280])} sizes="(max-width: 900px) 100vw, 66vw" alt={`${name} — foto 1`} class="media-img" fetchpriority="high" />
               </button>
             )}
             {thumbs.map((src, i) => {
@@ -362,7 +362,7 @@ const breadcrumbLd = {
               const isLast = i === thumbs.length - 1 && photos.length > thumbs.length + thumbOffset;
               return (
                 <button type="button" class="media-thumb photo-btn" data-index={index} aria-label={`Foto ${index + 1} vergroten`}>
-                  <img src={imageUrl(src, 640)} srcset={imageSrcset(src, [320, 480, 640])} sizes="(max-width: 900px) 50vw, 22vw" alt={`${name} — foto ${index + 1}`} loading="lazy" decoding="async" class="media-img" />
+                  <img src={imageUrl(src, 480)} srcset={imageSrcset(src, [480])} sizes="(max-width: 900px) 50vw, 22vw" alt={`${name} — foto ${index + 1}`} loading="lazy" decoding="async" class="media-img" />
                   {isLast && <span class="media-more">Alle {photos.length} foto's</span>}
                 </button>
               );
@@ -388,7 +388,7 @@ const breadcrumbLd = {
                   <div class="menu-grid">
                     {menuImages.map((src, i) => (
                       <a href={src} target="_blank" rel="noopener noreferrer" class="menu-item">
-                        <img src={imageUrl(src, 640)} alt={`Menukaart ${name} — pagina ${i + 1}`} loading="lazy" decoding="async" />
+                        <img src={imageUrl(src, 480)} alt={`Menukaart ${name} — pagina ${i + 1}`} loading="lazy" decoding="async" />
                       </a>
                     ))}
                   </div>
@@ -618,7 +618,7 @@ const breadcrumbLd = {
         <button type="button" class="lb-nav lb-next" id="lb-next" aria-label="Volgende foto">›</button>
         <p class="lb-counter" id="lb-counter"></p>
       </dialog>
-      <script type="application/json" id="photo-data" set:html={JSON.stringify(photos.map((p) => imageUrl(p, 1600, 80)))} />
+      <script type="application/json" id="photo-data" set:html={JSON.stringify(photos)} />
     </div>
   )}
 </BaseLayout>

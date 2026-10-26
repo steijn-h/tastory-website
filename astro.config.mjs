@@ -9,9 +9,11 @@ export default defineConfig({
     // Vercel maakt van de (grote) restaurantfoto's in Supabase kleine,
     // moderne versies op de maat die nodig is: zie src/lib/image.ts.
     imagesConfig: {
-      sizes: [320, 480, 640, 960, 1280, 1600],
+      // Weinig maten en alleen WebP: op het Hobby-plan van Vercel geldt een
+      // maandlimiet (ca. 5.000 omzettingen; elke foto × maat × formaat telt).
+      sizes: [480, 640, 1280],
       domains: ['vyqpdtjpocndgdqylzeo.supabase.co'],
-      formats: ['image/avif', 'image/webp'],
+      formats: ['image/webp'],
       minimumCacheTTL: 60 * 60 * 24 * 30,
     },
   }),
