@@ -390,23 +390,6 @@ const breadcrumbLd = {
               </section>
             )}
 
-            {(facilities.length > 0 || allergies.length > 0) && (
-              <section class="block">
-                {facilities.length > 0 && (
-                  <>
-                    <h2>Voorzieningen</h2>
-                    <ul class="chips">{facilities.map((f) => <li>{f}</li>)}</ul>
-                  </>
-                )}
-                {allergies.length > 0 && (
-                  <>
-                    <h3 class="subhead">Dieetwensen &amp; allergieën</h3>
-                    <ul class="chips">{allergies.map((a) => <li>{a}</li>)}</ul>
-                  </>
-                )}
-              </section>
-            )}
-
             <!-- Reviews -->
             <section class="block" id="reviews">
               <div class="reviews-head">
@@ -533,6 +516,18 @@ const breadcrumbLd = {
                   <li>
                     <span class="info-label">Website</span>
                     <a href={website} data-track="open_website" target="_blank" rel="noopener noreferrer" class="text-link">Bezoek de website →</a>
+                  </li>
+                )}
+                {facilities.length > 0 && (
+                  <li>
+                    <span class="info-label">Voorzieningen</span>
+                    <ul class="chips chips-sm">{facilities.map((f) => <li>{f}</li>)}</ul>
+                  </li>
+                )}
+                {allergies.length > 0 && (
+                  <li>
+                    <span class="info-label">Dieetwensen &amp; allergieën</span>
+                    <ul class="chips chips-sm">{allergies.map((a) => <li>{a}</li>)}</ul>
                   </li>
                 )}
                 {(instagram || facebook) && (
@@ -1093,11 +1088,6 @@ const breadcrumbLd = {
     color: var(--text);
     margin-bottom: var(--space-md);
   }
-  .subhead {
-    font-size: var(--text-base);
-    font-weight: 500;
-    margin: var(--space-lg) 0 var(--space-sm);
-  }
   .section-sub {
     margin: -0.5rem 0 var(--space-md);
     font-size: var(--text-sm);
@@ -1118,6 +1108,13 @@ const breadcrumbLd = {
     border-radius: 100px;
     padding: 0.35rem 0.8rem;
     font-size: var(--text-sm);
+  }
+  .info-list .chips {
+    margin-top: 0.3rem;
+  }
+  .chips-sm li {
+    padding: 0.25rem 0.65rem;
+    font-size: var(--text-xs);
   }
   .menu-grid {
     display: grid;
@@ -1354,7 +1351,7 @@ const breadcrumbLd = {
     margin-top: var(--space-lg);
     font-size: var(--text-sm);
   }
-  .info-list li {
+  .info-list > li {
     display: flex;
     flex-direction: column;
     gap: 0.15rem;
@@ -1502,14 +1499,15 @@ const breadcrumbLd = {
   }
 
   @media (max-width: 1000px) {
+    /* Geen extra rij-afstand: .block heeft al ruimte onder zich. */
     .layout {
       grid-template-columns: 1fr;
+      row-gap: 0;
     }
-    /* Smal scherm: praktische info (reserveren, adres, openingstijden)
-       direct onder de foto's, zoals op TripAdvisor. */
+    /* Smal scherm: eerst omschrijving, menukaart en reviews; adres en
+       openingstijden daarna (route en bellen staan in de balk onderin). */
     .side {
       position: static;
-      order: -1;
     }
     .nearby-grid {
       grid-template-columns: repeat(2, minmax(0, 1fr));
