@@ -182,4 +182,41 @@ const formattedScore = score?.toLocaleString('nl-NL', {
     font-size: var(--text-sm);
     color: var(--text-muted);
   }
+  /* Mobiel: twee kaartjes naast elkaar, alles iets compacter. */
+  @media (max-width: 520px) {
+    .card {
+      padding: 6px;
+      border-radius: 16px;
+    }
+    .photo {
+      border-radius: 11px;
+    }
+    .badge {
+      padding: 0.25rem 0.45rem;
+      font-size: 0.68rem;
+    }
+    .score,
+    .video {
+      left: 0.45rem;
+    }
+    .score {
+      top: 0.45rem;
+    }
+    .video {
+      bottom: 0.45rem;
+    }
+    .body {
+      padding: 0.6rem 0.3rem 0.3rem;
+    }
+    .city {
+      font-size: 0.62rem;
+      letter-spacing: 0.1em;
+    }
+    .name {
+      font-size: 1rem;
+    }
+    .details {
+      font-size: 0.8rem;
+    }
+  }
 </style>
