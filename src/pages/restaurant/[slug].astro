@@ -308,12 +308,6 @@ const breadcrumbLd = {
                 .map((tag) => <span class="tag">{tag}</span>)}
               {isPartner && <span class="tag tag-partner">Tastory partner</span>}
             </div>
-            {restaurant.address && (
-              <p class="head-address">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" /></svg>
-                {restaurant.address}{city && !restaurant.address.toLowerCase().includes(city.toLowerCase()) ? `, ${city}` : ''}
-              </p>
-            )}
           </div>
           <div class="head-actions">
             <SaveButton
@@ -980,14 +974,6 @@ const breadcrumbLd = {
     background: var(--orange);
     border-color: var(--orange);
     color: #fff;
-  }
-  .head-address {
-    display: flex;
-    align-items: center;
-    gap: 0.35rem;
-    margin-top: 0.6rem;
-    color: var(--text-muted);
-    font-size: var(--text-sm);
   }
   .head-actions {
     display: flex;
