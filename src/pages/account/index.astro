@@ -447,7 +447,7 @@ const statusLabel = (status: string | null) =>
   .grid {
     list-style: none;
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
     gap: var(--space-lg);
   }
   .saved {
@@ -464,7 +464,9 @@ const statusLabel = (status: string | null) =>
   .note {
     margin-top: 0.6rem;
     padding: 0.5rem 0.7rem;
-    background: var(--beige);
+    /* Kaartjes hebben geen kader meer: notitie in een licht vlak. */
+    background: var(--white);
+    border: 1px solid var(--beige-dark);
     border-radius: var(--radius-sm);
     font-size: var(--text-sm);
     color: var(--text);

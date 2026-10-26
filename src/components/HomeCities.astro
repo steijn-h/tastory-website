@@ -3,6 +3,7 @@
 // pagina van de site, en Google gebruikt interne links om te bepalen welke
 // pagina's belangrijk zijn.
 import SectionHeader from './SectionHeader.astro';
+import VideoShowcase from './VideoShowcase.astro';
 import { cityPath, getAllRestaurants, groupByCity } from '../lib/restaurants';
 
 const all = await getAllRestaurants();
@@ -17,6 +18,11 @@ const total = all?.length ?? 0;
 {
   cities.length > 0 && (
     <section class="cities">
+      {all && (
+        <div class="videos reveal">
+          <VideoShowcase restaurants={all} center />
+        </div>
+      )}
       <div class="reveal">
         <SectionHeader
           tag="Restaurants ontdekken"
@@ -43,6 +49,10 @@ const total = all?.length ?? 0;
 }
 
 <style>
+  .videos {
+    max-width: 1080px;
+    margin: 0 auto var(--space-3xl);
+  }
   .cities {
     padding-top: var(--space-3xl);
     padding-bottom: var(--space-3xl);

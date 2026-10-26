@@ -59,6 +59,11 @@ cacheStaticPage(Astro);
           <label for="phone">Telefoonnummer <span class="optional">(optioneel)</span></label>
           <input type="tel" id="phone" name="phone" />
         </div>
+        <!-- Verborgen veld: alleen bots vullen dit in. -->
+        <div class="hp" aria-hidden="true">
+          <label for="company_website">Laat dit veld leeg</label>
+          <input id="company_website" name="company_website" tabindex="-1" autocomplete="off" />
+        </div>
         <button type="submit" class="btn-primary">Aanmelden als restaurant</button>
         <div class="signup-feedback" id="signup-feedback" role="status"></div>
       </form>
@@ -67,48 +72,63 @@ cacheStaticPage(Astro);
 </BaseLayout>
 
 <script>
-  import { submitForm } from '../../utils/submitForm';
-
+  // Zelfde aanmeldroute als /restaurant-aanmelden: melding aan Tastory en een
+  // bevestiging per e-mail aan de aanmelder.
   const form = document.getElementById('signup-form') as HTMLFormElement;
   const feedback = document.getElementById('signup-feedback') as HTMLDivElement;
   const submitBtn = form.querySelector('button') as HTMLButtonElement;
+  let startedAt = Date.now();
 
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
     const data = new FormData(form);
+    const value = (key: string) => String(data.get(key) ?? '').trim();
 
     submitBtn.disabled = true;
     submitBtn.textContent = 'Aanmelden...';
+    feedback.className = 'signup-feedback';
+    feedback.textContent = '';
 
     try {
-      await submitForm({
-        name: data.get('name') as string,
-        email: data.get('email') as string,
-        phone: (data.get('phone') as string) || undefined,
-        company: data.get('company') as string,
-        subject: 'Nieuwe restaurantaanmelding — Tastory website',
+      const res = await fetch('/api/restaurant-aanmelden', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          kind: 'partner',
+          name: value('name'),
+          restaurant: value('company'),
+          email: value('email'),
+          phone: value('phone'),
+          company_website: value('company_website'),
+          startedAt,
+        }),
       });
-
+      const result = await res.json().catch(() => ({}));
+      if (!res.ok || !result.ok) throw new Error(result.message ?? 'Er ging iets mis. Probeer het later opnieuw.');
       feedback.textContent =
-        'Bedankt voor je aanmelding! We nemen zo snel mogelijk contact met je op.';
+        'Bedankt voor je aanmelding! Je ontvangt een bevestiging per e-mail en we nemen zo snel mogelijk contact met je op.';
       feedback.className = 'signup-feedback signup-feedback--success';
       form.reset();
-    } catch {
-      feedback.textContent = 'Er ging iets mis. Probeer het later opnieuw.';
+      startedAt = Date.now();
+    } catch (err) {
+      feedback.textContent = (err as Error).message;
       feedback.className = 'signup-feedback signup-feedback--error';
+    } finally {
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Aanmelden als restaurant';
     }
-
-    submitBtn.disabled = false;
-    submitBtn.textContent = 'Aanmelden als restaurant';
-
-    setTimeout(() => {
-      feedback.textContent = '';
-      feedback.className = 'signup-feedback';
-    }, 5000);
   });
 </script>
 
 <style>
+  .hp {
+    position: absolute;
+    left: -10000px;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+  }
+
   .signup-section {
     max-width: 600px;
   }

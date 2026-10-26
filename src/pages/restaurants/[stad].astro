@@ -6,6 +6,7 @@ export const prerender = false;
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import RestaurantGrid from '../../components/RestaurantGrid.astro';
 import BackLink from '../../components/BackLink.astro';
+import VideoShowcase from '../../components/VideoShowcase.astro';
 import { getAllRestaurants, groupByCity, restaurantPath } from '../../lib/restaurants';
 import { SITE_URL } from '../../lib/links';
 import { groupByCuisine, MIN_RESTAURANTS_PER_CUISINE_PAGE } from '../../lib/cuisine';
@@ -120,6 +121,7 @@ const breadcrumbLd = group
               <h1>Restaurants in {name}</h1>
               <p>{intro}</p>
             </header>
+            <VideoShowcase restaurants={restaurants} title={`Restaurants met video in ${name}`} />
             {cuisineLinks.length > 0 && (
               <nav class="cuisines" aria-label={`Restaurants in ${name} per keuken`}>
                 <h2>Per keuken</h2>
@@ -134,11 +136,7 @@ const breadcrumbLd = group
                 </ul>
               </nav>
             )}
-            <RestaurantGrid
-              restaurants={restaurants}
-              showCity={false}
-              searchPlaceholder={`Zoek in ${name}…`}
-            />
+            <RestaurantGrid restaurants={restaurants} searchPlaceholder={`Zoek in ${name}…`} />
           </>
         )
       }

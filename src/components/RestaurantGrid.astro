@@ -8,14 +8,12 @@ import { splitCuisines } from '../lib/cuisine';
 
 interface Props {
   restaurants: RestaurantListItem[];
-  showCity?: boolean;
   initialQuery?: string;
   searchPlaceholder?: string;
   showCuisineFilter?: boolean;
 }
 const {
   restaurants,
-  showCity = true,
   initialQuery = '',
   searchPlaceholder = 'Zoek op naam, stad of keuken…',
   showCuisineFilter = true,
@@ -118,13 +116,17 @@ const prices = [
           data-reviews={String(r.published_review_count ?? 0)}
           data-index={String(i)}
         >
-          <RestaurantCard restaurant={r} showCity={showCity} />
+          <RestaurantCard restaurant={r} />
         </li>
       ))
     }
   </ul>
   <p class="empty" data-empty hidden>
-    Geen restaurants gevonden. Probeer een andere zoekterm of filter.
+    Geen restaurants gevonden. Probeer een andere zoekterm of filter, of
+    <a href="/restaurant-aanmelden">meld het restaurant aan</a>.
+  </p>
+  <p class="suggest">
+    Mis je een restaurant? <a href="/restaurant-aanmelden">Meld het aan</a>, ook zonder account.
   </p>
 </div>
 
@@ -182,6 +184,17 @@ const prices = [
 </script>
 
 <style>
+  .suggest {
+    margin-top: var(--space-xl);
+    text-align: center;
+    font-size: var(--text-sm);
+    color: var(--text-muted);
+  }
+  .suggest a,
+  .empty a {
+    color: var(--brown);
+    font-weight: 500;
+  }
   .controls {
     display: flex;
     flex-wrap: wrap;
@@ -253,11 +266,12 @@ const prices = [
     color: var(--text-muted);
     margin-bottom: var(--space-md);
   }
+  /* 3 per rij op de computer, 2 op tablet en mobiel. */
   .grid {
     list-style: none;
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-    gap: var(--space-lg);
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: var(--space-xl);
   }
   .grid li[hidden],
   .empty[hidden] {
@@ -279,7 +293,7 @@ const prices = [
   @media (max-width: 520px) {
     .grid {
       grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: var(--space-sm);
+      gap: 12px;
     }
     .select {
       flex: 1 1 40%;

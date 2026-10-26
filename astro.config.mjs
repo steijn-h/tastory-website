@@ -41,6 +41,10 @@ export default defineConfig({
         default: 'https://vyqpdtjpocndgdqylzeo.supabase.co',
       }),
       SUPABASE_ANON_KEY: envField.string({ context: 'client', access: 'public', default: '' }),
+      // Resend (zelfde dienst en domein als de app) voor e-mails vanaf de
+      // website, bijv. bevestiging van een restaurantaanmelding. Geheim:
+      // alleen op de server. Zonder key geeft het formulier een nette fout.
+      RESEND_API_KEY: envField.string({ context: 'server', access: 'secret', optional: true }),
     },
   },
 });
