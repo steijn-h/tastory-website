@@ -82,7 +82,10 @@ const items = restaurants.filter(hasVideo).map((r) => ({
 </script>
 
 <style>
+  /* global.css geeft elke <section> veel padding (marketingpagina's). */
   .showcase {
+    padding: 0;
+    max-width: none;
     margin: var(--space-xl) 0;
   }
   h2 {

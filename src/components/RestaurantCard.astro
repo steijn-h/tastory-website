@@ -4,7 +4,7 @@
 // naam in de sierletter en keuken/prijs gedempt. Score en video als label op
 // de foto, zoals in de app.
 import { hasVideo, restaurantPath, type RestaurantListItem } from '../lib/restaurants';
-import { normalizeCity, priceLabel, splitUrls } from '../lib/format';
+import { normalizeCity, priceLabel, safeHttpsUrl, splitUrls } from '../lib/format';
 
 interface Props {
   restaurant: RestaurantListItem;
@@ -15,6 +15,7 @@ const city = normalizeCity(r.city);
 const score = r.weighted_score && r.weighted_score > 0 ? Number(r.weighted_score) : null;
 const reviewCount = r.published_review_count ?? 0;
 const video = hasVideo(r);
+const videoUrl = video ? safeHttpsUrl(r.video_url) : null;
 const details = [r.cuisine, r.price_level ? priceLabel(r.price_level) : null]
   .filter(Boolean)
   .join(' · ');
@@ -24,13 +25,30 @@ const formattedScore = score?.toLocaleString('nl-NL', {
 });
 ---
 
-<a href={restaurantPath(r)} class="card">
+<a
+  href={restaurantPath(r)}
+  class:list={['card', { 'has-video': video }]}
+  data-card-video={video ? '' : undefined}
+>
   <div class="photo">
     {
       photo ? (
         <img src={photo} alt={r.name ?? ''} loading="lazy" decoding="async" />
       ) : (
         <div class="placeholder" />
+      )
+    }
+    {
+      videoUrl && (
+        <video
+          src={videoUrl}
+          muted
+          loop
+          playsinline
+          preload="none"
+          aria-hidden="true"
+          class="preview"
+        />
       )
     }
     {
@@ -74,6 +92,30 @@ const formattedScore = score?.toLocaleString('nl-NL', {
     <slot />
   </div>
 </a>
+
+<script>
+  // Restaurants met video: op apparaten met een muis speelt de video in het
+  // kaartje bij aanwijzen. preload="none": er laadt niets tot je aanwijst.
+  const canPreview =
+    window.matchMedia('(hover: hover) and (pointer: fine)').matches &&
+    !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (canPreview) {
+    document.querySelectorAll<HTMLElement>('[data-card-video]').forEach((card) => {
+      const video = card.querySelector<HTMLVideoElement>('video.preview');
+      if (!video) return;
+      card.addEventListener('mouseenter', () => {
+        void video.play().then(
+          () => card.classList.add('playing'),
+          () => {},
+        );
+      });
+      card.addEventListener('mouseleave', () => {
+        card.classList.remove('playing');
+        video.pause();
+      });
+    });
+  }
+</script>
 
 <style>
   .card {
@@ -124,8 +166,32 @@ const formattedScore = score?.toLocaleString('nl-NL', {
   .card:hover .photo img {
     transform: scale(1.04);
   }
+  /* Video in het kaartje: onzichtbaar tot hij speelt. */
+  .preview {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 0;
+    transition: opacity 0.4s;
+  }
+  .card:global(.playing) .preview {
+    opacity: 1;
+  }
+  /* Restaurants met video vallen op met een warme, gouden rand. */
+  .card.has-video {
+    border-color: rgba(201, 168, 76, 0.55);
+    box-shadow:
+      0 0 0 1px rgba(201, 168, 76, 0.25),
+      0 10px 28px rgba(58, 46, 34, 0.08);
+  }
+  .card.has-video:hover {
+    border-color: rgba(201, 168, 76, 0.8);
+  }
   .badge {
     position: absolute;
+    z-index: 1;
     display: inline-flex;
     align-items: center;
     gap: 0.3rem;
@@ -152,7 +218,7 @@ const formattedScore = score?.toLocaleString('nl-NL', {
   .video {
     bottom: 0.65rem;
     left: 0.65rem;
-    background: rgba(20, 14, 8, 0.55);
+    background: linear-gradient(135deg, #c9a84c, #a8863a);
     color: #fff;
     backdrop-filter: blur(6px);
   }
