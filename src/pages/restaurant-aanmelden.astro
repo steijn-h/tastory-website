@@ -1,0 +1,265 @@
+---
+// Restaurant aanmelden (voorstellen) door iedereen, ook zonder account. Zelfde
+// functie als "Restaurant opgeven" in de app, plus een bevestigingsmail.
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHero from '../components/PageHero.astro';
+import { cacheStaticPage } from '../lib/cache';
+import '../styles/app-ui.css';
+
+cacheStaticPage(Astro);
+---
+
+<BaseLayout
+  title="Restaurant aanmelden | Tastory"
+  description="Mis je een restaurant op Tastory? Meld het aan, ook zonder account. We bekijken het en nemen het waar mogelijk op."
+>
+  <PageHero
+    title="Restaurant <em>aanmelden</em>"
+    description="Mis je een restaurant op Tastory? Laat het ons weten. Je hebt er geen account voor nodig: we sturen je een bevestiging en gaan ermee aan de slag."
+  />
+
+  <div class="wrap">
+    <div class="ui-card">
+      <form id="suggest-form" novalidate>
+        <div class="ui-field">
+          <label class="ui-label" for="restaurant">Naam van het restaurant</label>
+          <input
+            class="ui-input"
+            id="restaurant"
+            name="restaurant"
+            required
+            maxlength="120"
+            autocomplete="off"
+          />
+        </div>
+        <div class="ui-field">
+          <label class="ui-label" for="city">Plaats</label>
+          <input
+            class="ui-input"
+            id="city"
+            name="city"
+            required
+            maxlength="80"
+            autocomplete="address-level2"
+          />
+        </div>
+        <div class="ui-field">
+          <label class="ui-label" for="link"
+            >Website of Instagram <span class="ui-muted">(optioneel)</span></label
+          >
+          <input
+            class="ui-input"
+            id="link"
+            name="link"
+            maxlength="300"
+            inputmode="url"
+            placeholder="bijv. instagram.com/restaurant"
+          />
+        </div>
+        <div class="ui-field">
+          <label class="ui-label" for="reason"
+            >Waarom moet het op Tastory? <span class="ui-muted">(optioneel)</span></label
+          >
+          <textarea class="ui-input" id="reason" name="reason" maxlength="1500" rows="4"></textarea>
+        </div>
+
+        <hr />
+
+        <div class="ui-field">
+          <label class="ui-label" for="name"
+            >Je naam <span class="ui-muted">(optioneel)</span></label
+          >
+          <input class="ui-input" id="name" name="name" maxlength="80" autocomplete="name" />
+        </div>
+        <div class="ui-field">
+          <label class="ui-label" for="email">Je e-mailadres</label>
+          <input
+            class="ui-input"
+            id="email"
+            name="email"
+            type="email"
+            required
+            maxlength="200"
+            autocomplete="email"
+          />
+          <span class="ui-hint"
+            >Hier sturen we de bevestiging naartoe. We gebruiken het nergens anders voor.</span
+          >
+        </div>
+        <label class="check">
+          <input type="checkbox" name="isOwner" id="is-owner" />
+          <span>Ik ben eigenaar of werk bij dit restaurant</span>
+        </label>
+        <p class="ui-notice owner-note" id="owner-note" hidden>
+          Wil je meer dan een vermelding, zoals video en een eigen profiel? Bekijk dan ook
+          <a href="/aanmelden/restaurant">Tastory voor restaurants</a>.
+        </p>
+
+        <!-- Verborgen veld: alleen bots vullen dit in. -->
+        <div class="hp" aria-hidden="true">
+          <label for="company_website">Laat dit veld leeg</label>
+          <input id="company_website" name="company_website" tabindex="-1" autocomplete="off" />
+        </div>
+
+        <p class="ui-error" id="suggest-error" role="alert"></p>
+        <button type="submit" class="ui-btn ui-btn-primary ui-btn-block" id="suggest-submit"
+          >Restaurant aanmelden</button
+        >
+        <p class="ui-hint privacy">
+          We bewaren je gegevens alleen om je aanmelding te behandelen. Zie onze <a href="/privacy"
+            >privacyverklaring</a
+          >.
+        </p>
+      </form>
+
+      <div id="suggest-done" hidden>
+        <h2 class="done-title">Bedankt!</h2>
+        <p class="ui-muted done-text">
+          We hebben je aanmelding ontvangen en gaan ermee aan de slag. Je krijgt een bevestiging per
+          e-mail; kijk ook even in je spam als je niets ziet.
+        </p>
+        <div class="done-actions">
+          <a class="ui-btn ui-btn-primary" href="/restaurants">Restaurants bekijken</a>
+          <button type="button" class="ui-btn ui-btn-ghost" id="suggest-again"
+            >Nog een restaurant aanmelden</button
+          >
+        </div>
+      </div>
+    </div>
+  </div>
+</BaseLayout>
+
+<script>
+  const form = document.getElementById('suggest-form') as HTMLFormElement;
+  const errorEl = document.getElementById('suggest-error')!;
+  const submit = document.getElementById('suggest-submit') as HTMLButtonElement;
+  const done = document.getElementById('suggest-done')!;
+  const ownerBox = document.getElementById('is-owner') as HTMLInputElement;
+  const ownerNote = document.getElementById('owner-note')!;
+  let startedAt = Date.now();
+
+  ownerBox.addEventListener('change', () => (ownerNote.hidden = !ownerBox.checked));
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    errorEl.textContent = '';
+    const data = new FormData(form);
+    const value = (key: string) => String(data.get(key) ?? '').trim();
+    if (value('restaurant').length < 2 || value('city').length < 2) {
+      errorEl.textContent = 'Vul de naam en de plaats van het restaurant in.';
+      return;
+    }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(value('email'))) {
+      errorEl.textContent = 'Vul een geldig e-mailadres in.';
+      (document.getElementById('email') as HTMLInputElement).focus();
+      return;
+    }
+    submit.disabled = true;
+    submit.textContent = 'Versturen…';
+    try {
+      const res = await fetch('/api/restaurant-aanmelden', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          restaurant: value('restaurant'),
+          city: value('city'),
+          link: value('link'),
+          reason: value('reason'),
+          name: value('name'),
+          email: value('email'),
+          isOwner: ownerBox.checked,
+          company_website: value('company_website'),
+          startedAt,
+        }),
+      });
+      const result = await res.json().catch(() => ({}));
+      if (!res.ok || !result.ok) {
+        errorEl.textContent = result.message ?? 'Versturen is niet gelukt. Probeer het opnieuw.';
+        return;
+      }
+      form.hidden = true;
+      done.hidden = false;
+      done.scrollIntoView({ block: 'center', behavior: 'smooth' });
+    } catch {
+      errorEl.textContent = 'Geen verbinding. Controleer je internet en probeer het opnieuw.';
+    } finally {
+      submit.disabled = false;
+      submit.textContent = 'Restaurant aanmelden';
+    }
+  });
+
+  document.getElementById('suggest-again')?.addEventListener('click', () => {
+    form.reset();
+    ownerNote.hidden = true;
+    startedAt = Date.now();
+    done.hidden = true;
+    form.hidden = false;
+    (document.getElementById('restaurant') as HTMLInputElement).focus();
+  });
+</script>
+
+<style>
+  .wrap {
+    max-width: 620px;
+    margin: 0 auto;
+    padding: 0 var(--space-lg) var(--space-3xl);
+  }
+  hr {
+    border: 0;
+    border-top: 1px solid var(--beige-dark);
+    margin: var(--space-lg) 0;
+  }
+  .check {
+    display: flex;
+    gap: 0.6rem;
+    align-items: flex-start;
+    font-size: var(--text-sm);
+    margin-bottom: var(--space-md);
+    cursor: pointer;
+  }
+  .check input {
+    accent-color: var(--orange);
+    width: 18px;
+    height: 18px;
+    margin-top: 1px;
+  }
+  .owner-note {
+    margin-bottom: var(--space-md);
+  }
+  .owner-note a,
+  .privacy a {
+    color: var(--brown);
+  }
+  .hp {
+    position: absolute;
+    left: -10000px;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+  }
+  .privacy {
+    display: block;
+    margin-top: var(--space-md);
+    text-align: center;
+  }
+  .done-title {
+    font-family: var(--serif);
+    font-size: var(--text-2xl);
+    font-weight: 500;
+    margin-bottom: var(--space-sm);
+  }
+  .done-text {
+    line-height: 1.6;
+    margin-bottom: var(--space-lg);
+  }
+  .done-actions {
+    display: flex;
+    gap: var(--space-sm);
+    flex-wrap: wrap;
+  }
+  @media (max-width: 640px) {
+    .wrap {
+      padding: 0 var(--space-md) var(--space-2xl);
+    }
+  }
+</style>

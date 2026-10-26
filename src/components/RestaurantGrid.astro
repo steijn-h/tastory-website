@@ -124,7 +124,11 @@ const prices = [
     }
   </ul>
   <p class="empty" data-empty hidden>
-    Geen restaurants gevonden. Probeer een andere zoekterm of filter.
+    Geen restaurants gevonden. Probeer een andere zoekterm of filter, of
+    <a href="/restaurant-aanmelden">meld het restaurant aan</a>.
+  </p>
+  <p class="suggest">
+    Mis je een restaurant? <a href="/restaurant-aanmelden">Meld het aan</a>, ook zonder account.
   </p>
 </div>
 
@@ -182,6 +186,17 @@ const prices = [
 </script>
 
 <style>
+  .suggest {
+    margin-top: var(--space-xl);
+    text-align: center;
+    font-size: var(--text-sm);
+    color: var(--text-muted);
+  }
+  .suggest a,
+  .empty a {
+    color: var(--brown);
+    font-weight: 500;
+  }
   .controls {
     display: flex;
     flex-wrap: wrap;
