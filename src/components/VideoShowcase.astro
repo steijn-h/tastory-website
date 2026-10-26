@@ -1,58 +1,28 @@
 ---
-// "Restaurants met video", zoals de video-sectie in de app. De video's laden
-// pas bij het aanwijzen met de muis (preload="none"): restaurantvideo's zijn
-// vaak tientallen MB's en horen niet automatisch in een overzicht te laden.
-import { hasVideo, restaurantPath, type RestaurantListItem } from '../lib/restaurants';
-import { normalizeCity, safeHttpsUrl, splitUrls } from '../lib/format';
+// Rij met restaurants die een video hebben (zelfde bron als de video-sectie in
+// de app). Dezelfde kaartjes als in de lijsten, zodat het blok bij de rest van
+// de site past; de video speelt in het kaartje bij aanwijzen met de muis.
+import RestaurantCard from './RestaurantCard.astro';
+import { hasVideo, type RestaurantListItem } from '../lib/restaurants';
 
 interface Props {
   restaurants: RestaurantListItem[];
   title?: string;
+  /** Kaartjes in het midden (homepage) i.p.v. links uitgelijnd. */
+  center?: boolean;
 }
-const { restaurants, title = 'Restaurants met video' } = Astro.props;
-const items = restaurants.filter(hasVideo).map((r) => ({
-  r,
-  video: safeHttpsUrl(r.video_url)!,
-  poster: splitUrls(r.photo_url)[0] ?? safeHttpsUrl(r.background_url) ?? undefined,
-  city: normalizeCity(r.city),
-}));
+const { restaurants, title = 'Restaurants met video', center = false } = Astro.props;
+const items = restaurants.filter(hasVideo).slice(0, 12);
 ---
 
 {
   items.length > 0 && (
-    <section class="showcase" aria-labelledby="video-showcase-title">
-      <h2 id="video-showcase-title">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-          <path d="M8 5v14l11-7z" />
-        </svg>
-        {title}
-      </h2>
-      <p class="sub">Beleef de sfeer al vóór je reserveert.</p>
+    <section class:list={['showcase', { center }]} aria-label={title}>
+      <h2>{title}</h2>
       <ul class="row">
-        {items.map(({ r, video, poster, city }) => (
+        {items.map((r) => (
           <li>
-            <a href={restaurantPath(r)} class="tile" data-video-tile>
-              <video
-                src={video}
-                poster={poster}
-                muted
-                loop
-                playsinline
-                preload="none"
-                aria-hidden="true"
-              />
-              <span class="play" aria-hidden="true">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M8 5v14l11-7z" />
-                </svg>
-              </span>
-              <span class="caption">
-                <strong>{r.name}</strong>
-                {(r.cuisine || city) && (
-                  <span>{[r.cuisine, city].filter(Boolean).join(' · ')}</span>
-                )}
-              </span>
-            </a>
+            <RestaurantCard restaurant={r} />
           </li>
         ))}
       </ul>
@@ -60,127 +30,48 @@ const items = restaurants.filter(hasVideo).map((r) => ({
   )
 }
 
-<script>
-  // Alleen op apparaten met een muis, en niet bij "minder beweging".
-  const canPreview =
-    window.matchMedia('(hover: hover) and (pointer: fine)').matches &&
-    !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  if (canPreview) {
-    document.querySelectorAll<HTMLElement>('[data-video-tile]').forEach((tile) => {
-      const video = tile.querySelector('video');
-      if (!video) return;
-      tile.addEventListener('mouseenter', () => {
-        tile.classList.add('playing');
-        void video.play().catch(() => tile.classList.remove('playing'));
-      });
-      tile.addEventListener('mouseleave', () => {
-        tile.classList.remove('playing');
-        video.pause();
-      });
-    });
-  }
-</script>
-
 <style>
   /* global.css geeft elke <section> veel padding (marketingpagina's). */
   .showcase {
     padding: 0;
     max-width: none;
-    margin: var(--space-xl) 0;
+    margin: var(--space-xl) 0 var(--space-2xl);
   }
   h2 {
-    display: flex;
-    align-items: center;
-    gap: 0.45rem;
     font-family: var(--serif);
-    font-size: var(--text-2xl);
+    font-size: var(--text-xl);
     font-weight: 500;
     color: var(--text);
+    margin-bottom: var(--space-md);
   }
-  h2 svg {
-    color: var(--orange);
+  .center h2 {
+    text-align: center;
   }
-  .sub {
-    color: var(--text-muted);
-    font-size: var(--text-sm);
-    margin: 0.2rem 0 var(--space-md);
-  }
+  /* Eén rij; bij meer video's horizontaal scrollen. */
   .row {
     list-style: none;
     display: grid;
     grid-auto-flow: column;
-    grid-auto-columns: minmax(260px, 340px);
-    gap: var(--space-md);
+    grid-auto-columns: minmax(280px, calc((100% - 2 * var(--space-xl)) / 3));
+    gap: var(--space-xl);
     overflow-x: auto;
     scroll-snap-type: x mandatory;
-    padding-bottom: 0.5rem;
+    /* Ruimte voor de schaduw van de kaartjes (overflow knipt anders af). */
+    padding: 6px 14px 32px;
+    margin: -6px -14px -20px;
+  }
+  .center .row {
+    justify-content: center;
+    /* Past de rij niet, dan links beginnen i.p.v. kaartjes afknippen. */
+    justify-content: safe center;
   }
   .row li {
     scroll-snap-align: start;
   }
-  .tile {
-    position: relative;
-    display: block;
-    aspect-ratio: 16 / 10;
-    border-radius: var(--radius-md);
-    overflow: hidden;
-    background: var(--beige-dark);
-    color: #fff;
-    text-decoration: none;
-    box-shadow: var(--shadow-sm);
-  }
-  .tile:focus-visible {
-    outline: 3px solid var(--orange);
-    outline-offset: 2px;
-  }
-  .tile video {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    display: block;
-  }
-  .tile::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(transparent 45%, rgba(0, 0, 0, 0.7));
-    pointer-events: none;
-  }
-  .play {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    width: 52px;
-    height: 52px;
-    margin: -26px 0 0 -26px;
-    display: grid;
-    place-items: center;
-    border-radius: 50%;
-    background: rgba(0, 0, 0, 0.45);
-    backdrop-filter: blur(4px);
-    z-index: 1;
-    transition: opacity 0.2s;
-  }
-  .tile:global(.playing) .play {
-    opacity: 0;
-  }
-  .caption {
-    position: absolute;
-    left: 0.9rem;
-    right: 0.9rem;
-    bottom: 0.75rem;
-    z-index: 1;
-    display: flex;
-    flex-direction: column;
-    gap: 0.1rem;
-  }
-  .caption strong {
-    font-family: var(--serif);
-    font-size: var(--text-lg);
-    font-weight: 600;
-  }
-  .caption span {
-    font-size: var(--text-sm);
-    opacity: 0.9;
+  @media (max-width: 520px) {
+    .row {
+      grid-auto-columns: calc((100% - 12px) / 2);
+      gap: 12px;
+    }
   }
 </style>
