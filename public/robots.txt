@@ -2,7 +2,9 @@
 # mogen alle openbare pagina's lezen. Alleen persoonlijke pagina's niet.
 User-agent: *
 Allow: /
-Disallow: /account
+# $ = precies dit pad, zodat /account-verwijderen wel vindbaar blijft.
+Disallow: /account$
+Disallow: /account/
 Disallow: /inloggen
 Disallow: /auth/
 Disallow: /partials/
