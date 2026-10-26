@@ -54,6 +54,21 @@ const ADJECTIVE: Record<string, string> = {
   aziatisch: 'Aziatische',
 };
 
+// Geen landsnaam: in een zin met kleine letter ("een internationaal restaurant").
+const NOT_A_COUNTRY = new Set(['internationaal', 'mediterraans', 'fusion', 'aziatisch']);
+// Onverbogen vorm waar die afwijkt van de waarde in de database.
+const UNINFLECTED: Record<string, string> = { mediterraans: 'mediterraan' };
+
+/** Bijvoeglijk naamwoord in een lopende zin, verbogen ("Italiaanse") of niet ("Italiaans"). */
+export function cuisineAdjective(cuisine: string, inflected: boolean): string | null {
+  const key = cuisine.trim().toLowerCase();
+  const word = inflected
+    ? ADJECTIVE[key]
+    : (UNINFLECTED[key] ?? (ADJECTIVE[key] ? cuisine.trim() : null));
+  if (!word) return null;
+  return NOT_A_COUNTRY.has(key) ? word.toLowerCase() : word.charAt(0).toUpperCase() + word.slice(1);
+}
+
 /** "Italiaans" → "Italiaanse restaurants"; "Fusion" → "Restaurants met fusion keuken". */
 export function cuisineRestaurantsLabel(cuisine: string): string {
   const adjective = ADJECTIVE[cuisine.trim().toLowerCase()];

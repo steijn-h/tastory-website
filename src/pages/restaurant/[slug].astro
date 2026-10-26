@@ -23,6 +23,7 @@ import {
 import {
   capitalize,
   displayWebsite,
+  escapeXml,
   formatReviewDate,
   isImageUrl,
   normalizeCity,
@@ -34,6 +35,7 @@ import {
   todayDutch,
 } from '../../lib/format';
 import { APP_STORE_URL, SITE_URL } from '../../lib/links';
+import { describeRestaurant, describeRestaurantShort } from '../../lib/restaurant-text';
 
 const param = Astro.params.slug ?? '';
 const lookup = await getRestaurant(param);
@@ -130,27 +132,28 @@ const title = restaurant
 // Eigen, feitelijke samenvatting: de beschrijving komt vaak letterlijk van de
 // site van het restaurant (dubbele content voor Google). Deze zin is per
 // pagina uniek en makkelijk te citeren door zoekmachines en AI-assistenten.
-const facts = restaurant
-  ? [
-      restaurant.cuisine ? `keuken: ${restaurant.cuisine}` : null,
-      restaurant.vibe ? `sfeer: ${restaurant.vibe.toLowerCase()}` : null,
-      // Woordverbinder tussen de €-tekens: "€€" niet over twee regels.
-      restaurant.price_level ? `prijsklasse ${priceLabel(restaurant.price_level).split('').join('\u2060')}` : null,
-    ].filter((f): f is string => Boolean(f))
-  : [];
-const summary = restaurant
-  ? `${name} is een restaurant${city ? ` in ${city}` : ''}${restaurant.address ? ` (${restaurant.address})` : ''}${
-      facts.length > 0 ? `, ${facts.join(', ')}` : ''
-    }.${
+const textInput = restaurant
+  ? {
+      name,
+      city,
+      address: restaurant.address,
+      cuisine: restaurant.cuisine,
+      vibe: restaurant.vibe,
+      priceLevel: restaurant.price_level,
+      score,
+      reviewCount,
+    }
+  : null;
+const summary = textInput ? describeRestaurant(textInput) : '';
+// In de pagina: "€€€" niet over twee regels breken (alleen opmaak, de tekst
+// zelf blijft schoon voor Google en kopiëren).
+const summaryHtml = escapeXml(summary).replace(/€+/g, (m) => `<span style="white-space:nowrap">${m}</span>`);
+const metaLead = textInput
+  ? `${describeRestaurantShort(textInput)}${
       score !== null && reviewCount > 0
-        ? ` Tastory-gasten geven het gemiddeld een ${formatScore(score)} uit 5 (${reviewCount === 1 ? '1 review' : `${reviewCount} reviews`}).`
+        ? ` ${formatScore(score)}/5 uit ${reviewCount === 1 ? '1 review' : `${reviewCount} reviews`}.`
         : ''
-    }`
-  : '';
-const metaLead = restaurant
-  ? `${name}${city ? ` in ${city}` : ''}${restaurant.cuisine || restaurant.price_level ? ` (${[restaurant.cuisine, restaurant.price_level ? priceLabel(restaurant.price_level) : null].filter(Boolean).join(', ')})` : ''}${
-      score !== null && reviewCount > 0 ? `: ${formatScore(score)}/5 uit ${reviewCount === 1 ? '1 review' : `${reviewCount} reviews`}` : ''
-    }. Bekijk foto's, menu, openingstijden en adres op Tastory.`
+    } Bekijk foto's, menu en openingstijden op Tastory.`
   : '';
 const description = restaurant ? metaLead : 'Dit restaurant staat niet (meer) op Tastory.';
 const keywords = restaurant
@@ -166,7 +169,7 @@ const jsonLd = restaurant
       '@id': `${SITE_URL}${canonicalPath}#restaurant`,
       name,
       url: `${SITE_URL}${canonicalPath}`,
-      description: restaurant.description?.trim() || summary,
+      description: restaurant.description?.trim() || summary || undefined,
       image: photos.length > 0 ? photos.slice(0, 6) : undefined,
       servesCuisine: restaurant.cuisine ?? undefined,
       priceRange: restaurant.price_level ? priceLabel(restaurant.price_level) : undefined,
@@ -216,7 +219,7 @@ const videoLd =
         '@context': 'https://schema.org',
         '@type': 'VideoObject',
         name: `Video van ${name}${city ? ` in ${city}` : ''}`,
-        description: summary,
+        description: summary || `Video van ${name} op Tastory.`,
         thumbnailUrl: [photos[0]],
         uploadDate: restaurant.created_at,
         contentUrl: videoUrl,
@@ -355,11 +358,13 @@ const breadcrumbLd = {
         <div class="layout">
           <!-- Hoofdkolom -->
           <div class="main">
-            <section class="block">
-              <h2>Over {name}</h2>
-              <p class="about-summary">{summary}</p>
-              {restaurant.description && <p class="description">{restaurant.description}</p>}
-            </section>
+            {(summary || restaurant.description) && (
+              <section class="block">
+                <h2>Over {name}</h2>
+                {summary && <p class="about-summary" set:html={summaryHtml} />}
+                {restaurant.description && <p class="description">{restaurant.description}</p>}
+              </section>
+            )}
 
             {(menuImages.length > 0 || menuLink) && (
               <section class="block" id="menu">
