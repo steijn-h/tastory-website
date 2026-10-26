@@ -118,6 +118,7 @@ const { restaurantId, restaurantName, cuisine, returnPath } = Astro.props;
 
 <script>
   import { AUTH_COOKIE_NAME } from '../lib/auth-cookie';
+  import { trackEvent } from '../lib/tracking';
 
   type Account = typeof import('../lib/account');
   type SupabaseClient = import('@supabase/supabase-js').SupabaseClient;
@@ -195,6 +196,7 @@ const { restaurantId, restaurantName, cuisine, returnPath } = Astro.props;
           note: noteEl.value,
         });
         setSaved(true);
+        trackEvent({ event: 'save_restaurant', restaurantId, cuisine: cuisine || null });
         dialog!.close();
         showToast(`Opgeslagen in ${collectieName}`);
       } catch (e) {
@@ -252,6 +254,7 @@ const { restaurantId, restaurantName, cuisine, returnPath } = Astro.props;
       setSaved(false);
       try {
         await c.account.removeSavedRestaurant(c.supabase, c.userId, restaurantId);
+        trackEvent({ event: 'unsave_restaurant', restaurantId });
         showToast('Verwijderd uit opgeslagen');
       } catch (e) {
         setSaved(true);

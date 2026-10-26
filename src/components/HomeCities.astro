@@ -4,6 +4,7 @@
 // pagina's belangrijk zijn.
 import SectionHeader from './SectionHeader.astro';
 import VideoShowcase from './VideoShowcase.astro';
+import Recommendations from './Recommendations.astro';
 import { cityPath, getAllRestaurants, groupByCity } from '../lib/restaurants';
 
 const all = await getAllRestaurants();
@@ -18,6 +19,9 @@ const total = all?.length ?? 0;
 {
   cities.length > 0 && (
     <section class="cities">
+      <div class="recs-wrap" data-recs-center>
+        <Recommendations center />
+      </div>
       {all && (
         <div class="videos reveal">
           <VideoShowcase restaurants={all} center />
@@ -49,6 +53,10 @@ const total = all?.length ?? 0;
 }
 
 <style>
+  .recs-wrap {
+    max-width: 1080px;
+    margin: 0 auto;
+  }
   .videos {
     max-width: 1080px;
     margin: 0 auto var(--space-3xl);

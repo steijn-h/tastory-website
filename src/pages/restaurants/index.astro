@@ -4,6 +4,7 @@ export const prerender = false;
 
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import RestaurantGrid from '../../components/RestaurantGrid.astro';
+import Recommendations from '../../components/Recommendations.astro';
 import { getAllRestaurants, groupByCity } from '../../lib/restaurants';
 import { SITE_URL } from '../../lib/links';
 
@@ -58,6 +59,8 @@ if (restaurants) {
           <a class="suggest-btn" href="/restaurant-aanmelden">Meld het aan</a>
         </div>
       </header>
+
+      <Recommendations />
 
       {
         cities.length > 0 && (

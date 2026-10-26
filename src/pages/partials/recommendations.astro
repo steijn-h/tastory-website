@@ -1,0 +1,31 @@
+---
+// Aanbevelingen voor de ingelogde bezoeker (HTML-fragment). Privé: leest de
+// sessie uit de cookie en wordt nooit gecachet.
+export const prerender = false;
+export const partial = true;
+
+import Recommendations from '../../components/Recommendations.astro';
+import { getAllRestaurants } from '../../lib/restaurants';
+import { buildUserProfile, recommend } from '../../lib/recommendations';
+import { getServerSupabase, getServerUser } from '../../lib/supabase-server';
+
+Astro.response.headers.set('Cache-Control', 'private, no-store');
+
+const supabase = getServerSupabase(Astro);
+const user = await getServerUser(supabase);
+let items: Awaited<ReturnType<typeof recommend>> = [];
+if (supabase && user) {
+  const [profile, restaurants] = await Promise.all([
+    buildUserProfile(supabase, user.id),
+    getAllRestaurants(),
+  ]);
+  items = restaurants ? recommend(restaurants, profile, 10) : [];
+}
+// Niets aan te bevelen (gast of nog geen smaakprofiel): leeg antwoord.
+if (items.length === 0) {
+  return new Response(null, { status: 204, headers: { 'Cache-Control': 'private, no-store' } });
+}
+const center = Astro.url.searchParams.get('center') === '1';
+---
+
+{items.length > 0 && <Recommendations items={items} center={center} />}

@@ -6,6 +6,8 @@ import '../styles/global.css';
 
 interface Props {
   ogImage?: string;
+  /** Het eigen ogImage is 1200×630 (zoals /og/restaurant/…jpg). */
+  ogImageIsWide?: boolean;
   title: string;
   description?: string;
   keywords?: string[];
@@ -18,6 +20,7 @@ const {
   description = 'De ultieme smaakvolle verbinding tussen gast en restaurant. Ontdek restaurants via kwalitatieve videocontent.',
   keywords,
   ogImage: customOgImage,
+  ogImageIsWide = false,
   noindex = false,
 } = Astro.props;
 // Altijd zonder slash aan het eind (behalve de homepage), gelijk aan de sitemap.
@@ -46,7 +49,7 @@ const ogImage = customOgImage ?? defaultOgImage.toString();
     <meta property="og:locale" content="nl_NL" />
     <meta property="og:image" content={ogImage} />
     {
-      !customOgImage && (
+      (!customOgImage || ogImageIsWide) && (
         <>
           <meta property="og:image:width" content="1200" />
           <meta property="og:image:height" content="630" />
@@ -64,6 +67,7 @@ const ogImage = customOgImage ?? defaultOgImage.toString();
     <link rel="canonical" href={canonicalURL} />
     <link rel="sitemap" href="/sitemap-index.xml" />
     <!-- Vierkant app-icoon: Google toont dit naast de zoekresultaten (min. 48×48). -->
+    <link rel="icon" href="/favicon.ico" sizes="48x48" />
     <link
       rel="icon"
       type="image/png"
