@@ -60,34 +60,28 @@ const video = hasVideo(r);
 </a>
 
 <style>
+  /*
+   * Rustig en luxe: geen kader, rand of schaduw; een grote foto met afgeronde
+   * hoeken en de tekst er los onder. Beweging alleen in de foto.
+   */
   .card {
     display: flex;
     flex-direction: column;
-    background: var(--white);
-    border-radius: var(--radius-md);
-    overflow: hidden;
     text-decoration: none;
     color: inherit;
-    box-shadow: var(--shadow-sm);
-    border: 1px solid var(--beige-dark);
-    transition:
-      transform 0.2s,
-      box-shadow 0.2s;
     height: 100%;
-  }
-  .card:hover {
-    transform: translateY(-3px);
-    box-shadow: var(--shadow-md);
   }
   .card:focus-visible {
     outline: 3px solid var(--orange);
-    outline-offset: 2px;
+    outline-offset: 4px;
+    border-radius: var(--radius-md);
   }
   .photo {
     position: relative;
     aspect-ratio: 4 / 3;
     /* Zonder dit rekt een staande foto het vak op (ongelijke kaartjes). */
     overflow: hidden;
+    border-radius: var(--radius-md);
     background: var(--beige-dark);
   }
   .photo img,
@@ -97,29 +91,36 @@ const video = hasVideo(r);
     object-fit: cover;
     display: block;
   }
+  .photo img {
+    transition: transform 0.8s cubic-bezier(0.2, 0.6, 0.2, 1);
+  }
+  .card:hover .photo img {
+    transform: scale(1.04);
+  }
   /* Zelfde idee als de afspeelknop op kaarten in de app. */
   .video-badge {
     position: absolute;
-    top: 0.6rem;
-    left: 0.6rem;
+    top: 0.75rem;
+    left: 0.75rem;
     display: inline-flex;
     align-items: center;
     gap: 0.3rem;
-    padding: 0.25rem 0.55rem 0.25rem 0.45rem;
+    padding: 0.3rem 0.65rem 0.3rem 0.5rem;
     border-radius: 999px;
-    background: rgba(0, 0, 0, 0.55);
+    background: rgba(20, 14, 8, 0.5);
     color: #fff;
     font-size: var(--text-xs);
     font-weight: 500;
-    backdrop-filter: blur(4px);
+    letter-spacing: 0.02em;
+    backdrop-filter: blur(6px);
   }
   .body {
-    padding: 0.85rem 1rem 1rem;
+    padding: 0.9rem 0.15rem 0;
   }
   .name {
     font-family: var(--serif);
-    font-size: var(--text-lg);
-    font-weight: 600;
+    font-size: 1.3rem;
+    font-weight: 500;
     line-height: 1.25;
     color: var(--text);
   }
@@ -137,8 +138,9 @@ const video = hasVideo(r);
     color: var(--text-muted);
   }
   .tags {
-    margin-top: 0.3rem;
+    margin-top: 0.25rem;
     font-size: var(--text-sm);
     color: var(--text-muted);
+    letter-spacing: 0.01em;
   }
 </style>

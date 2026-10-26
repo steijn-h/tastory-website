@@ -268,11 +268,12 @@ const prices = [
     color: var(--text-muted);
     margin-bottom: var(--space-md);
   }
+  /* Grote foto's: 3 per rij op de computer, 2 op een tablet, 1 op mobiel. */
   .grid {
     list-style: none;
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-    gap: var(--space-lg);
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: var(--space-2xl) var(--space-xl);
   }
   .grid li[hidden],
   .empty[hidden] {
@@ -293,8 +294,8 @@ const prices = [
   }
   @media (max-width: 520px) {
     .grid {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: var(--space-sm);
+      grid-template-columns: minmax(0, 1fr);
+      gap: var(--space-xl);
     }
     .select {
       flex: 1 1 40%;
