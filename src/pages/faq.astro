@@ -1,6 +1,10 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import PageHero from '../components/PageHero.astro';
+import { cacheStaticPage } from '../lib/cache';
+
+cacheStaticPage(Astro);
+
 ---
 
 <BaseLayout
@@ -51,7 +55,7 @@ import PageHero from '../components/PageHero.astro';
           <details class="faq-item">
             <summary><span>Hoe kan ik mijn restaurant aanmelden bij Tastory?</span></summary>
             <p>
-              Neem contact met ons op via de <a href={`${import.meta.env.BASE_URL}/contact`}
+              Neem contact met ons op via de <a href={`${import.meta.env.BASE_URL}contact`}
                 >contactpagina</a
               > of stuur een e-mail naar <a href="mailto:Info@tastory.nl">Info@tastory.nl</a>. We
               bespreken dan samen de mogelijkheden.
@@ -77,7 +81,7 @@ import PageHero from '../components/PageHero.astro';
 
       <div class="faq-cta reveal">
         <p>Staat jouw vraag er niet bij?</p>
-        <a href={`${import.meta.env.BASE_URL}/contact`} class="btn-primary">Neem contact op</a>
+        <a href={`${import.meta.env.BASE_URL}contact`} class="btn-primary">Neem contact op</a>
       </div>
     </div>
   </section>

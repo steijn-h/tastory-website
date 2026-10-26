@@ -17,7 +17,7 @@ const page = isUuid(restaurantId)
 if (!page) {
   Astro.response.status = isUuid(restaurantId) ? 503 : 400;
 } else {
-  Astro.response.headers.set('Cache-Control', 'public, s-maxage=300, stale-while-revalidate=3600');
+  Astro.response.headers.set('Cache-Control', 'public, s-maxage=300, stale-while-revalidate=86400');
 }
 ---
 

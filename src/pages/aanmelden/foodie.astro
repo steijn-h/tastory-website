@@ -1,5 +1,9 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import { cacheStaticPage } from '../../lib/cache';
+
+cacheStaticPage(Astro);
+
 ---
 
 <BaseLayout

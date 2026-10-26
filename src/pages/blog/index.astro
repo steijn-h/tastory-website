@@ -9,6 +9,10 @@ const posts = (await getCollection('blog')).sort(
 );
 
 const base = import.meta.env.BASE_URL;
+import { cacheStaticPage } from '../../lib/cache';
+
+cacheStaticPage(Astro);
+
 ---
 
 <BaseLayout

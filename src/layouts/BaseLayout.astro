@@ -23,7 +23,8 @@ const {
 // Altijd zonder slash aan het eind (behalve de homepage), gelijk aan de sitemap.
 const canonicalPath = Astro.url.pathname.replace(/(.)\/+$/, '$1').replace(/\.html$/, '');
 const canonicalURL = new URL(canonicalPath, Astro.site);
-const defaultOgImage = new URL(`${import.meta.env.BASE_URL}/tastory-logo.png`, Astro.site);
+// BASE_URL is '/', dus géén extra slash ervoor: '//og-image.png' is een andere host.
+const defaultOgImage = new URL(`${import.meta.env.BASE_URL}og-image.png`, Astro.site);
 const ogImage = customOgImage ?? defaultOgImage.toString();
 ---
 
@@ -44,8 +45,14 @@ const ogImage = customOgImage ?? defaultOgImage.toString();
     <meta property="og:url" content={canonicalURL} />
     <meta property="og:locale" content="nl_NL" />
     <meta property="og:image" content={ogImage} />
-    <meta property="og:image:width" content="1200" />
-    <meta property="og:image:height" content="630" />
+    {
+      !customOgImage && (
+        <>
+          <meta property="og:image:width" content="1200" />
+          <meta property="og:image:height" content="630" />
+        </>
+      )
+    }
     <meta property="og:site_name" content="Tastory" />
 
     <!-- Twitter -->
@@ -56,11 +63,20 @@ const ogImage = customOgImage ?? defaultOgImage.toString();
 
     <link rel="canonical" href={canonicalURL} />
     <link rel="sitemap" href="/sitemap-index.xml" />
+    <!-- Vierkant app-icoon: Google toont dit naast de zoekresultaten (min. 48×48). -->
     <link
       rel="icon"
       type="image/png"
-      href={`${import.meta.env.BASE_URL}/tastory-logo-header.png`}
+      sizes="48x48"
+      href={`${import.meta.env.BASE_URL}favicon-48.png`}
     />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="192x192"
+      href={`${import.meta.env.BASE_URL}icon-192.png`}
+    />
+    <link rel="apple-touch-icon" href={`${import.meta.env.BASE_URL}apple-touch-icon.png`} />
 
     <!-- Font loading via link tags (non-render-blocking) -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
