@@ -1,0 +1,413 @@
+---
+// Tastory-badge voor de website van een restaurant: een plaatje met een link
+// naar de eigen Tastory-pagina. Goed voor gasten (reviews en foto's) en voor
+// de vindbaarheid van die pagina in Google. ?r=<slug> kiest alvast een
+// restaurant (link vanaf de restaurantpagina); dat gebeurt in de browser zodat
+// de pagina gecachet kan worden.
+export const prerender = false;
+
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHero from '../components/PageHero.astro';
+import { getAllRestaurants, restaurantPath } from '../lib/restaurants';
+import { SITE_URL } from '../lib/links';
+import '../styles/app-ui.css';
+
+const restaurants = await getAllRestaurants();
+const options = (restaurants ?? [])
+  .filter((r) => r.name)
+  .map((r) => ({
+    label: r.city ? `${r.name} (${r.city})` : r.name!,
+    name: r.name!,
+    slug: r.slug ?? '',
+    url: `${SITE_URL}${restaurantPath(r)}`,
+  }))
+  .sort((a, b) => a.label.localeCompare(b.label, 'nl'));
+
+if (restaurants) {
+  Astro.response.headers.set('Cache-Control', 'public, s-maxage=300, stale-while-revalidate=86400');
+} else {
+  Astro.response.status = 503;
+  Astro.response.headers.set('Retry-After', '120');
+}
+---
+
+<BaseLayout
+  title="Tastory-badge voor je restaurantwebsite | Tastory"
+  description="Zet een Tastory-badge op de website van je restaurant. Gasten zien direct je reviews, foto's en menukaart op Tastory. Gratis, in een paar minuten geplaatst."
+>
+  <PageHero
+    title="De Tastory-badge voor <em>je website</em>"
+    description="Laat gasten zien dat je op Tastory staat. Eén klik op de badge en ze lezen je reviews, bekijken foto's en je menukaart. Gratis en in een paar minuten geplaatst."
+  />
+
+  <div class="wrap">
+    <div class="layout">
+      <div class="ui-card tool">
+        <section class="step">
+          <h2><span class="num">1</span> Kies je restaurant</h2>
+          <input
+            class="ui-input"
+            list="badge-restaurants"
+            id="badge-restaurant"
+            placeholder="Typ de naam van je restaurant…"
+            autocomplete="off"
+            aria-label="Restaurant"
+          />
+          <datalist id="badge-restaurants">
+            {options.map((o) => <option value={o.label} />)}
+          </datalist>
+          <p class="ui-hint not-listed">
+            Staat je restaurant er niet bij? <a href="/restaurant-aanmelden">Meld het aan</a>.
+          </p>
+        </section>
+
+        <section class="step">
+          <h2><span class="num">2</span> Kies een stijl</h2>
+          <div class="styles" role="radiogroup" aria-label="Stijl van de badge">
+            <label class="style">
+              <input type="radio" name="badge-style" value="licht" checked />
+              <span class="style-preview light">
+                <img
+                  src="/badge/tastory-badge-licht.png"
+                  alt="Lichte badge"
+                  width="200"
+                  height="60"
+                />
+              </span>
+              <span class="style-name">Licht</span>
+            </label>
+            <label class="style">
+              <input type="radio" name="badge-style" value="donker" />
+              <span class="style-preview dark">
+                <img
+                  src="/badge/tastory-badge-donker.png"
+                  alt="Donkere badge"
+                  width="200"
+                  height="60"
+                />
+              </span>
+              <span class="style-name">Donker</span>
+            </label>
+          </div>
+        </section>
+
+        <section class="step">
+          <h2><span class="num">3</span> Zet hem op je website</h2>
+          <p class="ui-muted pick-first" id="badge-pick-first">Kies eerst je restaurant.</p>
+          <div id="badge-output" hidden>
+            <h3>Met HTML-code <span class="ui-muted">(WordPress, JouwWeb, eigen site)</span></h3>
+            <textarea class="ui-input code" id="badge-code" rows="4" readonly></textarea>
+            <button type="button" class="ui-btn ui-btn-primary" data-copy="badge-code"
+              >Kopieer code</button
+            >
+
+            <h3>Zonder code <span class="ui-muted">(Wix, Squarespace, Shopify)</span></h3>
+            <p class="ui-muted small">
+              Download de afbeelding, zet hem op je site en koppel er deze link aan:
+            </p>
+            <div class="link-row">
+              <input class="ui-input" id="badge-link" readonly aria-label="Link naar je pagina" />
+              <button type="button" class="ui-btn ui-btn-ghost" data-copy="badge-link"
+                >Kopieer link</button
+              >
+            </div>
+            <a class="ui-btn ui-btn-ghost download" id="badge-download" download
+              >Afbeelding downloaden</a
+            >
+          </div>
+        </section>
+      </div>
+
+      <aside class="info">
+        <h2>Waarom een badge?</h2>
+        <ul>
+          <li>
+            <strong>Gasten zien wat anderen ervan vonden.</strong> Reviews, foto's van gasten en je menukaart
+            op één plek.
+          </li>
+          <li>
+            <strong>Meer reviews.</strong> Gasten die via je site komen, kunnen direct een review achterlaten.
+          </li>
+          <li>
+            <strong>Beter vindbaar.</strong> Een link vanaf je eigen website helpt je Tastory-pagina hoger
+            in Google te komen.
+          </li>
+        </ul>
+
+        <h2>Waar plaats ik hem?</h2>
+        <p>
+          Onderaan je website (in de footer) of op je contact- of reserveringspagina. Laat je je
+          website door iemand anders bouwen? Stuur deze pagina dan door.
+        </p>
+        <details>
+          <summary>WordPress</summary>
+          <p>
+            Bewerk de pagina of footer, voeg een blok <em>Aangepaste HTML</em> toe en plak de code.
+          </p>
+        </details>
+        <details>
+          <summary>JouwWeb</summary>
+          <p>Voeg een element <em>HTML</em> toe en plak de code.</p>
+        </details>
+        <details>
+          <summary>Wix, Squarespace of Shopify</summary>
+          <p>
+            Gebruik <em>Zonder code</em>: voeg de afbeelding toe en stel bij de afbeelding de link
+            in. Dat werkt beter dan een HTML-blok.
+          </p>
+        </details>
+      </aside>
+    </div>
+  </div>
+
+  <script type="application/json" id="badge-data" set:html={JSON.stringify(options)} />
+</BaseLayout>
+
+<script>
+  type Option = { label: string; name: string; slug: string; url: string };
+  const options: Option[] = JSON.parse(document.getElementById('badge-data')!.textContent || '[]');
+  const SITE = 'https://www.tastory.nl';
+  const input = document.getElementById('badge-restaurant') as HTMLInputElement;
+  const output = document.getElementById('badge-output')!;
+  const pickFirst = document.getElementById('badge-pick-first')!;
+  const code = document.getElementById('badge-code') as HTMLTextAreaElement;
+  const link = document.getElementById('badge-link') as HTMLInputElement;
+  const download = document.getElementById('badge-download') as HTMLAnchorElement;
+
+  const escape = (s: string) =>
+    s.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
+  const style = () =>
+    (document.querySelector('input[name="badge-style"]:checked') as HTMLInputElement).value;
+
+  function render() {
+    const option = options.find((o) => o.label === input.value.trim());
+    output.hidden = !option;
+    pickFirst.hidden = Boolean(option);
+    if (!option) return;
+    const img = `${SITE}/badge/tastory-badge-${style()}.png`;
+    code.value =
+      `<a href="${option.url}" target="_blank" rel="noopener" title="${escape(option.name)} op Tastory">` +
+      `<img src="${img}" alt="Bekijk ${escape(option.name)} op Tastory" width="200" height="60" /></a>`;
+    link.value = option.url;
+    download.href = img;
+  }
+
+  const preset = new URLSearchParams(location.search).get('r');
+  const presetOption = preset ? options.find((o) => o.slug === preset) : undefined;
+  if (presetOption) input.value = presetOption.label;
+
+  input.addEventListener('input', render);
+  document
+    .querySelectorAll('input[name="badge-style"]')
+    .forEach((el) => el.addEventListener('change', render));
+  render();
+
+  document.querySelectorAll<HTMLButtonElement>('[data-copy]').forEach((button) => {
+    const label = button.textContent;
+    button.addEventListener('click', async () => {
+      const field = document.getElementById(button.dataset.copy!) as HTMLInputElement;
+      try {
+        await navigator.clipboard.writeText(field.value);
+      } catch {
+        field.select();
+        document.execCommand('copy');
+      }
+      button.textContent = 'Gekopieerd ✓';
+      setTimeout(() => (button.textContent = label), 2000);
+    });
+  });
+</script>
+
+<style>
+  .wrap {
+    max-width: 1080px;
+    margin: 0 auto;
+    padding: var(--space-2xl) var(--space-lg) var(--space-3xl);
+  }
+  .layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 320px;
+    gap: var(--space-2xl);
+    align-items: start;
+  }
+  .tool {
+    padding: var(--space-2xl);
+  }
+  /* global.css geeft elke <section> veel padding (voor de marketingpagina's). */
+  .step {
+    padding: 0;
+    max-width: none;
+  }
+  .step + .step {
+    margin-top: var(--space-xl);
+    padding-top: var(--space-xl);
+    border-top: 1px solid var(--beige-dark);
+  }
+  .step h2 {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    font-family: var(--serif);
+    font-size: var(--text-xl);
+    font-weight: 500;
+    margin-bottom: var(--space-md);
+  }
+  .num {
+    display: inline-grid;
+    place-items: center;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: var(--orange);
+    color: #fff;
+    font-family: var(--sans);
+    font-size: var(--text-sm);
+  }
+  .step h3 {
+    font-size: var(--text-base);
+    font-weight: 500;
+    margin: var(--space-lg) 0 var(--space-sm);
+  }
+  .step h3:first-child {
+    margin-top: 0;
+  }
+  .step h3 .ui-muted {
+    font-weight: 400;
+    font-size: var(--text-sm);
+  }
+  .not-listed {
+    display: block;
+    margin-top: var(--space-sm);
+  }
+  .not-listed a {
+    color: var(--brown);
+  }
+  .styles {
+    display: flex;
+    gap: var(--space-md);
+    flex-wrap: wrap;
+  }
+  .style {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.4rem;
+    cursor: pointer;
+  }
+  .style input {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+  }
+  .style-preview {
+    display: block;
+    padding: var(--space-md);
+    border: 2px solid var(--beige-deeper);
+    border-radius: var(--radius-md);
+    transition: border-color 0.2s;
+  }
+  .style-preview.light {
+    background: var(--beige);
+  }
+  .style-preview.dark {
+    background: var(--white);
+  }
+  .style-preview img {
+    display: block;
+  }
+  .style input:checked + .style-preview {
+    border-color: var(--orange);
+  }
+  .style input:focus-visible + .style-preview {
+    outline: 3px solid var(--orange);
+    outline-offset: 2px;
+  }
+  .style-name {
+    font-size: var(--text-sm);
+    color: var(--text-muted);
+  }
+  .code {
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: var(--text-xs);
+    resize: none;
+    margin-bottom: var(--space-sm);
+  }
+  .small {
+    font-size: var(--text-sm);
+    margin-bottom: var(--space-sm);
+  }
+  .link-row {
+    display: flex;
+    gap: var(--space-sm);
+  }
+  .link-row .ui-input {
+    flex: 1;
+    min-width: 0;
+  }
+  .download {
+    margin-top: var(--space-sm);
+  }
+  .info {
+    padding-top: var(--space-md);
+    line-height: 1.6;
+  }
+  .info h2 {
+    font-family: var(--serif);
+    font-size: var(--text-xl);
+    font-weight: 500;
+    margin-bottom: var(--space-md);
+  }
+  .info ul {
+    margin-bottom: var(--space-xl);
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
+    color: var(--text-muted);
+  }
+  .info strong {
+    display: block;
+    color: var(--text);
+    font-weight: 500;
+  }
+  .info p {
+    color: var(--text-muted);
+  }
+  details {
+    border-top: 1px solid var(--beige-deeper);
+    padding: 0.7rem 0;
+  }
+  details:last-child {
+    border-bottom: 1px solid var(--beige-deeper);
+  }
+  summary {
+    cursor: pointer;
+    font-weight: 500;
+  }
+  .info > p {
+    margin-bottom: var(--space-md);
+  }
+  details p {
+    margin-top: 0.4rem;
+    font-size: var(--text-sm);
+  }
+  @media (max-width: 860px) {
+    .layout {
+      grid-template-columns: 1fr;
+    }
+    .info {
+      padding-top: 0;
+    }
+  }
+  @media (max-width: 560px) {
+    .wrap {
+      padding: var(--space-xl) var(--space-md) var(--space-2xl);
+    }
+    .tool {
+      padding: var(--space-lg);
+    }
+    .link-row {
+      flex-direction: column;
+    }
+  }
+</style>
