@@ -1,5 +1,5 @@
 ---
-
+import { APP_STORE_URL } from '../lib/links';
 ---
 
 <section class="hero" id="hero">
@@ -10,10 +10,10 @@
   <div class="hero-overlay"></div>
   <div class="hero-content">
     <div class="hero-text">
-      <div class="hero-badge">
+      <a class="hero-badge" href={APP_STORE_URL} target="_blank" rel="noopener noreferrer">
         <span class="hero-badge-dot"></span>
-        Nu live in de App Store
-      </div>
+        Download in de App Store
+      </a>
       <h1>Find it. Taste it.<br /><em>Share it.</em></h1>
       <p class="hero-desc">
         De ultieme smaakvolle verbinding tussen gast en restaurant. Via Tastory kunnen restaurants
@@ -87,6 +87,7 @@
     align-items: center;
   }
   .hero-badge {
+    text-decoration: none;
     display: inline-flex;
     align-items: center;
     gap: 0.6rem;
