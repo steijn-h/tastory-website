@@ -22,12 +22,24 @@ const pendingCount = r.pending_review_count ?? 0;
 const totalReviews = reviewCount + pendingCount;
 const video = hasVideo(r);
 const videoUrl = video ? safeHttpsUrl(r.video_url) : null;
-const details = [
-  r.cuisine,
-  r.price_level ? `${priceLabel(r.price_level)} (${priceRange(r.price_level)})` : null,
-]
+// Keuken, sfeer en prijs als losse stukjes die elk heel blijven (geen prijs
+// die halverwege afbreekt). Sfeer kort houden: hooguit twee woorden.
+const vibe = (r.vibe ?? '')
+  .split(',')
+  .map((v) => v.trim())
   .filter(Boolean)
-  .join(' · ');
+  .slice(0, 2)
+  .join(', ');
+const details = [
+  r.cuisine ? { text: r.cuisine, cls: 'cuisine' } : null,
+  vibe ? { text: vibe, cls: 'vibe' } : null,
+  r.price_level
+    ? {
+        text: `${priceLabel(r.price_level)} · ${priceRange(r.price_level).replace(' p.p.', '')}`,
+        cls: 'price',
+      }
+    : null,
+].filter((d): d is { text: string; cls: string } => d !== null);
 const formattedScore = score?.toLocaleString('nl-NL', {
   minimumFractionDigits: 1,
   maximumFractionDigits: 1,
@@ -108,7 +120,17 @@ const formattedScore = score?.toLocaleString('nl-NL', {
         </p>
       )
     }
-    {details && <p class="details">{details}</p>}
+    {
+      details.length > 0 && (
+        <div class="details-wrap">
+          <p class="details">
+            {details.map((d) => (
+              <span class={d.cls}>{d.text}</span>
+            ))}
+          </p>
+        </div>
+      )
+    }
     <slot />
   </div>
 </a>
@@ -264,10 +286,30 @@ const formattedScore = score?.toLocaleString('nl-NL', {
     line-height: 1.25;
     color: var(--text);
   }
-  .details {
+  /* Stukjes naast elkaar met een punt ertussen. Past iets niet meer, dan gaat
+     het hele stukje naar de volgende regel; de punt aan het begin van een
+     regel valt dan weg (buiten beeld door de negatieve marge). */
+  .details-wrap {
     margin-top: 0.3rem;
+    overflow: hidden;
+  }
+  .details {
+    display: flex;
+    flex-wrap: wrap;
+    row-gap: 0.15rem;
+    margin-left: -1em;
     font-size: var(--text-sm);
     color: var(--text-muted);
+  }
+  .details span::before {
+    content: '·';
+    display: inline-block;
+    width: 1em;
+    text-align: center;
+  }
+  .details .vibe,
+  .details .price {
+    white-space: nowrap;
   }
   /* Mobiel: twee kaartjes naast elkaar, alles iets compacter. */
   @media (max-width: 520px) {
