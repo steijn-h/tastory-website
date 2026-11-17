@@ -241,7 +241,7 @@ const CITIES_COLLAPSED = 10;
           data-allergies={x.allergies.join('|')}
           data-price={String(x.r.price_level ?? '')}
           data-score={String(x.r.weighted_score ?? 0)}
-          data-reviews={String(x.r.published_review_count ?? 0)}
+          data-reviews={String((x.r.published_review_count ?? 0) + (x.r.pending_review_count ?? 0))}
           data-index={String(i)}
           hidden={i >= 24}
         >

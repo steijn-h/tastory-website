@@ -90,6 +90,10 @@ const backgroundUrl = safeHttpsUrl(restaurant?.background_url);
 const score =
   restaurant?.weighted_score && restaurant.weighted_score > 0 ? Number(restaurant.weighted_score) : null;
 const reviewCount = stats?.count ?? restaurant?.published_review_count ?? 0;
+// Geplaatst maar nog niet geverifieerd: staan in de lijst met een label, maar
+// tellen niet mee in de score.
+const listedCount =
+  reviewPage?.total ?? reviewCount + (restaurant?.pending_review_count ?? 0);
 const reviews = reviewPage?.reviews ?? [];
 const hours = parseOpeningHours(restaurant?.opening_hours);
 const today = todayDutch();
@@ -209,7 +213,7 @@ const jsonLd = restaurant
             }
           : undefined,
       review: reviews
-        .filter((r) => r.rating)
+        .filter((r) => r.rating && r.status !== 'pending')
         .slice(0, 5)
         .map((r) => ({
           '@type': 'Review',
@@ -413,7 +417,7 @@ const breadcrumbLd = {
             <!-- Reviews -->
             <section class="block" id="reviews">
               <div class="reviews-head">
-                <h2>Reviews{reviewCount > 0 ? ` (${reviewCount})` : ''}</h2>
+                <h2>Reviews{listedCount > 0 ? ` (${listedCount})` : ''}</h2>
                 <a class="btn btn-ghost btn-sm" href={`${canonicalPath}/review`} rel="nofollow">Schrijf een review</a>
               </div>
 
@@ -422,7 +426,7 @@ const breadcrumbLd = {
                   <div class="summary-score">
                     {score !== null && <span class="big-score">{formatScore(score)}</span>}
                     {score !== null && <RatingStars rating={score} size={20} />}
-                    <span class="muted">{reviewCount === 1 ? '1 review' : `${reviewCount} reviews`}</span>
+                    <span class="muted">{reviewCount === 1 ? '1 geverifieerde review' : `${reviewCount} geverifieerde reviews`}</span>
                   </div>
                   <div class="summary-bars" aria-label="Verdeling van de beoordelingen">
                     {[5, 4, 3, 2, 1].map((stars) => {
@@ -843,6 +847,27 @@ const breadcrumbLd = {
       var(--partner-bg);
     background-size: 100% auto;
     background-repeat: no-repeat;
+  }
+  /* Huisstijl van het restaurant als achtergrond: bovenaan duidelijk, verder
+     naar beneden lichter, zodat tekst goed leesbaar blijft. */
+  .page[data-brand] {
+    background-color: color-mix(in srgb, var(--brand) 12%, var(--beige));
+    background-image: linear-gradient(
+      to bottom,
+      color-mix(in srgb, var(--brand) 30%, var(--beige)),
+      color-mix(in srgb, var(--brand) 12%, var(--beige)) 700px
+    );
+    background-repeat: no-repeat;
+  }
+  .page.partner[data-brand] {
+    background-image:
+      linear-gradient(
+        to bottom,
+        color-mix(in srgb, var(--brand) 25%, rgba(245, 235, 221, 0.86)),
+        color-mix(in srgb, var(--brand) 12%, var(--beige)) 520px
+      ),
+      var(--partner-bg);
+    background-size: 100% auto;
   }
   .container {
     max-width: 1180px;
