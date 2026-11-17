@@ -81,7 +81,7 @@ export function describeRestaurant(input: Input): string {
 
   if (input.score !== null && input.reviewCount > 0) {
     sentences.push(
-      `Tastory-gasten geven het gemiddeld een ${formatScore(input.score)} uit 5 (${
+      `Tastory-gebruikers geven het gemiddeld een ${formatScore(input.score)} uit 5 (${
         input.reviewCount === 1 ? '1 review' : `${input.reviewCount} reviews`
       }).`,
     );

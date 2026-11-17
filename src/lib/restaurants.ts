@@ -54,6 +54,7 @@ export type RestaurantListItem = Pick<
   | 'video_url'
   | 'background_url'
   | 'facilities'
+  | 'allergie_keuze'
 >;
 
 // Zelfde kolommen als de detailquery in de app (RestaurantDetailScreen).
@@ -90,7 +91,7 @@ const DETAIL_COLUMNS = [
 ].join(',');
 
 const LIST_COLUMNS =
-  'id,name,slug,photo_url,city,cuisine,vibe,price_level,weighted_score,published_review_count,lat,lng,video_url,background_url,facilities';
+  'id,name,slug,photo_url,city,cuisine,vibe,price_level,weighted_score,published_review_count,lat,lng,video_url,background_url,facilities,allergie_keuze';
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
@@ -261,7 +262,7 @@ interface PublicProfile {
 function authorFromProfile(profile: PublicProfile | undefined): ReviewAuthor {
   const username = profile?.username?.trim();
   const firstName = profile?.full_name?.trim().split(/\s+/)[0];
-  const name = username ? `@${username}` : firstName || 'Tastory-gast';
+  const name = username ? `@${username}` : firstName || 'Tastory-gebruiker';
   const initial = (username || firstName || 'T').charAt(0).toUpperCase();
   return { name, avatarUrl: profile?.avatar_url || null, initial };
 }

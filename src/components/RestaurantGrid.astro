@@ -1,40 +1,142 @@
 ---
-// Raster met restaurantkaarten plus zoeken/filteren/sorteren in de browser.
-// Gebruikt op /restaurants en op de stadspagina's.
+// Raster met restaurantkaarten plus steden, filters en zoeken in de browser.
+// Gebruikt op /restaurants (met steden) en op de stads- en keukenpagina's.
+// De filters werken zoals in de app (zie lib/filters.ts). Alle kaarten staan
+// in de HTML (voor zoekmachines), maar er worden er steeds maar 24 getoond:
+// dat scheelt veel laadtijd op de telefoon.
 import RestaurantCard from './RestaurantCard.astro';
-import { hasVideo, type RestaurantListItem } from '../lib/restaurants';
-import { normalizeCity, priceLabel } from '../lib/format';
-import { splitCuisines } from '../lib/cuisine';
+import type { RestaurantListItem } from '../lib/restaurants';
+import { normalizeCity } from '../lib/format';
+import {
+  DIEET_OPTIONS,
+  KEUKEN_OPTIONS,
+  PRIJS_OPTIONS,
+  SFEER_OPTIONS,
+  SOORT_OPTIONS,
+  VOORZIENINGEN_OPTIONS,
+} from '../lib/filters';
 
 interface Props {
   restaurants: RestaurantListItem[];
   initialQuery?: string;
   searchPlaceholder?: string;
-  showCuisineFilter?: boolean;
+  /** Stedenkeuze bovenaan (alleen op /restaurants). */
+  showCities?: boolean;
 }
 const {
   restaurants,
   initialQuery = '',
-  searchPlaceholder = 'Zoek op naam, stad of keuken…',
-  showCuisineFilter = true,
+  searchPlaceholder = 'Zoek op naam of keuken…',
+  showCities = false,
 } = Astro.props;
 
-// "Internationaal, Japans" telt als twee keukens (niet als eigen optie).
-const cuisines = [...new Set(restaurants.flatMap((r) => splitCuisines(r.cuisine)))].sort((a, b) =>
-  a.localeCompare(b, 'nl'),
-);
-const videoCount = restaurants.filter(hasVideo).length;
-const prices = [
-  ...new Set(
-    restaurants
-      .map((r) => r.price_level)
-      .filter((p): p is number => typeof p === 'number' && p > 0),
-  ),
-].sort();
+const lower = (v: string | null | undefined) => (v ?? '').toLowerCase();
+const rows = restaurants.map((r) => ({
+  r,
+  city: normalizeCity(r.city) ?? '',
+  cuisine: lower(r.cuisine),
+  vibe: lower(r.vibe),
+  facilities: (r.facilities ?? []).map(lower),
+  allergies: (r.allergie_keuze ?? []).map(lower),
+}));
+
+// Alleen opties tonen waar op deze pagina minstens één restaurant bij hoort.
+const has = (test: (row: (typeof rows)[number]) => boolean) => rows.some(test);
+const groups = [
+  {
+    key: 'keuken',
+    title: 'Keuken',
+    options: KEUKEN_OPTIONS.filter((k) => has((x) => x.cuisine.includes(lower(k)))).map((k) => ({
+      value: lower(k),
+      label: k,
+    })),
+  },
+  {
+    key: 'prijs',
+    title: 'Prijs',
+    options: PRIJS_OPTIONS.filter((p) => has((x) => x.r.price_level === p.value)).map((p) => ({
+      value: String(p.value),
+      label: `${p.label} · ${p.range}`,
+    })),
+  },
+  {
+    key: 'sfeer',
+    title: 'Sfeer',
+    options: SFEER_OPTIONS.filter((v) => has((x) => x.vibe.includes(lower(v)))).map((v) => ({
+      value: lower(v),
+      label: v,
+    })),
+  },
+  {
+    key: 'soort',
+    title: 'Soort restaurant',
+    options: SOORT_OPTIONS.filter((s) =>
+      has((x) => x.cuisine.includes(lower(s)) || x.vibe.includes(lower(s))),
+    ).map((s) => ({ value: lower(s), label: s })),
+  },
+  {
+    key: 'voorziening',
+    title: 'Voorzieningen',
+    options: VOORZIENINGEN_OPTIONS.filter((v) =>
+      has((x) => x.facilities.some((f) => f.includes(lower(v)))),
+    ).map((v) => ({ value: lower(v), label: v })),
+  },
+  {
+    key: 'dieet',
+    title: 'Dieetwensen',
+    options: DIEET_OPTIONS.filter((a) =>
+      has((x) => [...x.allergies, ...x.facilities].some((f) => f.includes(lower(a)))),
+    ).map((a) => ({ value: lower(a), label: a })),
+  },
+].filter((g) => g.options.length > 0);
+
+const cityCounts = new Map<string, number>();
+for (const x of rows) if (x.city) cityCounts.set(x.city, (cityCounts.get(x.city) ?? 0) + 1);
+const cities = [...cityCounts.entries()]
+  .map(([name, count]) => ({ name, count, value: lower(name) }))
+  .sort((a, b) => a.name.localeCompare(b.name, 'nl'));
+const CITIES_COLLAPSED = 10;
 ---
 
-<div class="grid-wrap" data-grid>
-  <div class="controls">
+<div class="grid-wrap" data-grid data-collapsed={CITIES_COLLAPSED}>
+  {
+    showCities && cities.length > 1 && (
+      <section class="cities" aria-labelledby="cities-title">
+        <div class="cities-head">
+          <h2 id="cities-title">Kies een stad uit Twente</h2>
+          <label class="city-search">
+            <span class="sr-only">Zoek een stad</span>
+            <input
+              type="search"
+              placeholder="Zoek een stad en druk op Enter"
+              autocomplete="off"
+              enterkeyhint="done"
+              data-city-search
+            />
+          </label>
+        </div>
+        <ul class="chips" data-city-list>
+          {cities.map((c, i) => (
+            <li data-city-item={c.value} hidden={i >= CITIES_COLLAPSED}>
+              <button type="button" class="chip" aria-pressed="false" data-city-btn={c.value}>
+                {c.name} <span class="chip-count">{c.count}</span>
+              </button>
+            </li>
+          ))}
+        </ul>
+        <p class="ui-note" data-city-empty hidden>
+          Geen stad gevonden.
+        </p>
+        {cities.length > CITIES_COLLAPSED && (
+          <button type="button" class="link-btn" data-city-more>
+            Alle {cities.length} steden tonen
+          </button>
+        )}
+      </section>
+    )
+  }
+
+  <div class="toolbar">
     <label class="search">
       <span class="sr-only">Zoeken</span>
       <svg
@@ -56,37 +158,27 @@ const prices = [
       />
     </label>
     {
-      showCuisineFilter && cuisines.length > 1 && (
-        <label class="select">
-          <span class="sr-only">Keuken</span>
-          <select data-cuisine>
-            <option value="">Alle keukens</option>
-            {cuisines.map((c) => (
-              <option value={c.toLowerCase()}>{c}</option>
-            ))}
-          </select>
-        </label>
-      )
-    }
-    {
-      prices.length > 1 && (
-        <label class="select">
-          <span class="sr-only">Prijs</span>
-          <select data-price>
-            <option value="">Alle prijzen</option>
-            {prices.map((p) => (
-              <option value={String(p)}>{priceLabel(p)}</option>
-            ))}
-          </select>
-        </label>
-      )
-    }
-    {
-      videoCount > 0 && (
-        <label class="toggle">
-          <input type="checkbox" data-video-only />
-          <span>Met video ({videoCount})</span>
-        </label>
+      groups.length > 0 && (
+        <button
+          type="button"
+          class="filter-btn"
+          aria-expanded="false"
+          aria-controls="filter-panel"
+          data-filter-toggle
+        >
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            aria-hidden="true"
+          >
+            <path d="M3 6h18M7 12h10M10 18h4" />
+          </svg>
+          Filters <span class="filter-count" data-filter-count hidden />
+        </button>
       )
     }
     <label class="select">
@@ -99,30 +191,69 @@ const prices = [
     </label>
   </div>
 
+  {
+    groups.length > 0 && (
+      <div class="filter-panel" id="filter-panel" data-filter-panel hidden>
+        {groups.map((g) => (
+          <fieldset class="group">
+            <legend>{g.title}</legend>
+            <div class="chips">
+              {g.options.map((o) => (
+                <button
+                  type="button"
+                  class="chip"
+                  aria-pressed="false"
+                  data-filter={g.key}
+                  data-value={o.value}
+                >
+                  {o.label}
+                </button>
+              ))}
+            </div>
+          </fieldset>
+        ))}
+        <div class="panel-actions">
+          <button type="button" class="link-btn" data-filter-clear>
+            Alle filters wissen
+          </button>
+          <button type="button" class="done-btn" data-filter-done>
+            Toon restaurants
+          </button>
+        </div>
+      </div>
+    )
+  }
+
   <p class="count" data-count aria-live="polite">{restaurants.length} restaurants</p>
 
   <ul class="grid" data-list>
     {
-      restaurants.map((r, i) => (
+      rows.map((x, i) => (
         <li
-          data-name={(r.name ?? '').toLowerCase()}
-          data-city={(normalizeCity(r.city) ?? '').toLowerCase()}
-          data-cuisine={splitCuisines(r.cuisine)
-            .map((c) => c.toLowerCase())
-            .join('|')}
-          data-video={hasVideo(r) ? '1' : undefined}
-          data-price={String(r.price_level ?? '')}
-          data-score={String(r.weighted_score ?? 0)}
-          data-reviews={String(r.published_review_count ?? 0)}
+          data-name={lower(x.r.name)}
+          data-city={lower(x.city)}
+          data-cuisine={x.cuisine}
+          data-vibe={x.vibe}
+          data-facilities={x.facilities.join('|')}
+          data-allergies={x.allergies.join('|')}
+          data-price={String(x.r.price_level ?? '')}
+          data-score={String(x.r.weighted_score ?? 0)}
+          data-reviews={String(x.r.published_review_count ?? 0)}
           data-index={String(i)}
+          hidden={i >= 24}
         >
-          <RestaurantCard restaurant={r} />
+          <RestaurantCard restaurant={x.r} priority={i < 4} />
         </li>
       ))
     }
   </ul>
+  <div class="more-wrap">
+    <button type="button" class="more-btn" data-more hidden={restaurants.length <= 24}>
+      Meer restaurants tonen
+    </button>
+  </div>
   <p class="empty" data-empty hidden>
-    Geen restaurants gevonden. Probeer een andere zoekterm of filter, of
+    Geen restaurants gevonden. Probeer een andere stad of minder filters, of
     <a href="/restaurant-aanmelden">meld het restaurant aan</a>.
   </p>
   <p class="suggest">
@@ -131,37 +262,94 @@ const prices = [
 </div>
 
 <script>
+  const PAGE = 24;
+
   document.querySelectorAll<HTMLElement>('[data-grid]').forEach((root) => {
-    const search = root.querySelector<HTMLInputElement>('[data-search]');
-    const cuisine = root.querySelector<HTMLSelectElement>('[data-cuisine]');
-    const price = root.querySelector<HTMLSelectElement>('[data-price]');
-    const videoOnly = root.querySelector<HTMLInputElement>('[data-video-only]');
-    const sort = root.querySelector<HTMLSelectElement>('[data-sort]');
     const list = root.querySelector<HTMLElement>('[data-list]');
-    const count = root.querySelector<HTMLElement>('[data-count]');
-    const empty = root.querySelector<HTMLElement>('[data-empty]');
     if (!list) return;
     const items = Array.from(list.children) as HTMLElement[];
+    const search = root.querySelector<HTMLInputElement>('[data-search]');
+    const sort = root.querySelector<HTMLSelectElement>('[data-sort]');
+    const count = root.querySelector<HTMLElement>('[data-count]');
+    const empty = root.querySelector<HTMLElement>('[data-empty]');
+    const more = root.querySelector<HTMLButtonElement>('[data-more]');
+    const panel = root.querySelector<HTMLElement>('[data-filter-panel]');
+    const toggle = root.querySelector<HTMLButtonElement>('[data-filter-toggle]');
+    const filterCount = root.querySelector<HTMLElement>('[data-filter-count]');
+    const filterChips = Array.from(root.querySelectorAll<HTMLButtonElement>('[data-filter]'));
+    const cityButtons = Array.from(root.querySelectorAll<HTMLButtonElement>('[data-city-btn]'));
+    const cityItems = Array.from(root.querySelectorAll<HTMLElement>('[data-city-item]'));
+    const citySearch = root.querySelector<HTMLInputElement>('[data-city-search]');
+    const cityMore = root.querySelector<HTMLButtonElement>('[data-city-more]');
+    const cityEmpty = root.querySelector<HTMLElement>('[data-city-empty]');
+    const collapsedCities = Number(root.dataset.collapsed) || 10;
+
+    const selectedCities = new Set<string>();
+    const selected: Record<string, Set<string>> = {};
+    let limit = PAGE;
+    let citiesExpanded = false;
+
+    const pressed = (b: HTMLButtonElement, on: boolean) =>
+      b.setAttribute('aria-pressed', String(on));
+    const split = (v: string | undefined) => (v ? v.split('|') : []);
+
+    // Zelfde regels als passesFilters() in de app.
+    const matches = (d: DOMStringMap) => {
+      const q = (search?.value ?? '').trim().toLowerCase();
+      if (q && ![d.name, d.city, d.cuisine].some((v) => (v ?? '').includes(q))) return false;
+      if (selectedCities.size && !selectedCities.has(d.city ?? '')) return false;
+      const cuisine = d.cuisine ?? '';
+      const vibe = d.vibe ?? '';
+      const facilities = split(d.facilities);
+      const allergies = split(d.allergies);
+      const any = (key: string, test: (v: string) => boolean) =>
+        !selected[key]?.size || [...selected[key]].some(test);
+      return (
+        any('keuken', (k) => cuisine.includes(k)) &&
+        any('prijs', (p) => d.price === p) &&
+        any('sfeer', (v) => vibe.includes(v)) &&
+        any('soort', (s) => cuisine.includes(s) || vibe.includes(s)) &&
+        any('voorziening', (v) => facilities.some((f) => f.includes(v))) &&
+        // Dieetwensen staan in de data vaak bij de voorzieningen; beide tellen.
+        (!selected.dieet?.size ||
+          [...selected.dieet].every((a) =>
+            [...allergies, ...facilities].some((f) => f.includes(a)),
+          ))
+      );
+    };
+
+    const renderCities = () => {
+      const q = (citySearch?.value ?? '').trim().toLowerCase();
+      let shown = 0;
+      cityItems.forEach((li, i) => {
+        const value = li.dataset.cityItem ?? '';
+        const visible = q
+          ? value.includes(q)
+          : citiesExpanded || i < collapsedCities || selectedCities.has(value);
+        li.hidden = !visible;
+        if (visible) shown++;
+      });
+      if (cityEmpty) cityEmpty.hidden = shown > 0;
+      if (cityMore) {
+        cityMore.hidden = Boolean(q);
+        cityMore.textContent = citiesExpanded
+          ? 'Minder steden tonen'
+          : `Alle ${cityItems.length} steden tonen`;
+      }
+    };
+
+    const syncUrl = () => {
+      const params = new URLSearchParams(location.search);
+      if (selectedCities.size) params.set('stad', [...selectedCities].join(','));
+      else params.delete('stad');
+      const q = (search?.value ?? '').trim();
+      if (q) params.set('q', q);
+      else params.delete('q');
+      const query = params.toString();
+      history.replaceState(null, '', `${location.pathname}${query ? `?${query}` : ''}`);
+    };
 
     const apply = () => {
-      const q = (search?.value ?? '').trim().toLowerCase();
-      const c = cuisine?.value ?? '';
-      const p = price?.value ?? '';
-      const v = videoOnly?.checked ?? false;
-      let visible = 0;
-      for (const item of items) {
-        const d = item.dataset;
-        const show =
-          (!q ||
-            (d.name ?? '').includes(q) ||
-            (d.city ?? '').includes(q) ||
-            (d.cuisine ?? '').includes(q)) &&
-          (!c || (d.cuisine ?? '').split('|').includes(c)) &&
-          (!p || d.price === p) &&
-          (!v || d.video === '1');
-        item.hidden = !show;
-        if (show) visible++;
-      }
       const mode = sort?.value ?? 'score';
       const sorted = [...items].sort((a, b) => {
         if (mode === 'name')
@@ -169,17 +357,114 @@ const prices = [
         if (mode === 'reviews') return Number(b.dataset.reviews) - Number(a.dataset.reviews);
         return Number(a.dataset.index) - Number(b.dataset.index);
       });
-      sorted.forEach((el) => list.appendChild(el));
-      if (count) count.textContent = `${visible} ${visible === 1 ? 'restaurant' : 'restaurants'}`;
-      if (empty) empty.hidden = visible > 0;
+      let total = 0;
+      for (const item of sorted) {
+        const ok = matches(item.dataset);
+        if (ok) total++;
+        item.hidden = !ok || total > limit;
+        list.appendChild(item);
+      }
+      if (count) count.textContent = `${total} ${total === 1 ? 'restaurant' : 'restaurants'}`;
+      if (empty) empty.hidden = total > 0;
+      if (more) {
+        more.hidden = total <= limit;
+        more.textContent = `Meer restaurants tonen (nog ${total - limit})`;
+      }
+      const active = Object.values(selected).reduce((n, s) => n + s.size, 0);
+      if (filterCount) {
+        filterCount.hidden = active === 0;
+        filterCount.textContent = String(active);
+      }
+      toggle?.classList.toggle('has-active', active > 0);
     };
 
-    search?.addEventListener('input', apply);
-    cuisine?.addEventListener('change', apply);
-    price?.addEventListener('change', apply);
-    videoOnly?.addEventListener('change', apply);
+    const refresh = () => {
+      limit = PAGE;
+      apply();
+      syncUrl();
+    };
+
+    // Steden: meerdere tegelijk, oranje als ze aan staan.
+    const toggleCity = (value: string) => {
+      if (selectedCities.has(value)) selectedCities.delete(value);
+      else selectedCities.add(value);
+      cityButtons.forEach((b) => pressed(b, selectedCities.has(b.dataset.cityBtn ?? '')));
+      renderCities();
+      refresh();
+    };
+    cityButtons.forEach((b) =>
+      b.addEventListener('click', () => toggleCity(b.dataset.cityBtn ?? '')),
+    );
+    citySearch?.addEventListener('input', renderCities);
+    citySearch?.addEventListener('keydown', (e) => {
+      if (e.key !== 'Enter') return;
+      e.preventDefault();
+      const q = citySearch.value.trim().toLowerCase();
+      if (!q) return;
+      // Precies die stad, anders de eerste die begint met / bevat wat je typte.
+      const values = cityItems.map((li) => li.dataset.cityItem ?? '');
+      const hit =
+        values.find((v) => v === q) ??
+        values.find((v) => v.startsWith(q)) ??
+        values.find((v) => v.includes(q));
+      if (!hit) return;
+      if (!selectedCities.has(hit)) toggleCity(hit);
+      citySearch.value = '';
+      renderCities();
+    });
+    cityMore?.addEventListener('click', () => {
+      citiesExpanded = !citiesExpanded;
+      renderCities();
+    });
+
+    // Filters: meerdere tegelijk, ook binnen een groep.
+    filterChips.forEach((chip) =>
+      chip.addEventListener('click', () => {
+        const key = chip.dataset.filter!;
+        const value = chip.dataset.value!;
+        const set = (selected[key] ??= new Set());
+        if (set.has(value)) set.delete(value);
+        else set.add(value);
+        pressed(chip, set.has(value));
+        refresh();
+      }),
+    );
+    toggle?.addEventListener('click', () => {
+      if (!panel) return;
+      panel.hidden = !panel.hidden;
+      toggle.setAttribute('aria-expanded', String(!panel.hidden));
+    });
+    root.querySelector('[data-filter-clear]')?.addEventListener('click', () => {
+      Object.values(selected).forEach((s) => s.clear());
+      filterChips.forEach((c) => pressed(c, false));
+      refresh();
+    });
+    root.querySelector('[data-filter-done]')?.addEventListener('click', () => {
+      if (panel) panel.hidden = true;
+      toggle?.setAttribute('aria-expanded', 'false');
+      count?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+
+    more?.addEventListener('click', () => {
+      limit += PAGE;
+      apply();
+    });
+    search?.addEventListener('input', refresh);
     sort?.addEventListener('change', apply);
-    if (search?.value) apply();
+
+    // Steden en zoekterm uit de link (?stad=enschede,hengelo&q=...).
+    const fromUrl = new URLSearchParams(location.search).get('stad');
+    if (fromUrl) {
+      const known = new Set(cityItems.map((li) => li.dataset.cityItem));
+      fromUrl
+        .split(',')
+        .map((v) => v.trim().toLowerCase())
+        .filter((v) => known.has(v))
+        .forEach((v) => selectedCities.add(v));
+      cityButtons.forEach((b) => pressed(b, selectedCities.has(b.dataset.cityBtn ?? '')));
+    }
+    if (cityItems.length) renderCities();
+    if (selectedCities.size || search?.value) apply();
   });
 </script>
 
@@ -195,14 +480,120 @@ const prices = [
     color: var(--brown);
     font-weight: 500;
   }
-  .controls {
+
+  /* Steden */
+  /* global.css geeft elke <section> veel padding (marketingpagina's). */
+  .cities {
+    padding: var(--space-lg);
+    max-width: none;
+    margin: var(--space-lg) 0 var(--space-md);
+    background: var(--white);
+    border: 1px solid var(--beige-deeper);
+    border-radius: var(--radius-md);
+  }
+  .cities-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-sm) var(--space-md);
+    margin-bottom: var(--space-md);
+  }
+  .cities h2 {
+    font-family: var(--serif);
+    font-size: var(--text-xl);
+    font-weight: 500;
+  }
+  .city-search input {
+    width: 280px;
+    max-width: 100%;
+    padding: 0.55rem 0.95rem;
+    border: 1px solid var(--beige-deeper);
+    border-radius: 100px;
+    background: var(--beige);
+    font: inherit;
+    font-size: var(--text-sm);
+    color: var(--text);
+  }
+  .city-search input:focus {
+    outline: none;
+    border-color: var(--brown);
+    background: var(--white);
+  }
+  .chips {
+    list-style: none;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+  .chips li[hidden] {
+    display: none;
+  }
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.45rem 0.9rem;
+    background: var(--white);
+    border: 1px solid var(--beige-deeper);
+    border-radius: 100px;
+    font: inherit;
+    font-size: var(--text-sm);
+    color: var(--text);
+    cursor: pointer;
+    transition:
+      background 0.15s,
+      border-color 0.15s,
+      color 0.15s;
+  }
+  .chip:hover {
+    border-color: var(--orange);
+  }
+  .chip[aria-pressed='true'] {
+    background: var(--orange);
+    border-color: var(--orange);
+    color: #fff;
+  }
+  .chip-count {
+    color: var(--text-muted);
+    font-size: var(--text-xs);
+  }
+  .chip[aria-pressed='true'] .chip-count {
+    color: rgba(255, 255, 255, 0.85);
+  }
+  .chip:focus-visible,
+  .filter-btn:focus-visible,
+  .more-btn:focus-visible {
+    outline: 3px solid var(--orange);
+    outline-offset: 2px;
+  }
+  .link-btn {
+    margin-top: var(--space-sm);
+    padding: 0;
+    border: 0;
+    background: none;
+    font: inherit;
+    font-size: var(--text-sm);
+    font-weight: 500;
+    color: var(--brown);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    cursor: pointer;
+  }
+  .ui-note {
+    font-size: var(--text-sm);
+    color: var(--text-muted);
+  }
+
+  /* Zoeken, filters, sorteren */
+  .toolbar {
     display: flex;
     flex-wrap: wrap;
     gap: 0.6rem;
     margin-bottom: var(--space-md);
   }
   .search {
-    flex: 1 1 280px;
+    flex: 1 1 260px;
     display: flex;
     align-items: center;
     gap: 0.5rem;
@@ -225,34 +616,47 @@ const prices = [
     outline: none;
     min-width: 0;
   }
-  .toggle {
+  .filter-btn {
     display: inline-flex;
     align-items: center;
     gap: 0.45rem;
-    padding: 0 0.9rem;
+    padding: 0 1rem;
+    min-height: 46px;
     background: var(--white);
     border: 1px solid var(--beige-deeper);
     border-radius: var(--radius-sm);
-    font-size: var(--text-sm);
+    font: inherit;
+    font-weight: 500;
     color: var(--text);
     cursor: pointer;
   }
-  .toggle input {
-    accent-color: var(--orange);
-    width: 16px;
-    height: 16px;
-  }
-  .toggle:has(input:checked) {
+  .filter-btn.has-active,
+  .filter-btn[aria-expanded='true'] {
     border-color: var(--orange);
+  }
+  .filter-count {
+    display: inline-grid;
+    place-items: center;
+    min-width: 20px;
+    height: 20px;
+    padding: 0 6px;
+    border-radius: 100px;
+    background: var(--orange);
+    color: #fff;
+    font-size: var(--text-xs);
+  }
+  .filter-count[hidden] {
+    display: none;
   }
   .select select {
     appearance: none;
+    min-height: 46px;
     background: var(--white)
       url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%238a7a6a' stroke-width='2.5'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E")
       no-repeat right 0.8rem center;
     border: 1px solid var(--beige-deeper);
     border-radius: var(--radius-sm);
-    padding: 0.75rem 2.2rem 0.75rem 0.9rem;
+    padding: 0.7rem 2.2rem 0.7rem 0.9rem;
     font: inherit;
     color: var(--text);
     cursor: pointer;
@@ -261,10 +665,63 @@ const prices = [
     outline: 3px solid var(--orange);
     outline-offset: 1px;
   }
+  .filter-panel {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: var(--space-lg) var(--space-xl);
+    padding: var(--space-lg);
+    margin-bottom: var(--space-md);
+    background: var(--white);
+    border: 1px solid var(--beige-deeper);
+    border-radius: var(--radius-md);
+  }
+  .filter-panel[hidden] {
+    display: none;
+  }
+  .group {
+    border: 0;
+    padding: 0;
+    margin: 0;
+  }
+  .group legend {
+    font-size: var(--text-sm);
+    font-weight: 500;
+    color: var(--text);
+    margin-bottom: 0.5rem;
+  }
+  .panel-actions {
+    grid-column: 1 / -1;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-md);
+    padding-top: var(--space-md);
+    border-top: 1px solid var(--beige-dark);
+  }
+  .panel-actions .link-btn {
+    margin: 0;
+  }
+  .done-btn,
+  .more-btn {
+    padding: 0.7rem 1.4rem;
+    border: 0;
+    border-radius: 100px;
+    background: var(--orange);
+    color: #fff;
+    font: inherit;
+    font-weight: 500;
+    cursor: pointer;
+  }
+  .done-btn:hover,
+  .more-btn:hover {
+    background: var(--orange-dark);
+  }
+
   .count {
     font-size: var(--text-sm);
     color: var(--text-muted);
     margin-bottom: var(--space-md);
+    scroll-margin-top: 100px;
   }
   /* 3 per rij op de computer, 2 op tablet en mobiel. */
   .grid {
@@ -274,8 +731,14 @@ const prices = [
     gap: var(--space-xl);
   }
   .grid li[hidden],
-  .empty[hidden] {
+  .empty[hidden],
+  .more-btn[hidden] {
     display: none;
+  }
+  .more-wrap {
+    display: flex;
+    justify-content: center;
+    margin-top: var(--space-xl);
   }
   .empty {
     text-align: center;
@@ -291,15 +754,30 @@ const prices = [
     white-space: nowrap;
   }
   @media (max-width: 520px) {
+    .cities {
+      padding: var(--space-md);
+    }
+    .city-search,
+    .city-search input {
+      width: 100%;
+    }
     .grid {
       grid-template-columns: repeat(2, minmax(0, 1fr));
       gap: 12px;
     }
+    .filter-btn,
     .select {
       flex: 1 1 40%;
     }
+    .filter-btn {
+      justify-content: center;
+    }
     .select select {
       width: 100%;
+    }
+    .filter-panel {
+      grid-template-columns: 1fr;
+      padding: var(--space-md);
     }
   }
 </style>

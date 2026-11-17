@@ -1,23 +1,28 @@
 ---
 // Restaurantkaartje voor overzichten. Luxe maar rustig: een duidelijk kaartje
 // met de foto in een smalle rand (passe-partout), de stad als kleine kop, de
-// naam in de sierletter en keuken/prijs gedempt. Score en video als label op
-// de foto, zoals in de app.
+// naam in de sierletter en keuken/prijs gedempt. Video als label op de foto;
+// heeft een restaurant reviews, dan staat de score onder de naam.
 import { hasVideo, restaurantPath, type RestaurantListItem } from '../lib/restaurants';
-import { normalizeCity, priceLabel, safeHttpsUrl, splitUrls } from '../lib/format';
+import { normalizeCity, priceLabel, priceRange, safeHttpsUrl, splitUrls } from '../lib/format';
 import { imageSrcset, imageUrl } from '../lib/image';
 
 interface Props {
   restaurant: RestaurantListItem;
+  /** Bovenaan de pagina: foto direct laden (snellere eerste weergave). */
+  priority?: boolean;
 }
-const { restaurant: r } = Astro.props;
+const { restaurant: r, priority = false } = Astro.props;
 const photo = splitUrls(r.photo_url)[0] ?? null;
 const city = normalizeCity(r.city);
 const score = r.weighted_score && r.weighted_score > 0 ? Number(r.weighted_score) : null;
 const reviewCount = r.published_review_count ?? 0;
 const video = hasVideo(r);
 const videoUrl = video ? safeHttpsUrl(r.video_url) : null;
-const details = [r.cuisine, r.price_level ? priceLabel(r.price_level) : null]
+const details = [
+  r.cuisine,
+  r.price_level ? `${priceLabel(r.price_level)} (${priceRange(r.price_level)})` : null,
+]
   .filter(Boolean)
   .join(' · ');
 const formattedScore = score?.toLocaleString('nl-NL', {
@@ -39,7 +44,8 @@ const formattedScore = score?.toLocaleString('nl-NL', {
           srcset={imageSrcset(photo, [480, 640])}
           sizes="(max-width: 520px) 50vw, (max-width: 1100px) 50vw, 380px"
           alt={r.name ?? ''}
-          loading="lazy"
+          loading={priority ? 'eager' : 'lazy'}
+          fetchpriority={priority ? 'high' : undefined}
           decoding="async"
         />
       ) : (
@@ -57,20 +63,6 @@ const formattedScore = score?.toLocaleString('nl-NL', {
           aria-hidden="true"
           class="preview"
         />
-      )
-    }
-    {
-      score !== null && (
-        <span
-          class="badge score"
-          aria-label={`Beoordeling ${formattedScore} van 5, ${reviewCount} reviews`}
-        >
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-            <path d="M12 2.5l2.9 6.1 6.6.8-4.9 4.6 1.3 6.6L12 17.3l-5.9 3.3 1.3-6.6-4.9-4.6 6.6-.8z" />
-          </svg>
-          {formattedScore}
-          {reviewCount > 0 && <span class="count">({reviewCount})</span>}
-        </span>
       )
     }
     {
@@ -96,6 +88,22 @@ const formattedScore = score?.toLocaleString('nl-NL', {
       )
     }
     <h3 class="name">{r.name}</h3>
+    {
+      reviewCount > 0 && (
+        <p
+          class="rating"
+          aria-label={`${formattedScore ? `Beoordeling ${formattedScore} van 5, ` : ''}${reviewCount} ${reviewCount === 1 ? 'review' : 'reviews'}`}
+        >
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <path d="M12 2.5l2.9 6.1 6.6.8-4.9 4.6 1.3 6.6L12 17.3l-5.9 3.3 1.3-6.6-4.9-4.6 6.6-.8z" />
+          </svg>
+          {formattedScore && <strong>{formattedScore}</strong>}
+          <span>
+            {reviewCount} {reviewCount === 1 ? 'review' : 'reviews'}
+          </span>
+        </p>
+      )
+    }
     {details && <p class="details">{details}</p>}
     <slot />
   </div>
@@ -209,19 +217,20 @@ const formattedScore = score?.toLocaleString('nl-NL', {
     font-weight: 500;
     line-height: 1;
   }
-  .score {
-    top: 0.65rem;
-    left: 0.65rem;
-    background: rgba(255, 252, 248, 0.94);
-    color: var(--text);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  .rating {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    margin-top: 0.3rem;
+    font-size: var(--text-sm);
+    color: var(--text-muted);
   }
-  .score svg {
+  .rating svg {
     color: var(--orange);
   }
-  .count {
-    color: var(--text-muted);
-    font-weight: 400;
+  .rating strong {
+    color: var(--text);
+    font-weight: 600;
   }
   .video {
     bottom: 0.65rem;
@@ -269,15 +278,12 @@ const formattedScore = score?.toLocaleString('nl-NL', {
       padding: 0.25rem 0.45rem;
       font-size: 0.68rem;
     }
-    .score,
     .video {
       left: 0.45rem;
-    }
-    .score {
-      top: 0.45rem;
-    }
-    .video {
       bottom: 0.45rem;
+    }
+    .rating {
+      font-size: 0.8rem;
     }
     .body {
       padding: 0.6rem 0.3rem 0.3rem;

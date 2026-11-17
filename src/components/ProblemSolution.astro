@@ -35,157 +35,32 @@ import Icon from './Icon.astro';
         </p>
       </div>
     </div>
-
-    <div class="ps-phone reveal-right">
-      <div class="phone-glow"></div>
-      <div class="phone-wrapper">
-
-        <!-- Screenshot layer -->
-        <div class="phone-screen">
-          <img
-            src="/homepage-long-screenshot.png"
-            alt="Tastory app screenshot"
-            class="phone-screenshot"
-            width="1170"
-            height="4944"
-            loading="lazy"
-          />
-        </div>
-
-        <!--
-          SVG iPhone frame — clean and proportional
-          ViewBox 0 0 280 580
-          Frame outer:  x=0..280  y=0..580  rx=44
-          Screen hole:  x=5..275  y=5..575  rx=39   (5px frame)
-          Black bezel:  x=5..275  y=5..575  rx=39  inner hole x=11..269 y=11..569 rx=33  (6px bezel)
-          phone-screen CSS: left=11 top=11 width=258 height=558 rx=33
-        -->
-        <svg
-          class="phone-frame-svg"
-          viewBox="0 0 280 580"
-          xmlns="http://www.w3.org/2000/svg"
-          aria-hidden="true"
-        >
-          <defs>
-            <!-- Subtle titanium orange gradient -->
-            <linearGradient id="frame-g" x1="0" y1="0" x2="1" y2="1">
-              <stop offset="0%"   stop-color="#D4894A" />
-              <stop offset="50%"  stop-color="#C07838" />
-              <stop offset="100%" stop-color="#A86228" />
-            </linearGradient>
-            <!-- Top edge light catch -->
-            <linearGradient id="top-g" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%"   stop-color="rgba(255,220,160,0.55)" />
-              <stop offset="100%" stop-color="rgba(255,220,160,0)" />
-            </linearGradient>
-            <!-- Left edge light catch -->
-            <linearGradient id="left-g" x1="0" y1="0" x2="1" y2="0">
-              <stop offset="0%"   stop-color="rgba(255,210,140,0.4)" />
-              <stop offset="100%" stop-color="rgba(255,210,140,0)" />
-            </linearGradient>
-            <!-- Right/bottom shadow -->
-            <linearGradient id="right-g" x1="0" y1="0" x2="1" y2="0">
-              <stop offset="0%"   stop-color="rgba(40,10,0,0)" />
-              <stop offset="100%" stop-color="rgba(40,10,0,0.4)" />
-            </linearGradient>
-            <!-- Button gradient -->
-            <linearGradient id="btn-g" x1="0" y1="0" x2="1" y2="0">
-              <stop offset="0%"   stop-color="#8A4A14" />
-              <stop offset="100%" stop-color="#C87838" />
-            </linearGradient>
-            <linearGradient id="btn-gr" x1="0" y1="0" x2="1" y2="0">
-              <stop offset="0%"   stop-color="#C87838" />
-              <stop offset="100%" stop-color="#8A4A14" />
-            </linearGradient>
-          </defs>
-
-          <!-- ① Orange titanium frame (with transparent screen hole) -->
-          <path
-            fill-rule="evenodd"
-            fill="url(#frame-g)"
-            d="M 44,0 H 236 A 44,44 0 0,1 280,44 V 536 A 44,44 0 0,1 236,580 H 44 A 44,44 0 0,1 0,536 V 44 A 44,44 0 0,1 44,0 Z
-               M 44,5 A 39,39 0 0,0 5,44 V 536 A 39,39 0 0,0 44,575 H 236 A 39,39 0 0,0 275,536 V 44 A 39,39 0 0,0 236,5 Z"
-          />
-
-          <!-- ② Top edge highlight (subtle light catch) -->
-          <path
-            fill="url(#top-g)"
-            d="M 44,0 H 236 A 44,44 0 0,1 280,44 V 48 A 44,44 0 0,0 236,4 H 44 A 44,44 0 0,0 0,48 V 44 A 44,44 0 0,1 44,0 Z"
-          />
-          <!-- Left edge highlight -->
-          <rect x="0" y="44" width="5" height="492" fill="url(#left-g)" />
-          <!-- Right edge shadow -->
-          <rect x="275" y="44" width="5" height="492" fill="url(#right-g)" />
-
-          <!-- ③ Black bezel ring -->
-          <path
-            fill-rule="evenodd"
-            fill="#0a0a0a"
-            d="M 44,5 A 39,39 0 0,0 5,44 V 536 A 39,39 0 0,0 44,575 H 236 A 39,39 0 0,0 275,536 V 44 A 39,39 0 0,0 236,5 Z
-               M 44,11 A 33,33 0 0,0 11,44 V 536 A 33,33 0 0,0 44,569 H 236 A 33,33 0 0,0 269,536 V 44 A 33,33 0 0,0 236,11 Z"
-          />
-
-          <!-- ④ Polished inner chamfer — thin bright line at glass edge -->
-          <path
-            fill="none"
-            stroke="rgba(255,230,160,0.35)"
-            stroke-width="1"
-            d="M 44,5.5 A 38.5,38.5 0 0,0 5.5,44 V 536 A 38.5,38.5 0 0,0 44,574.5 H 236 A 38.5,38.5 0 0,0 274.5,536 V 44 A 38.5,38.5 0 0,0 236,5.5 Z"
-          />
-
-          <!-- ⑤ Outer rim -->
-          <path
-            fill="none"
-            stroke="rgba(200,130,60,0.25)"
-            stroke-width="0.5"
-            d="M 44,0.3 H 236 A 43.7,43.7 0 0,1 279.7,44 V 536 A 43.7,43.7 0 0,1 236,579.7 H 44 A 43.7,43.7 0 0,1 0.3,536 V 44 A 43.7,43.7 0 0,1 44,0.3 Z"
-          />
-
-          <!-- ⑦ Dynamic Island (no separate earpiece — it's integrated in DI on iPhone Pro) -->
-          <rect x="100" y="14" width="80" height="24" rx="12" fill="#000" />
-          <!-- Camera dot inside Dynamic Island -->
-          <circle cx="167" cy="26" r="6" fill="#0a0a0a" />
-          <circle cx="167" cy="26" r="4.5" fill="#111" />
-          <circle cx="167" cy="26" r="3" fill="#050505" />
-          <circle cx="165.5" cy="24.5" r="1" fill="rgba(255,255,255,0.12)" />
-
-          <!-- ⑧ Buttons (5px wide, clean) -->
-          <!-- Action button left -->
-          <rect x="-3" y="108" width="5" height="28" rx="2" fill="url(#btn-g)" />
-          <!-- Volume up left -->
-          <rect x="-3" y="156" width="5" height="52" rx="2" fill="url(#btn-g)" />
-          <!-- Volume down left -->
-          <rect x="-3" y="218" width="5" height="52" rx="2" fill="url(#btn-g)" />
-          <!-- Power right -->
-          <rect x="278" y="168" width="5" height="72" rx="2" fill="url(#btn-gr)" />
-        </svg>
-
-        <div class="float-card float-card-1">
-          <div class="fc-label">Reviews met hoge<br />betrouwbaarheid</div>
-        </div>
-        <div class="float-card float-card-2">
-          <div class="fc-label">Jouw verhaal</div>
-        </div>
-        <div class="float-card float-card-3">
-          <div class="fc-label">Actuele content</div>
-        </div>
-      </div>
-    </div>
   </div>
 </section>
 
 <style>
-  section { scroll-margin-top: 80px; }
+  section {
+    scroll-margin-top: 80px;
+  }
 
   .ps-grid {
     display: grid;
-    grid-template-columns: 1fr 430px;
+    grid-template-columns: 1fr;
     gap: 4rem;
     margin-top: 3.5rem;
     align-items: center;
   }
 
-  .problem-grid { display: flex; flex-direction: column; gap: 1.5rem; }
+  .problem-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+  }
+  @media (max-width: 900px) {
+    .problem-grid {
+      grid-template-columns: 1fr;
+    }
+  }
 
   .problem-card {
     padding: 2.5rem;
@@ -196,13 +71,18 @@ import Icon from './Icon.astro';
 
   .problem-bg-icon {
     position: absolute;
-    bottom: 10px; right: 10px;
+    bottom: 10px;
+    right: 10px;
     opacity: 0.1;
     pointer-events: none;
   }
 
-  .problem-card.problem .problem-bg-icon { color: var(--brown); }
-  .problem-card.solution .problem-bg-icon { color: var(--orange); }
+  .problem-card.problem .problem-bg-icon {
+    color: var(--brown);
+  }
+  .problem-card.solution .problem-bg-icon {
+    color: var(--orange);
+  }
 
   .problem-card.problem {
     background: rgba(136, 101, 69, 0.08);
@@ -223,156 +103,17 @@ import Icon from './Icon.astro';
     margin-bottom: 1.2rem;
   }
 
-  .problem-card p { font-size: 1rem; line-height: 1.8; color: var(--text-muted); }
-  .problem-card .hl { color: var(--text); font-weight: 500; }
-  .problem-card.problem strong { color: var(--text); font-weight: 600; }
-
-  /* ── Phone ── */
-  .ps-phone {
-    display: flex;
-    justify-content: flex-start;
-    position: relative;
+  .problem-card p {
+    font-size: 1rem;
+    line-height: 1.8;
+    color: var(--text-muted);
   }
-
-  .phone-glow {
-    position: absolute;
-    width: 300px; height: 300px;
-    top: 50%; left: 50%;
-    transform: translate(-50%, -50%);
-    background: radial-gradient(circle, rgba(200, 120, 56, 0.2) 0%, transparent 70%);
-    border-radius: 50%;
-    filter: blur(50px);
-    pointer-events: none;
-    z-index: 0;
-  }
-
-  .phone-wrapper {
-    position: relative;
-    z-index: 1;
-    /* explicit size so absolute children (screen + SVG) anchor float cards correctly */
-    width: 280px;
-    height: 580px;
-    margin-left: 4px;
-  }
-
-  /*
-    Matches SVG inner hole: x=11..269 y=11..569 rx=33  (in 280×580 viewBox)
-    phone-screen: left=11 top=11 width=258 height=558
-  */
-  .phone-screen {
-    position: absolute;
-    left: 11px; top: 11px;
-    width: 258px; height: 558px;
-    border-radius: 33px;
-    overflow: hidden;
-    background: #000;
-  }
-
-  .phone-screenshot {
-    width: 100%;
-    height: auto;
-    display: block;
-    animation: scroll-app 16s ease-in-out 1.5s infinite alternate;
-  }
-
-  @keyframes scroll-app {
-    0%, 10%  { transform: translateY(0); }
-    90%, 100% { transform: translateY(-61%); }
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    .phone-screenshot { animation: none; }
-  }
-
-  /* SVG frame on top */
-  .phone-frame-svg {
-    position: absolute;
-    top: 0; left: 0;
-    width: 280px; height: 580px;
-    pointer-events: none;
-    overflow: visible;
-    filter:
-      drop-shadow(0 24px 48px rgba(0, 0, 0, 0.35))
-      drop-shadow(0 6px 16px rgba(120, 60, 10, 0.25));
-  }
-
-  /* ── Float cards ── */
-  .float-card {
-    position: absolute;
-    background: rgba(255, 252, 248, 0.95);
-    backdrop-filter: blur(24px);
-    border: 1.5px solid rgba(255, 142, 62, 0.35);
-    border-radius: var(--radius-sm);
-    padding: 0.4rem 0.75rem;
-    animation: float 6s ease-in-out infinite;
-    white-space: nowrap;
-    box-shadow:
-      0 4px 12px rgba(58, 46, 34, 0.08),
-      0 12px 40px rgba(58, 46, 34, 0.1);
-  }
-
-  .float-card-1 { top: 22%; right: -135px; animation-delay: 0s; }
-  .float-card-2 { bottom: 16%; right: -120px; animation-delay: 2s; }
-  .float-card-3 { top: 52%; right: -130px; animation-delay: 4s; }
-
-  .fc-label {
-    font-size: 0.8rem;
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
+  .problem-card .hl {
     color: var(--text);
     font-weight: 500;
   }
-
-  /* ── Responsive ── */
-  @media (max-width: 1200px) {
-    .float-card-1 { right: -80px; }
-    .float-card-2 { right: -70px; }
-    .float-card-3 { right: -75px; }
-  }
-
-  @media (max-width: 1024px) {
-    .ps-grid { grid-template-columns: 1fr; gap: 3rem; }
-    .ps-phone { order: -1; justify-content: center; }
-
-    /* scale ≈ 0.857 → 240×497 */
-    .phone-wrapper { width: 240px; height: 497px; }
-    .phone-screen { left: 9px; top: 9px; width: 221px; height: 478px; border-radius: 28px; }
-    .phone-frame-svg { width: 240px; height: 497px; }
-
-    .float-card-1 { right: -60px; }
-    .float-card-2 { right: -55px; }
-    .float-card-3 { right: -55px; }
-    .fc-label { font-size: 0.65rem; }
-  }
-
-  @media (max-width: 640px) {
-    /* scale ≈ 0.714 → 200×414 */
-    .phone-wrapper { width: 200px; height: 414px; }
-    .phone-screen { left: 8px; top: 8px; width: 184px; height: 398px; border-radius: 24px; }
-    .phone-frame-svg { width: 200px; height: 414px; }
-
-    .float-card { padding: 0.3rem 0.55rem; }
-    .float-card-1 { right: -80px; }
-    .float-card-2 { right: -70px; }
-    .float-card-3 { right: -75px; }
-    .fc-label { font-size: 0.55rem; }
-  }
-
-  @media (max-width: 390px) {
-    /* scale ≈ 0.679 → 190×394 */
-    .phone-wrapper { width: 190px; height: 394px; }
-    .phone-screen { left: 7px; top: 7px; width: 175px; height: 379px; border-radius: 22px; }
-    .phone-frame-svg { width: 190px; height: 394px; }
-  }
-
-  @media (max-width: 360px) {
-    /* scale ≈ 0.625 → 175×363 */
-    .phone-wrapper { width: 175px; height: 363px; }
-    .phone-screen { left: 7px; top: 7px; width: 161px; height: 349px; border-radius: 21px; }
-    .phone-frame-svg { width: 175px; height: 363px; }
-
-    .float-card-1 { right: -65px; }
-    .float-card-2 { right: -55px; }
-    .float-card-3 { right: -60px; }
+  .problem-card.problem strong {
+    color: var(--text);
+    font-weight: 600;
   }
 </style>
