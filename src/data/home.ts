@@ -42,7 +42,7 @@ export const features = [
     icon: 'share',
     title: 'Delen & ontdekken',
     description:
-      'Openheid is verworven door de hele app, niet alleen op de restaurantprofielen. Onze sociale feed maakt het mogelijk om te laten zien bij welke restaurants gasten hebben genoten. Sociaal, smaakvol en persoonlijk anderen inspireren.',
+      'Openheid zit in de hele app, niet alleen op de restaurantprofielen. Gebruikers delen hun ervaringen met reviews, zodat je ziet bij welke restaurants anderen hebben genoten. Sociaal, smaakvol en persoonlijk anderen inspireren.',
   },
 ];
 

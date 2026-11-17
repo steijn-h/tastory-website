@@ -13,11 +13,17 @@ const tier =
   review.verification_tier ??
   (review.gps_checked_in ? 'VERIFIED' : review.photo_verified ? 'SEMI' : null);
 const badge =
-  tier === 'VERIFIED'
-    ? { text: 'Ter plaatse ✓', cls: 'verified', title: 'Geplaatst op locatie bij het restaurant' }
-    : tier === 'SEMI'
-      ? { text: 'Foto ✓', cls: 'semi', title: 'Bevestigd met een foto van het bezoek' }
-      : { text: 'Niet geverifieerd', cls: 'none', title: 'Bezoek niet geverifieerd' };
+  review.status === 'pending'
+    ? {
+        text: 'Nog niet geverifieerd',
+        cls: 'pending',
+        title: 'Deze review is geplaatst en wordt nog geverifieerd; telt nog niet mee in de score',
+      }
+    : tier === 'VERIFIED'
+      ? { text: 'Ter plaatse ✓', cls: 'verified', title: 'Geplaatst op locatie bij het restaurant' }
+      : tier === 'SEMI'
+        ? { text: 'Foto ✓', cls: 'semi', title: 'Bevestigd met een foto van het bezoek' }
+        : { text: 'Niet geverifieerd', cls: 'none', title: 'Bezoek niet geverifieerd' };
 
 const aspects = ASPECTS.flatMap(({ key, label }) => {
   const value = review[key];
@@ -139,6 +145,10 @@ const date = formatReviewDate(review.created_at);
   .badge.none {
     background: rgba(136, 130, 121, 0.12);
     color: var(--text-muted);
+  }
+  .badge.pending {
+    background: rgba(230, 160, 40, 0.14);
+    color: #8a5a00;
   }
   .text {
     margin-top: 0.75rem;

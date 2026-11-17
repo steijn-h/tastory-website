@@ -116,6 +116,17 @@ if (restaurants) {
             >
           </div>
         </section>
+
+        <section class="step cards-step" id="badge-cards" hidden>
+          <h2><span class="num">+</span> Reviewkaartjes voor op tafel</h2>
+          <p class="ui-muted small">
+            Vier kaartjes op een A4 met een QR-code. Gasten scannen hem en schrijven direct een
+            review. Zo krijg je meer reviews, en met reviews krijg je sterren in Google.
+          </p>
+          <a class="ui-btn ui-btn-primary" id="badge-cards-link" target="_blank" rel="noopener"
+            >Reviewkaartjes printen</a
+          >
+        </section>
       </div>
 
       <aside class="info">
@@ -173,6 +184,8 @@ if (restaurants) {
   const code = document.getElementById('badge-code') as HTMLTextAreaElement;
   const link = document.getElementById('badge-link') as HTMLInputElement;
   const download = document.getElementById('badge-download') as HTMLAnchorElement;
+  const cards = document.getElementById('badge-cards')!;
+  const cardsLink = document.getElementById('badge-cards-link') as HTMLAnchorElement;
 
   const escape = (s: string) =>
     s.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
@@ -182,6 +195,7 @@ if (restaurants) {
   function render() {
     const option = options.find((o) => o.label === input.value.trim());
     output.hidden = !option;
+    cards.hidden = !option?.slug;
     pickFirst.hidden = Boolean(option);
     if (!option) return;
     const img = `${SITE}/badge/tastory-badge-${style()}.png`;
@@ -190,6 +204,7 @@ if (restaurants) {
       `<img src="${img}" alt="Bekijk ${escape(option.name)} op Tastory" width="200" height="60" /></a>`;
     link.value = option.url;
     download.href = img;
+    cardsLink.href = `/reviewkaart/${encodeURIComponent(option.slug)}`;
   }
 
   const preset = new URLSearchParams(location.search).get('r');

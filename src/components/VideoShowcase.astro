@@ -1,9 +1,9 @@
 ---
-// Rij met restaurants die een video hebben (zelfde bron als de video-sectie in
-// de app). Dezelfde kaartjes als in de lijsten, zodat het blok bij de rest van
-// de site past; de video speelt in het kaartje bij aanwijzen met de muis.
+// Rij met geverifieerde restaurants (partners: eigen video of profiel, zelfde
+// regel als de app). Dezelfde kaartjes als in de lijsten; bij een video speelt
+// die in het kaartje bij aanwijzen met de muis.
 import RestaurantCard from './RestaurantCard.astro';
-import { hasVideo, type RestaurantListItem } from '../lib/restaurants';
+import { hasVideo, isPartnerRestaurant, type RestaurantListItem } from '../lib/restaurants';
 
 interface Props {
   restaurants: RestaurantListItem[];
@@ -11,8 +11,12 @@ interface Props {
   /** Kaartjes in het midden (homepage) i.p.v. links uitgelijnd. */
   center?: boolean;
 }
-const { restaurants, title = 'Restaurants met video', center = false } = Astro.props;
-const items = restaurants.filter(hasVideo).slice(0, 12);
+const { restaurants, title = 'Geverifieerde restaurants', center = false } = Astro.props;
+// Met video eerst: die vallen het meest op.
+const items = restaurants
+  .filter(isPartnerRestaurant)
+  .sort((a, b) => Number(hasVideo(b)) - Number(hasVideo(a)))
+  .slice(0, 12);
 ---
 
 {

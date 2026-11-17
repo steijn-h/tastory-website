@@ -5,6 +5,24 @@ export function priceLabel(level: number | null | undefined): string {
   return '€'.repeat(Math.max(1, Math.min(level ?? 1, 4)));
 }
 
+/** Prijs per persoon (hoofdgerecht + drankje) per prijsniveau; gelijk aan de app. */
+const PRICE_RANGES: Record<number, string> = {
+  1: 'tot €20',
+  2: '€20–35',
+  3: '€35–60',
+  4: 'vanaf €60',
+};
+
+/** Bijv. "€20–35 p.p." voor niveau 2. */
+export function priceRange(level: number | null | undefined): string {
+  return `${PRICE_RANGES[Math.max(1, Math.min(level ?? 1, 4))]} p.p.`;
+}
+
+/** Bijv. "€€ · €20–35 p.p." */
+export function priceWithRange(level: number | null | undefined): string {
+  return `${priceLabel(level)} · ${priceRange(level)}`;
+}
+
 /** photo_url / menukaart_url zijn komma-gescheiden lijsten met URL's. */
 export function splitUrls(value: string | null | undefined): string[] {
   if (!value) return [];

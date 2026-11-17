@@ -9,6 +9,7 @@
   <ul class="nav-links">
     <li><a href="/">Home</a></li>
     <li><a href="/restaurants">Restaurants</a></li>
+    <li><a href="/app">App</a></li>
     <li><a href="/oplossingen">Oplossingen</a></li>
     <li><a href="/contact">Contact</a></li>
     <li><a href="/inloggen" data-account-link>Inloggen</a></li>
@@ -33,6 +34,7 @@
     <span class="mobile-menu-label">Menu</span>
     <a href="/">Home</a>
     <a href="/restaurants">Restaurants</a>
+    <a href="/app">App</a>
     <a href="/oplossingen">Oplossingen</a>
     <div class="mobile-submenu">
       <a href="/oplossingen/restaurants" class="mobile-submenu-link">Voor restaurants</a>
@@ -152,6 +154,7 @@
     color: var(--orange) !important;
   }
   .nav-cta {
+    white-space: nowrap;
     background: var(--orange);
     color: var(--white) !important;
     padding: 0.65rem 1.6rem;
@@ -297,6 +300,23 @@
     text-align: center;
     font-size: var(--text-base);
     letter-spacing: 0.04em;
+  }
+  /* Tussen tablet en breed scherm: iets compacter zodat alles op één regel past. */
+  @media (max-width: 1180px) {
+    nav {
+      padding: 1.1rem 2rem;
+    }
+    .nav-links {
+      gap: 1.4rem;
+    }
+  }
+  @media (max-width: 1000px) {
+    .nav-links {
+      gap: 1rem;
+    }
+    .nav-links a {
+      font-size: 0.82rem;
+    }
   }
   @media (max-width: 768px) {
     nav {

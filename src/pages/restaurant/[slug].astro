@@ -9,6 +9,7 @@ import ReviewCard from '../../components/ReviewCard.astro';
 import RestaurantCard from '../../components/RestaurantCard.astro';
 import SaveButton from '../../components/SaveButton.astro';
 import BackLink from '../../components/BackLink.astro';
+import FacilityList from '../../components/FacilityList.astro';
 import {
   cityPath,
   getAllRestaurants,
@@ -16,6 +17,7 @@ import {
   getReviews,
   getReviewStats,
   getStories,
+  getBrandColor,
   isPartnerRestaurant,
   isUuid,
   restaurantPath,
@@ -29,6 +31,7 @@ import {
   normalizeWebsite,
   parseOpeningHours,
   priceLabel,
+  priceWithRange,
   safeHttpsUrl,
   splitUrls,
   todayDutch,
@@ -47,14 +50,24 @@ if (lookup.status === 'ok' && isUuid(param) && lookup.restaurant.slug) {
 
 const restaurant: Restaurant | null = lookup.status === 'ok' ? lookup.restaurant : null;
 
-const [reviewPage, stats, stories, allRestaurants] = restaurant
+const [reviewPage, stats, stories, allRestaurants, brandColor] = restaurant
   ? await Promise.all([
       getReviews(restaurant.id),
       getReviewStats(restaurant.id),
       getStories(restaurant.id),
       getAllRestaurants(),
+      getBrandColor(restaurant.id),
     ])
-  : [null, null, [], null];
+  : [null, null, [], null, null];
+
+// Huisstijl van het restaurant: reserveerknoppen en een accentrand in die
+// kleur. Tekst op de knop wit of donker, afhankelijk van hoe licht de kleur is.
+const brandStyle = (() => {
+  if (!brandColor) return undefined;
+  const [r, g, b] = [1, 3, 5].map((i) => parseInt(brandColor.slice(i, i + 2), 16) / 255);
+  const lum = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+  return `--brand: ${brandColor}; --brand-ink: ${lum > 0.6 ? '#2b2118' : '#ffffff'};`;
+})();
 
 if (lookup.status === 'not-found') {
   Astro.response.status = 404;
@@ -77,6 +90,10 @@ const backgroundUrl = safeHttpsUrl(restaurant?.background_url);
 const score =
   restaurant?.weighted_score && restaurant.weighted_score > 0 ? Number(restaurant.weighted_score) : null;
 const reviewCount = stats?.count ?? restaurant?.published_review_count ?? 0;
+// Geplaatst maar nog niet geverifieerd: staan in de lijst met een label, maar
+// tellen niet mee in de score.
+const listedCount =
+  reviewPage?.total ?? reviewCount + (restaurant?.pending_review_count ?? 0);
 const reviews = reviewPage?.reviews ?? [];
 const hours = parseOpeningHours(restaurant?.opening_hours);
 const today = todayDutch();
@@ -89,6 +106,8 @@ const instagram = safeHttpsUrl(restaurant?.instagram_url);
 const facebook = safeHttpsUrl(restaurant?.facebook_url);
 const facilities = (restaurant?.facilities ?? []).filter(Boolean).map(capitalize);
 const allergies = (restaurant?.allergie_keuze ?? []).filter(Boolean).map(capitalize);
+// Voorzieningen en dieetwensen samen (dieetwensen staan vaak bij de voorzieningen).
+const amenities = [...new Set([...facilities, ...allergies])];
 const phone = restaurant?.phone?.trim() || null;
 const phoneHref = phone ? `tel:${phone.replace(/[^\d+]/g, '')}` : null;
 const hasCoords =
@@ -194,7 +213,7 @@ const jsonLd = restaurant
             }
           : undefined,
       review: reviews
-        .filter((r) => r.rating)
+        .filter((r) => r.rating && r.status !== 'pending')
         .slice(0, 5)
         .map((r) => ({
           '@type': 'Review',
@@ -274,7 +293,7 @@ const breadcrumbLd = {
       </div>
     </div>
   ) : (
-    <div class:list={['page', { partner: isPartner && backgroundUrl }]} style={isPartner && backgroundUrl ? `--partner-bg: url('${backgroundUrl}')` : undefined} data-restaurant-id={restaurant.id} data-restaurant-cuisine={restaurant.cuisine ?? ''}>
+    <div class:list={['page', { partner: isPartner && backgroundUrl }]} style={[isPartner && backgroundUrl ? `--partner-bg: url('${backgroundUrl}');` : '', brandStyle ?? ''].join(' ').trim() || undefined} data-brand={brandColor ? '' : undefined} data-restaurant-id={restaurant.id} data-restaurant-cuisine={restaurant.cuisine ?? ''}>
       <div class="container">
         <BackLink
           href={city ? cityPath(city) : '/restaurants'}
@@ -302,10 +321,15 @@ const breadcrumbLd = {
                   <span class="muted">{reviewCount === 1 ? '1 review' : `${reviewCount} reviews`}</span>
                 </a>
               )}
-              {[restaurant.cuisine, restaurant.vibe, restaurant.price_level ? priceLabel(restaurant.price_level) : null]
+              {[restaurant.cuisine, restaurant.vibe, restaurant.price_level ? priceWithRange(restaurant.price_level) : null]
                 .filter(Boolean)
                 .map((tag) => <span class="tag">{tag}</span>)}
-              {isPartner && <span class="tag tag-partner">Tastory partner</span>}
+              {isPartner && (
+                <span class="tag tag-partner">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" aria-hidden="true"><path d="m5 12 5 5 9-10" /></svg>
+                  Geverifieerd
+                </span>
+              )}
             </div>
           </div>
           <div class="head-side">
@@ -393,7 +417,7 @@ const breadcrumbLd = {
             <!-- Reviews -->
             <section class="block" id="reviews">
               <div class="reviews-head">
-                <h2>Reviews{reviewCount > 0 ? ` (${reviewCount})` : ''}</h2>
+                <h2>Reviews{listedCount > 0 ? ` (${listedCount})` : ''}</h2>
                 <a class="btn btn-ghost btn-sm" href={`${canonicalPath}/review`} rel="nofollow">Schrijf een review</a>
               </div>
 
@@ -402,7 +426,7 @@ const breadcrumbLd = {
                   <div class="summary-score">
                     {score !== null && <span class="big-score">{formatScore(score)}</span>}
                     {score !== null && <RatingStars rating={score} size={20} />}
-                    <span class="muted">{reviewCount === 1 ? '1 review' : `${reviewCount} reviews`}</span>
+                    <span class="muted">{reviewCount === 1 ? '1 geverifieerde review' : `${reviewCount} geverifieerde reviews`}</span>
                   </div>
                   <div class="summary-bars" aria-label="Verdeling van de beoordelingen">
                     {[5, 4, 3, 2, 1].map((stars) => {
@@ -518,16 +542,10 @@ const breadcrumbLd = {
                     <a href={website} data-track="open_website" target="_blank" rel="noopener noreferrer" class="text-link">Bezoek de website →</a>
                   </li>
                 )}
-                {facilities.length > 0 && (
+                {amenities.length > 0 && (
                   <li>
                     <span class="info-label">Voorzieningen</span>
-                    <ul class="chips chips-sm">{facilities.map((f) => <li>{f}</li>)}</ul>
-                  </li>
-                )}
-                {allergies.length > 0 && (
-                  <li>
-                    <span class="info-label">Dieetwensen &amp; allergieën</span>
-                    <ul class="chips chips-sm">{allergies.map((a) => <li>{a}</li>)}</ul>
+                    <FacilityList items={amenities} />
                   </li>
                 )}
                 {(instagram || facebook) && (
@@ -561,7 +579,7 @@ const breadcrumbLd = {
             </div>
 
             <a class="owner-link" href={`/badge?r=${encodeURIComponent(restaurant.slug ?? '')}`}>
-              Is dit jouw restaurant? Zet Tastory op je website →
+              Is dit jouw restaurant? Badge en reviewkaartjes →
             </a>
 
           </aside>
@@ -830,6 +848,27 @@ const breadcrumbLd = {
     background-size: 100% auto;
     background-repeat: no-repeat;
   }
+  /* Huisstijl van het restaurant als achtergrond: bovenaan duidelijk, verder
+     naar beneden lichter, zodat tekst goed leesbaar blijft. */
+  .page[data-brand] {
+    background-color: color-mix(in srgb, var(--brand) 12%, var(--beige));
+    background-image: linear-gradient(
+      to bottom,
+      color-mix(in srgb, var(--brand) 30%, var(--beige)),
+      color-mix(in srgb, var(--brand) 12%, var(--beige)) 700px
+    );
+    background-repeat: no-repeat;
+  }
+  .page.partner[data-brand] {
+    background-image:
+      linear-gradient(
+        to bottom,
+        color-mix(in srgb, var(--brand) 25%, rgba(245, 235, 221, 0.86)),
+        color-mix(in srgb, var(--brand) 12%, var(--beige)) 520px
+      ),
+      var(--partner-bg);
+    background-size: 100% auto;
+  }
   .container {
     max-width: 1180px;
     margin: 0 auto;
@@ -867,6 +906,18 @@ const breadcrumbLd = {
   }
   .btn-primary:hover {
     background: var(--orange-dark);
+  }
+  /* Huisstijlkleur van het restaurant (als die bekend is). */
+  [data-brand] .btn-primary,
+  [data-brand] .btn-primary:hover {
+    background: var(--brand);
+    color: var(--brand-ink);
+  }
+  [data-brand] .btn-primary:hover {
+    filter: brightness(0.92);
+  }
+  [data-brand] .side-card {
+    border-top: 4px solid var(--brand);
   }
   .btn-ghost {
     background: var(--white);
@@ -953,17 +1004,27 @@ const breadcrumbLd = {
     text-decoration: underline;
   }
   .tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
     font-size: var(--text-xs);
     font-weight: 500;
-    background: var(--white);
-    border: 1px solid var(--beige-deeper);
+    background: var(--orange);
+    border: 1px solid var(--orange);
+    color: #fff;
     padding: 0.25rem 0.7rem;
     border-radius: 100px;
   }
   .tag-partner {
-    background: var(--orange);
-    border-color: var(--orange);
-    color: #fff;
+    background: var(--brown-dark);
+    border-color: var(--brown-dark);
+  }
+  /* Met huisstijl: labels in de kleur van het restaurant (vol, dus ze blijven
+     opvallen op de lichtere achtergrond in dezelfde kleur). */
+  [data-brand] .tag:not(.tag-partner) {
+    background: var(--brand);
+    border-color: var(--brand);
+    color: var(--brand-ink);
   }
   .head-side {
     display: flex;
@@ -1112,13 +1173,6 @@ const breadcrumbLd = {
     border-radius: 100px;
     padding: 0.35rem 0.8rem;
     font-size: var(--text-sm);
-  }
-  .info-list .chips {
-    margin-top: 0.3rem;
-  }
-  .chips-sm li {
-    padding: 0.25rem 0.65rem;
-    font-size: var(--text-xs);
   }
   .menu-grid {
     display: grid;
@@ -1405,10 +1459,20 @@ const breadcrumbLd = {
   .hours td {
     padding: 0.2rem 0;
   }
+  /* Vandaag: oranje gemarkeerd. */
   .hours tr.today th,
   .hours tr.today td {
     font-weight: 600;
-    color: var(--brown-dark);
+    color: var(--orange-dark);
+    background: rgba(255, 142, 62, 0.1);
+  }
+  .hours tr.today th {
+    box-shadow: inset 3px 0 0 var(--orange);
+    padding-left: 0.6rem;
+    border-radius: 6px 0 0 6px;
+  }
+  .hours tr.today td {
+    border-radius: 0 6px 6px 0;
   }
   /* In de buurt */
   .nearby {

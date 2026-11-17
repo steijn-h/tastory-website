@@ -123,7 +123,7 @@ const collectieCounts = new Map(
   collecties.map((c) => [c.id, savedItems.filter((s) => s.collecties.includes(c.id)).length]),
 );
 
-const displayName = profile?.full_name?.trim() || profile?.username || user.email || 'Tastory-gast';
+const displayName = profile?.full_name?.trim() || profile?.username || user.email || 'Tastory-gebruiker';
 const initial = displayName.charAt(0).toUpperCase();
 
 const statusLabel = (status: string | null) =>

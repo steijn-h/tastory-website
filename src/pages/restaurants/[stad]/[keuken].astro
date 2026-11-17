@@ -204,11 +204,7 @@ const breadcrumbLd =
               </h1>
               <p>{intro}</p>
             </header>
-            <RestaurantGrid
-              restaurants={restaurants}
-              showCuisineFilter={false}
-              searchPlaceholder={`Zoek in ${cityName}…`}
-            />
+            <RestaurantGrid restaurants={restaurants} searchPlaceholder={`Zoek in ${cityName}…`} />
           </>
         )
       }

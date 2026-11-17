@@ -1,0 +1,136 @@
+---
+// De Tastory-app: hoe de app eruitziet (telefoon met scrollende schermafbeelding)
+// en wat je ermee kunt. Bereikbaar via "App" in de navigatie.
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHero from '../components/PageHero.astro';
+import AppPhone from '../components/AppPhone.astro';
+import AppFunctions from '../components/AppFunctions.astro';
+import { appFunctions } from '../data/home';
+import { cacheStaticPage } from '../lib/cache';
+import { APP_STORE_URL } from '../lib/links';
+
+cacheStaticPage(Astro);
+---
+
+<BaseLayout
+  title="De Tastory-app — restaurants ontdekken via video en eerlijke reviews | Tastory"
+  description="Zo werkt de Tastory-app: ontdek restaurants via video en foto's, lees eerlijke reviews en bewaar je favorieten. Gratis voor iOS en Android."
+>
+  <PageHero
+    title="De Tastory-<em>app</em>"
+    description="Ontdek restaurants via video en foto's, lees eerlijke reviews en bewaar je favorieten. Gratis voor iOS en Android."
+  />
+
+  <section class="intro">
+    <div class="intro-grid">
+      <div class="intro-phone reveal">
+        <AppPhone />
+      </div>
+      <div class="intro-text reveal">
+        <div class="section-tag">Zo ziet het eruit</div>
+        <h2>Alles over een restaurant, <em>in één app</em></h2>
+        <p>
+          Bekijk de sfeer in video's en actuele foto's, lees reviews van andere gebruikers met een
+          score per onderdeel, en vind de menukaart en openingstijden. Sla restaurants op in je
+          eigen collecties en ontdek nieuwe plekken die bij jouw smaak passen.
+        </p>
+        <div class="store-badges">
+          <a href={APP_STORE_URL} target="_blank" rel="noopener noreferrer">
+            <img
+              src="https://developer.apple.com/assets/elements/badges/download-on-the-app-store.svg"
+              alt="Download in de App Store"
+              width="156"
+              height="52"
+              loading="lazy"
+            />
+          </a>
+          <a
+            href="https://play.google.com/store/apps/details?id=nl.tastory.app"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <img
+              src="https://play.google.com/intl/en_us/badges/static/images/badges/en_badge_web_generic.png"
+              alt="Ontdek het op Google Play"
+              width="200"
+              height="77"
+              class="play"
+              loading="lazy"
+            />
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <AppFunctions functions={appFunctions} />
+</BaseLayout>
+
+<style>
+  .intro {
+    padding: var(--space-3xl) 3rem;
+    max-width: none;
+  }
+  .intro-grid {
+    max-width: 1080px;
+    margin: 0 auto;
+    display: grid;
+    /* Ruim voor de telefoon: de labels steken rechts naast de telefoon uit. */
+    grid-template-columns: 440px 1fr;
+    gap: 3rem;
+    align-items: center;
+  }
+  .intro-phone {
+    display: flex;
+    justify-content: flex-start;
+  }
+  .intro-text h2 {
+    font-family: var(--serif);
+    font-size: clamp(1.8rem, 3.5vw, 2.6rem);
+    line-height: 1.15;
+    margin: 0.5rem 0 1rem;
+  }
+  .intro-text p {
+    color: var(--text-muted);
+    line-height: 1.75;
+    max-width: 52ch;
+  }
+  .store-badges {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: var(--space-lg);
+  }
+  .store-badges img {
+    display: block;
+    height: 52px;
+    width: auto;
+  }
+  /* Het Google Play-plaatje heeft veel witruimte rondom. */
+  .store-badges .play {
+    height: 77px;
+    margin: -12px 0;
+  }
+  @media (max-width: 900px) {
+    .intro {
+      padding: var(--space-2xl) var(--space-md);
+    }
+    .intro-grid {
+      grid-template-columns: 1fr;
+      gap: var(--space-2xl);
+    }
+    .intro-phone {
+      justify-content: center;
+    }
+    .intro-text {
+      text-align: center;
+    }
+    .intro-text p {
+      margin: 0 auto;
+    }
+    .store-badges {
+      justify-content: center;
+    }
+  }
+</style>

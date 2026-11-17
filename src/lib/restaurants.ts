@@ -33,6 +33,7 @@ export interface Restaurant {
   reservering_url: string | null;
   weighted_score: number | null;
   published_review_count: number | null;
+  pending_review_count: number | null;
   created_at: string | null;
 }
 
@@ -49,11 +50,13 @@ export type RestaurantListItem = Pick<
   | 'price_level'
   | 'weighted_score'
   | 'published_review_count'
+  | 'pending_review_count'
   | 'lat'
   | 'lng'
   | 'video_url'
   | 'background_url'
   | 'facilities'
+  | 'allergie_keuze'
 >;
 
 // Zelfde kolommen als de detailquery in de app (RestaurantDetailScreen).
@@ -86,11 +89,12 @@ const DETAIL_COLUMNS = [
   'reservering_url',
   'weighted_score',
   'published_review_count',
+  'pending_review_count',
   'created_at',
 ].join(',');
 
 const LIST_COLUMNS =
-  'id,name,slug,photo_url,city,cuisine,vibe,price_level,weighted_score,published_review_count,lat,lng,video_url,background_url,facilities';
+  'id,name,slug,photo_url,city,cuisine,vibe,price_level,weighted_score,published_review_count,pending_review_count,lat,lng,video_url,background_url,facilities,allergie_keuze';
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
@@ -214,6 +218,8 @@ export type AspectKey = (typeof ASPECTS)[number]['key'];
 export interface Review {
   id: string;
   user_id: string | null;
+  /** 'published' = geverifieerd; 'pending' = geplaatst, nog niet geverifieerd. */
+  status: 'published' | 'pending' | null;
   rating: number | null;
   text: string | null;
   created_at: string | null;
@@ -238,6 +244,7 @@ export interface ReviewAuthor {
 const REVIEW_COLUMNS = [
   'id',
   'user_id',
+  'status',
   'rating',
   'text',
   'created_at',
@@ -261,7 +268,7 @@ interface PublicProfile {
 function authorFromProfile(profile: PublicProfile | undefined): ReviewAuthor {
   const username = profile?.username?.trim();
   const firstName = profile?.full_name?.trim().split(/\s+/)[0];
-  const name = username ? `@${username}` : firstName || 'Tastory-gast';
+  const name = username ? `@${username}` : firstName || 'Tastory-gebruiker';
   const initial = (username || firstName || 'T').charAt(0).toUpperCase();
   return { name, avatarUrl: profile?.avatar_url || null, initial };
 }
@@ -287,6 +294,8 @@ async function fetchProfiles(userIds: string[]): Promise<Map<string, PublicProfi
 export interface ReviewPage {
   reviews: Review[];
   hasMore: boolean;
+  /** Totaal zichtbare reviews (geverifieerd + nog niet geverifieerd). */
+  total: number | null;
 }
 
 export const REVIEWS_PAGE_SIZE = 10;
@@ -299,11 +308,13 @@ export async function getReviews(
   const supabase = getSupabase();
   if (!supabase) return null;
   // Eén extra rij ophalen om te weten of er nog meer zijn.
-  const { data, error } = await supabase
+  const { data, error, count } = await supabase
     .from('reviews')
-    .select(REVIEW_COLUMNS)
+    .select(REVIEW_COLUMNS, { count: 'exact' })
     .eq('restaurant_id', restaurantId)
-    .eq('status', 'published')
+    // Ook reviews die nog niet geverifieerd zijn (met een label); gemarkeerde
+    // (flagged) reviews blijven verborgen. De score telt alleen geverifieerde.
+    .in('status', ['published', 'pending'])
     .eq('is_private', false)
     .order('created_at', { ascending: false })
     .range(offset, offset + limit);
@@ -317,6 +328,7 @@ export async function getReviews(
   return {
     reviews: page.map((r) => ({ ...r, author: authorFromProfile(profiles.get(r.user_id ?? '')) })),
     hasMore: rows.length > limit,
+    total: count ?? null,
   };
 }
 
@@ -368,6 +380,24 @@ export interface Story {
   caption: string | null;
   created_at: string | null;
   author: ReviewAuthor;
+}
+
+/**
+ * Huisstijlkleur van het restaurant (kolom huisstijl_kleur, bijv. "#1e5a3c").
+ * Los opgehaald: bestaat de kolom (nog) niet of gaat er iets mis, dan gewoon
+ * geen kleur en blijft de pagina werken.
+ */
+export async function getBrandColor(restaurantId: string): Promise<string | null> {
+  const supabase = getSupabase();
+  if (!supabase) return null;
+  const { data, error } = await supabase
+    .from('restaurants')
+    .select('huisstijl_kleur')
+    .eq('id', restaurantId)
+    .maybeSingle();
+  if (error || !data) return null;
+  const value = String((data as { huisstijl_kleur?: unknown }).huisstijl_kleur ?? '').trim();
+  return /^#[0-9a-f]{6}$/i.test(value) ? value.toLowerCase() : null;
 }
 
 export async function getStories(restaurantId: string, limit = 12): Promise<Story[]> {
