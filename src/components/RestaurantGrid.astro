@@ -224,7 +224,10 @@ const CITIES_COLLAPSED = 10;
     )
   }
 
-  <p class="count" data-count aria-live="polite">{restaurants.length} restaurants</p>
+  <p class="count" data-count aria-live="polite">
+    {restaurants.length}
+    {restaurants.length === 1 ? 'restaurant' : 'restaurants'}
+  </p>
 
   <ul class="grid" data-list>
     {

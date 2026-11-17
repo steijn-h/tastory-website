@@ -54,7 +54,10 @@ const total = all?.length ?? 0;
                 )}
                 <span class="city-text">
                   <span class="city-name">{c.name}</span>
-                  <span class="city-count">{c.restaurants.length} restaurants</span>
+                  <span class="city-count">
+                    {c.restaurants.length}{' '}
+                    {c.restaurants.length === 1 ? 'restaurant' : 'restaurants'}
+                  </span>
                 </span>
               </a>
             </li>
@@ -68,13 +71,12 @@ const total = all?.length ?? 0;
         <p class="credits">
           Foto's via Wikimedia Commons:{' '}
           {credits.map((x, i) => (
-            <>
-              {i > 0 && ', '}
+            <span>
               <a href={x.photo!.source} target="_blank" rel="noopener noreferrer">
                 {x.city}
-              </a>{' '}
-              ({x.photo!.author}, {x.photo!.license})
-            </>
+              </a>
+              {` (${x.photo!.author}, ${x.photo!.license})${i < credits.length - 1 ? ', ' : '.'}`}
+            </span>
           ))}
         </p>
       )}

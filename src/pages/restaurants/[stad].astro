@@ -8,6 +8,7 @@ import RestaurantGrid from '../../components/RestaurantGrid.astro';
 import BackLink from '../../components/BackLink.astro';
 import { getAllRestaurants, groupByCity, restaurantPath } from '../../lib/restaurants';
 import { SITE_URL } from '../../lib/links';
+import { CITY_PHOTOS } from '../../data/city-photos';
 import { groupByCuisine, MIN_RESTAURANTS_PER_CUISINE_PAGE } from '../../lib/cuisine';
 
 const stad = (Astro.params.stad ?? '').toLowerCase();
@@ -24,6 +25,7 @@ if (all === null) {
 }
 
 const name = group?.name ?? 'Onbekende stad';
+const photo = group ? CITY_PHOTOS[group.slug] : undefined;
 const restaurants = group?.restaurants ?? [];
 const rated = restaurants.filter((r) => (r.weighted_score ?? 0) > 0);
 const intro = `${restaurants.length} ${restaurants.length === 1 ? 'restaurant' : 'restaurants'} in ${name}${
@@ -116,6 +118,24 @@ const breadcrumbLd = group
           </div>
         ) : (
           <>
+            {photo && (
+              <figure class="city-photo">
+                <img
+                  src={photo.src}
+                  alt={`Centrum van ${name}`}
+                  width="640"
+                  height="480"
+                  fetchpriority="high"
+                />
+                <figcaption>
+                  Foto:{' '}
+                  <a href={photo.source} target="_blank" rel="noopener noreferrer">
+                    {photo.author}
+                  </a>
+                  , {photo.license}
+                </figcaption>
+              </figure>
+            )}
             <header class="head">
               <h1>{name}</h1>
               <p>{intro}</p>
@@ -182,6 +202,39 @@ const breadcrumbLd = group
   .breadcrumbs a:hover {
     text-decoration: underline;
     color: var(--text);
+  }
+  .city-photo {
+    position: relative;
+    margin: 0 0 var(--space-lg);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    aspect-ratio: 16 / 6;
+    background: var(--beige-dark);
+  }
+  .city-photo img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+  .city-photo figcaption {
+    position: absolute;
+    right: 0.5rem;
+    bottom: 0.4rem;
+    padding: 0.1rem 0.45rem;
+    border-radius: 4px;
+    background: rgba(0, 0, 0, 0.45);
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 0.65rem;
+  }
+  .city-photo figcaption a {
+    color: inherit;
+  }
+  @media (max-width: 700px) {
+    .city-photo {
+      aspect-ratio: 16 / 9;
+      border-radius: var(--radius-md);
+    }
   }
   .head {
     margin-bottom: var(--space-xl);
