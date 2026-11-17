@@ -58,7 +58,7 @@ const iconFor = (label: string) => ICONS.find(([re]) => re.test(label))?.[1] ?? 
 <ul class="facilities">
   {
     items.map((label) => (
-      <li>
+      <li class:list={{ wide: label.length > 14 }}>
         <span class="icon" aria-hidden="true">
           <svg
             width="18"
@@ -83,6 +83,8 @@ const iconFor = (label: string) => ICONS.find(([re]) => re.test(label))?.[1] ?? 
     list-style: none;
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
+    /* Korte namen schuiven door naar lege plekken naast een brede tegel. */
+    grid-auto-flow: dense;
     gap: 0.5rem;
     margin-top: 0.4rem;
   }
@@ -97,6 +99,14 @@ const iconFor = (label: string) => ICONS.find(([re]) => re.test(label))?.[1] ?? 
     font-size: var(--text-sm);
     color: var(--text);
     line-height: 1.2;
+    /* Woorden heel laten (de lijst eromheen breekt anders midden in een woord). */
+    overflow-wrap: normal;
+    word-break: normal;
+    min-width: 0;
+  }
+  /* Lange namen (bijv. Rolstoeltoegankelijk) krijgen de hele breedte. */
+  .facilities li.wide {
+    grid-column: 1 / -1;
   }
   .icon {
     display: inline-grid;
