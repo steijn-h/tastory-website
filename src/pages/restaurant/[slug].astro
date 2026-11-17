@@ -17,6 +17,7 @@ import {
   getReviews,
   getReviewStats,
   getStories,
+  getBrandColor,
   isPartnerRestaurant,
   isUuid,
   restaurantPath,
@@ -49,14 +50,24 @@ if (lookup.status === 'ok' && isUuid(param) && lookup.restaurant.slug) {
 
 const restaurant: Restaurant | null = lookup.status === 'ok' ? lookup.restaurant : null;
 
-const [reviewPage, stats, stories, allRestaurants] = restaurant
+const [reviewPage, stats, stories, allRestaurants, brandColor] = restaurant
   ? await Promise.all([
       getReviews(restaurant.id),
       getReviewStats(restaurant.id),
       getStories(restaurant.id),
       getAllRestaurants(),
+      getBrandColor(restaurant.id),
     ])
-  : [null, null, [], null];
+  : [null, null, [], null, null];
+
+// Huisstijl van het restaurant: reserveerknoppen en een accentrand in die
+// kleur. Tekst op de knop wit of donker, afhankelijk van hoe licht de kleur is.
+const brandStyle = (() => {
+  if (!brandColor) return undefined;
+  const [r, g, b] = [1, 3, 5].map((i) => parseInt(brandColor.slice(i, i + 2), 16) / 255);
+  const lum = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+  return `--brand: ${brandColor}; --brand-ink: ${lum > 0.6 ? '#2b2118' : '#ffffff'};`;
+})();
 
 if (lookup.status === 'not-found') {
   Astro.response.status = 404;
@@ -278,7 +289,7 @@ const breadcrumbLd = {
       </div>
     </div>
   ) : (
-    <div class:list={['page', { partner: isPartner && backgroundUrl }]} style={isPartner && backgroundUrl ? `--partner-bg: url('${backgroundUrl}')` : undefined} data-restaurant-id={restaurant.id} data-restaurant-cuisine={restaurant.cuisine ?? ''}>
+    <div class:list={['page', { partner: isPartner && backgroundUrl }]} style={[isPartner && backgroundUrl ? `--partner-bg: url('${backgroundUrl}');` : '', brandStyle ?? ''].join(' ').trim() || undefined} data-brand={brandColor ? '' : undefined} data-restaurant-id={restaurant.id} data-restaurant-cuisine={restaurant.cuisine ?? ''}>
       <div class="container">
         <BackLink
           href={city ? cityPath(city) : '/restaurants'}
@@ -870,6 +881,18 @@ const breadcrumbLd = {
   }
   .btn-primary:hover {
     background: var(--orange-dark);
+  }
+  /* Huisstijlkleur van het restaurant (als die bekend is). */
+  [data-brand] .btn-primary,
+  [data-brand] .btn-primary:hover {
+    background: var(--brand);
+    color: var(--brand-ink);
+  }
+  [data-brand] .btn-primary:hover {
+    filter: brightness(0.92);
+  }
+  [data-brand] .side-card {
+    border-top: 4px solid var(--brand);
   }
   .btn-ghost {
     background: var(--white);

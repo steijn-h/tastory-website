@@ -371,6 +371,24 @@ export interface Story {
   author: ReviewAuthor;
 }
 
+/**
+ * Huisstijlkleur van het restaurant (kolom huisstijl_kleur, bijv. "#1e5a3c").
+ * Los opgehaald: bestaat de kolom (nog) niet of gaat er iets mis, dan gewoon
+ * geen kleur en blijft de pagina werken.
+ */
+export async function getBrandColor(restaurantId: string): Promise<string | null> {
+  const supabase = getSupabase();
+  if (!supabase) return null;
+  const { data, error } = await supabase
+    .from('restaurants')
+    .select('huisstijl_kleur')
+    .eq('id', restaurantId)
+    .maybeSingle();
+  if (error || !data) return null;
+  const value = String((data as { huisstijl_kleur?: unknown }).huisstijl_kleur ?? '').trim();
+  return /^#[0-9a-f]{6}$/i.test(value) ? value.toLowerCase() : null;
+}
+
 export async function getStories(restaurantId: string, limit = 12): Promise<Story[]> {
   const supabase = getSupabase();
   if (!supabase) return [];
