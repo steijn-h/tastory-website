@@ -128,8 +128,8 @@ export type LookupResult =
   | { status: 'not-found' }
   | { status: 'error' };
 
-/** Zoekt op slug, of op id (oude deellinks uit de app gebruiken het id). */
-export async function getRestaurant(param: string): Promise<LookupResult> {
+// Eén restaurant ophalen (zonder bewaren); zie getRestaurant onderaan.
+async function loadRestaurant(param: string): Promise<LookupResult> {
   const supabase = getSupabase();
   if (!supabase) return { status: 'error' };
   const { data, error } = await supabase
@@ -300,10 +300,10 @@ export interface ReviewPage {
 
 export const REVIEWS_PAGE_SIZE = 10;
 
-export async function getReviews(
+async function loadReviews(
   restaurantId: string,
-  offset = 0,
-  limit = REVIEWS_PAGE_SIZE,
+  offset: number,
+  limit: number,
 ): Promise<ReviewPage | null> {
   const supabase = getSupabase();
   if (!supabase) return null;
@@ -339,7 +339,7 @@ export interface ReviewStats {
   aspects: { key: AspectKey; label: string; average: number | null; count: number }[];
 }
 
-export async function getReviewStats(restaurantId: string): Promise<ReviewStats | null> {
+async function loadReviewStats(restaurantId: string): Promise<ReviewStats | null> {
   const supabase = getSupabase();
   if (!supabase) return null;
   const { data, error } = await supabase
@@ -387,7 +387,7 @@ export interface Story {
  * Los opgehaald: bestaat de kolom (nog) niet of gaat er iets mis, dan gewoon
  * geen kleur en blijft de pagina werken.
  */
-export async function getBrandColor(restaurantId: string): Promise<string | null> {
+async function loadBrandColor(restaurantId: string): Promise<string | null> {
   const supabase = getSupabase();
   if (!supabase) return null;
   const { data, error } = await supabase
@@ -400,7 +400,7 @@ export async function getBrandColor(restaurantId: string): Promise<string | null
   return /^#[0-9a-f]{6}$/i.test(value) ? value.toLowerCase() : null;
 }
 
-export async function getStories(restaurantId: string, limit = 12): Promise<Story[]> {
+async function loadStories(restaurantId: string, limit: number): Promise<Story[]> {
   const supabase = getSupabase();
   if (!supabase) return [];
   const { data, error } = await supabase
@@ -431,4 +431,71 @@ export async function getStories(restaurantId: string, limit = 12): Promise<Stor
     created_at: s.created_at,
     author: authorFromProfile(profiles.get(s.user_id ?? '')),
   }));
+}
+
+// ── Kort bewaren per serverfunctie ─────────────────────────────────────────
+// Als de database traag is, hoeft niet elke bezoeker daarop te wachten: wat
+// net is opgehaald, wordt 5 minuten bewaard (net zo lang als Vercel de pagina
+// zelf bewaart). Fouten worden niet bewaard, zodat het meteen opnieuw kan.
+const MEMO_TTL_MS = 5 * 60 * 1000;
+const memo = new Map<string, { at: number; value: unknown }>();
+
+async function remember<T>(
+  key: string,
+  load: () => Promise<T>,
+  keep: (value: T) => boolean,
+): Promise<T> {
+  const hit = memo.get(key);
+  if (hit && Date.now() - hit.at < MEMO_TTL_MS) return hit.value as T;
+  const value = await load();
+  if (keep(value)) {
+    memo.set(key, { at: Date.now(), value });
+    if (memo.size > 2000) memo.delete(memo.keys().next().value as string);
+  }
+  return value;
+}
+
+/** Zoekt op slug, of op id (oude deellinks uit de app gebruiken het id). */
+export function getRestaurant(param: string): Promise<LookupResult> {
+  return remember(
+    `restaurant:${param}`,
+    () => loadRestaurant(param),
+    (r) => r.status !== 'error',
+  );
+}
+
+export function getReviews(
+  restaurantId: string,
+  offset = 0,
+  limit = REVIEWS_PAGE_SIZE,
+): Promise<ReviewPage | null> {
+  return remember(
+    `reviews:${restaurantId}:${offset}:${limit}`,
+    () => loadReviews(restaurantId, offset, limit),
+    (page) => page !== null,
+  );
+}
+
+export function getReviewStats(restaurantId: string): Promise<ReviewStats | null> {
+  return remember(
+    `stats:${restaurantId}`,
+    () => loadReviewStats(restaurantId),
+    (v) => v !== null,
+  );
+}
+
+export function getBrandColor(restaurantId: string): Promise<string | null> {
+  return remember(
+    `brand:${restaurantId}`,
+    () => loadBrandColor(restaurantId),
+    () => true,
+  );
+}
+
+export function getStories(restaurantId: string, limit = 12): Promise<Story[]> {
+  return remember(
+    `stories:${restaurantId}:${limit}`,
+    () => loadStories(restaurantId, limit),
+    () => true,
+  );
 }

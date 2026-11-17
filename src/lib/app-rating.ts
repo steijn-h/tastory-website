@@ -15,7 +15,7 @@ export async function getAppRating(): Promise<AppRating | null> {
   if (cached && Date.now() - cached.at < MAX_AGE_MS) return cached.rating;
   let rating: AppRating | null = null;
   try {
-    const res = await fetch(LOOKUP_URL, { signal: AbortSignal.timeout(3000) });
+    const res = await fetch(LOOKUP_URL, { signal: AbortSignal.timeout(1500) });
     if (res.ok) {
       const app = (await res.json())?.results?.[0];
       const value = Number(app?.averageUserRating);
