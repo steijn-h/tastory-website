@@ -1019,6 +1019,13 @@ const breadcrumbLd = {
     background: var(--brown-dark);
     border-color: var(--brown-dark);
   }
+  /* Met huisstijl: labels in de kleur van het restaurant (vol, dus ze blijven
+     opvallen op de lichtere achtergrond in dezelfde kleur). */
+  [data-brand] .tag:not(.tag-partner) {
+    background: var(--brand);
+    border-color: var(--brand);
+    color: var(--brand-ink);
+  }
   .head-side {
     display: flex;
     flex-direction: column;
