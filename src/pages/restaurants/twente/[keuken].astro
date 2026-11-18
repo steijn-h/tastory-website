@@ -1,0 +1,372 @@
+---
+// Pagina per keuken voor heel Twente, bijv. /restaurants/twente/chinees, met
+// de restaurants per plaats. Voor zoekopdrachten als "chinees Wierden": in een
+// dorp zijn er vaak maar 1–2 (te weinig voor een eigen pagina), samen per
+// plaats wel een nuttig overzicht. Alles komt uit de eigen gegevens.
+export const prerender = false;
+
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import RestaurantCard from '../../../components/RestaurantCard.astro';
+import BackLink from '../../../components/BackLink.astro';
+import { getAllRestaurants, groupByCity, restaurantPath } from '../../../lib/restaurants';
+import {
+  cuisineAdjective,
+  cuisineRestaurantsLabel,
+  groupByCuisine,
+  MIN_RESTAURANTS_PER_CUISINE_PAGE,
+  MIN_RESTAURANTS_PER_REGION_CUISINE_PAGE,
+  REGION_NAME,
+  REGION_SLUG,
+} from '../../../lib/cuisine';
+import { priceLabel, priceRange } from '../../../lib/format';
+import { SITE_URL } from '../../../lib/links';
+
+const keuken = (Astro.params.keuken ?? '').toLowerCase();
+const all = await getAllRestaurants();
+const group = all ? (groupByCuisine(all).find((g) => g.slug === keuken) ?? null) : null;
+
+if (all === null) {
+  Astro.response.status = 503;
+  Astro.response.headers.set('Retry-After', '120');
+} else if (!group) {
+  Astro.response.status = 404;
+} else {
+  Astro.response.headers.set('Cache-Control', 'public, s-maxage=300, stale-while-revalidate=86400');
+}
+
+const restaurants = group?.restaurants ?? [];
+const thin = restaurants.length < MIN_RESTAURANTS_PER_REGION_CUISINE_PAGE;
+const label = group ? cuisineRestaurantsLabel(group.name) : 'Restaurants';
+// In een lopende zin: "17 Chinese restaurants", "5 restaurants met fusion keuken".
+const inSentence = group
+  ? cuisineAdjective(group.name, true)
+    ? `${cuisineAdjective(group.name, true)} restaurants`
+    : `restaurants met ${group.name.toLowerCase()} keuken`
+  : 'restaurants';
+
+// Per plaats, grootste eerst; per plaats een link naar de stadspagina en (als
+// die er is) de pagina voor deze keuken in die plaats.
+const cities = groupByCity(restaurants)
+  .map((c) => ({ ...c, hasCityHub: c.restaurants.length >= MIN_RESTAURANTS_PER_CUISINE_PAGE }))
+  .sort(
+    (a, b) => b.restaurants.length - a.restaurants.length || a.name.localeCompare(b.name, 'nl'),
+  );
+
+// Feiten voor de inleiding: aantallen, plaatsen, prijsklassen, sfeer.
+const prices = [1, 2, 3, 4]
+  .map((p) => ({ p, n: restaurants.filter((r) => r.price_level === p).length }))
+  .filter((x) => x.n > 0);
+const vibeCounts = new Map<string, number>();
+for (const r of restaurants) {
+  for (const v of (r.vibe ?? '')
+    .split(',')
+    .map((x) => x.trim().toLowerCase())
+    .filter(Boolean)) {
+    vibeCounts.set(v, (vibeCounts.get(v) ?? 0) + 1);
+  }
+}
+const topVibes = [...vibeCounts.entries()].sort((a, b) => b[1] - a[1]).slice(0, 3);
+const list = (items: string[]) =>
+  items.length > 1
+    ? `${items.slice(0, -1).join(', ')} en ${items[items.length - 1]}`
+    : (items[0] ?? '');
+const cityText = list(
+  cities.map((c) => (c.restaurants.length > 1 ? `${c.name} (${c.restaurants.length})` : c.name)),
+);
+const intro = group
+  ? `Op Tastory staan ${restaurants.length} ${inSentence} in ${cities.length} ${
+      cities.length === 1 ? 'plaats' : 'plaatsen'
+    } in ${REGION_NAME}: ${cityText}.`
+  : '';
+const priceText =
+  prices.length > 0
+    ? `Prijsklasse: ${prices.map((x) => `${x.n}× ${priceLabel(x.p)} (${priceRange(x.p)})`).join(', ')}.`
+    : '';
+const vibeText =
+  topVibes.length > 0
+    ? `Vaak genoemde sfeer: ${list(topVibes.map(([v, n]) => `${v} (${n})`))}.`
+    : '';
+
+const path = `/restaurants/${REGION_SLUG}/${keuken}`;
+const title = group
+  ? `${label} in ${REGION_NAME} (${restaurants.length}) — per plaats | Tastory`
+  : 'Niet gevonden | Tastory';
+const description = group
+  ? `${restaurants.length} ${inSentence} in ${REGION_NAME}, per plaats: ${
+      cities.length > 6
+        ? `${cities
+            .slice(0, 6)
+            .map((c) => c.name)
+            .join(', ')} en meer`
+        : list(cities.map((c) => c.name))
+    }. Met foto's, adres en openingstijden op Tastory.`
+  : 'Deze keuken staat (nog) niet op Tastory.';
+
+const itemList = group
+  ? {
+      '@context': 'https://schema.org',
+      '@type': 'ItemList',
+      name: `${label} in ${REGION_NAME}`,
+      numberOfItems: restaurants.length,
+      itemListElement: restaurants.slice(0, 50).map((r, i) => ({
+        '@type': 'ListItem',
+        position: i + 1,
+        url: `${SITE_URL}${restaurantPath(r)}`,
+        name: r.name ?? undefined,
+      })),
+    }
+  : null;
+const breadcrumbLd = group
+  ? {
+      '@context': 'https://schema.org',
+      '@type': 'BreadcrumbList',
+      itemListElement: [
+        { '@type': 'ListItem', position: 1, name: 'Home', item: `${SITE_URL}/` },
+        { '@type': 'ListItem', position: 2, name: 'Restaurants', item: `${SITE_URL}/restaurants` },
+        {
+          '@type': 'ListItem',
+          position: 3,
+          name: `${group.name} in ${REGION_NAME}`,
+          item: `${SITE_URL}${path}`,
+        },
+      ],
+    }
+  : null;
+
+// Andere keukens met een eigen Twente-pagina.
+const otherCuisines = all
+  ? groupByCuisine(all)
+      .filter(
+        (g) => g.slug !== keuken && g.restaurants.length >= MIN_RESTAURANTS_PER_REGION_CUISINE_PAGE,
+      )
+      .slice(0, 16)
+  : [];
+---
+
+<BaseLayout
+  title={title}
+  description={description}
+  keywords={group
+    ? [
+        `${group.name.toLowerCase()} restaurant twente`,
+        ...cities.slice(0, 8).map((c) => `${group.name.toLowerCase()} ${c.name.toLowerCase()}`),
+      ]
+    : []}
+  noindex={!group || thin}
+>
+  {itemList && <script type="application/ld+json" set:html={JSON.stringify(itemList)} />}
+  {breadcrumbLd && <script type="application/ld+json" set:html={JSON.stringify(breadcrumbLd)} />}
+
+  <div class="page">
+    <div class="container">
+      <BackLink href="/restaurants" label="Alle restaurants" />
+      <nav class="breadcrumbs" aria-label="Kruimelpad">
+        <a href="/">Home</a> › <a href="/restaurants">Restaurants</a>
+        {
+          group && (
+            <>
+              {' '}
+              ›{' '}
+              <span aria-current="page">
+                {group.name} in {REGION_NAME}
+              </span>
+            </>
+          )
+        }
+      </nav>
+
+      {
+        all === null ? (
+          <p class="state">
+            Restaurants kunnen op dit moment niet geladen worden. Probeer het over een paar minuten
+            opnieuw.
+          </p>
+        ) : !group ? (
+          <div class="state">
+            <h1>Niet gevonden</h1>
+            <p>
+              <a href="/restaurants">Bekijk alle restaurants →</a>
+            </p>
+          </div>
+        ) : (
+          <>
+            <header class="head">
+              <h1>
+                {label} in {REGION_NAME}
+              </h1>
+              <p>{intro}</p>
+              {(priceText || vibeText) && (
+                <p class="facts">
+                  {priceText} {vibeText}
+                </p>
+              )}
+            </header>
+
+            {cities.map((c) => (
+              <section class="city" aria-labelledby={`stad-${c.slug}`}>
+                <div class="city-head">
+                  <h2 id={`stad-${c.slug}`}>
+                    {group.name} in {c.name}
+                  </h2>
+                  <p>
+                    {c.hasCityHub ? (
+                      <a href={`/restaurants/${c.slug}/${keuken}`}>
+                        Alle {c.restaurants.length} {inSentence} in {c.name} →
+                      </a>
+                    ) : (
+                      <a href={`/restaurants/${c.slug}`}>Alle restaurants in {c.name} →</a>
+                    )}
+                  </p>
+                </div>
+                <ul class="grid">
+                  {c.restaurants.map((r) => (
+                    <li>
+                      <RestaurantCard restaurant={r} />
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            ))}
+          </>
+        )
+      }
+
+      {
+        otherCuisines.length > 0 && (
+          <nav class="others" aria-label={`Andere keukens in ${REGION_NAME}`}>
+            <h2>Andere keukens in {REGION_NAME}</h2>
+            <ul>
+              {otherCuisines.map((c) => (
+                <li>
+                  <a href={`/restaurants/${REGION_SLUG}/${c.slug}`}>
+                    {c.name} <span>{c.restaurants.length}</span>
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </nav>
+        )
+      }
+    </div>
+  </div>
+</BaseLayout>
+
+<style>
+  .page {
+    padding: 110px 0 var(--space-3xl);
+    min-height: 80vh;
+  }
+  .container {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 0 var(--space-lg);
+  }
+  .breadcrumbs {
+    font-size: var(--text-sm);
+    color: var(--text-muted);
+    margin-bottom: var(--space-md);
+  }
+  .breadcrumbs a {
+    color: inherit;
+    text-decoration: none;
+  }
+  .breadcrumbs a:hover {
+    color: var(--brown);
+    text-decoration: underline;
+  }
+  .head {
+    margin-bottom: var(--space-xl);
+  }
+  .head h1 {
+    font-family: var(--serif);
+    font-size: clamp(2rem, 4.5vw, 3rem);
+    line-height: 1.1;
+  }
+  .head p {
+    color: var(--text-muted);
+    margin-top: 0.5rem;
+    max-width: 75ch;
+    line-height: 1.6;
+  }
+  .head .facts {
+    font-size: var(--text-sm);
+  }
+  /* global.css geeft elke <section> veel padding (voor de marketingpagina's). */
+  .city {
+    padding: 0;
+    max-width: none;
+    margin-bottom: var(--space-2xl);
+  }
+  .city-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0.25rem var(--space-md);
+    margin-bottom: var(--space-md);
+  }
+  .city-head h2 {
+    font-family: var(--serif);
+    font-size: var(--text-2xl);
+  }
+  .city-head a {
+    color: var(--brown);
+    font-size: var(--text-sm);
+    font-weight: 500;
+  }
+  .grid {
+    list-style: none;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: var(--space-xl);
+  }
+  .state {
+    padding: var(--space-2xl) 0;
+  }
+  .others {
+    margin-top: var(--space-2xl);
+    padding-top: var(--space-xl);
+    border-top: 1px solid var(--beige-deeper);
+  }
+  .others h2 {
+    font-size: var(--text-base);
+    font-weight: 500;
+    margin-bottom: var(--space-sm);
+  }
+  .others ul {
+    list-style: none;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+  .others a {
+    display: inline-flex;
+    gap: 0.4rem;
+    align-items: center;
+    padding: 0.45rem 0.9rem;
+    background: var(--white);
+    border: 1px solid var(--beige-deeper);
+    border-radius: 100px;
+    text-decoration: none;
+    color: var(--text);
+    font-size: var(--text-sm);
+  }
+  .others a:hover {
+    border-color: var(--brown);
+  }
+  .others a span {
+    color: var(--text-muted);
+  }
+  @media (max-width: 640px) {
+    .page {
+      padding-top: 90px;
+    }
+    .container {
+      padding: 0 var(--space-md);
+    }
+    .grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+  }
+</style>

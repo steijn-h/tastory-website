@@ -39,6 +39,16 @@ import {
 import { APP_STORE_URL, SITE_URL } from '../../lib/links';
 import { describeRestaurant, describeRestaurantShort } from '../../lib/restaurant-text';
 import { imageSrcset, imageUrl } from '../../lib/image';
+import {
+  cuisineAdjective,
+  cuisineRestaurantsLabel,
+  cuisineSlug,
+  MIN_RESTAURANTS_PER_CUISINE_PAGE,
+  MIN_RESTAURANTS_PER_REGION_CUISINE_PAGE,
+  REGION_NAME,
+  REGION_SLUG,
+  splitCuisines,
+} from '../../lib/cuisine';
 
 const param = Astro.params.slug ?? '';
 const lookup = await getRestaurant(param);
@@ -143,10 +153,42 @@ const maxDistribution = stats ? Math.max(1, ...stats.distribution) : 1;
 const formatScore = (value: number) =>
   value.toLocaleString('nl-NL', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
 
+// Links naar keukenpagina’s: deze keuken in deze plaats (als die
+// pagina bestaat, dus ≥3 restaurants) en deze keuken in heel Twente.
+const primaryCuisine = splitCuisines(restaurant?.cuisine)[0] ?? null;
+const primaryCuisineSlug = primaryCuisine ? cuisineSlug(primaryCuisine) : null;
+const sameCuisine = (allRestaurants ?? []).filter(
+  (r) => primaryCuisineSlug && splitCuisines(r.cuisine).some((c) => cuisineSlug(c) === primaryCuisineSlug),
+);
+const cityCuisineCount = sameCuisine.filter((r) => city && normalizeCity(r.city) === city).length;
+const cityCuisineHub =
+  primaryCuisine && city && cityCuisineCount >= MIN_RESTAURANTS_PER_CUISINE_PAGE
+    ? { path: `${cityPath(city)}/${primaryCuisineSlug}`, label: `${cuisineRestaurantsLabel(primaryCuisine)} in ${city}` }
+    : null;
+const regionCuisineHub =
+  primaryCuisine && sameCuisine.length >= MIN_RESTAURANTS_PER_REGION_CUISINE_PAGE
+    ? { path: `/restaurants/${REGION_SLUG}/${primaryCuisineSlug}`, label: `${cuisineRestaurantsLabel(primaryCuisine)} in ${REGION_NAME}` }
+    : null;
+
 // ── SEO ────────────────────────────────────────────────────────────────────
 const canonicalPath = restaurant ? restaurantPath(restaurant) : `/restaurant/${param}`;
+// Titel belooft alleen wat er op de pagina staat (foto’s, menukaart, reviews).
+const titleKind = primaryCuisine
+  ? `${cuisineAdjective(primaryCuisine, false) ?? primaryCuisine} restaurant`
+  : 'restaurant';
+const titleExtras = [
+  photos.length > 0 ? `foto's` : null,
+  menuImages.length > 0 || menuLink ? 'menukaart' : null,
+  (restaurant?.published_review_count ?? 0) + (restaurant?.pending_review_count ?? 0) > 0 ? 'reviews' : null,
+].filter((x) => x !== null) as string[];
+const titleExtrasText =
+  titleExtras.length > 1
+    ? `${titleExtras.slice(0, -1).join(', ')} & ${titleExtras[titleExtras.length - 1]}`
+    : (titleExtras[0] ?? '');
 const title = restaurant
-  ? `${name}${city ? `, ${city}` : ''} — reviews, foto's & menu | Tastory`
+  ? `${name}${city ? `, ${city}` : ''} — ${titleKind}${
+      titleExtras.length ? `: ${titleExtrasText}` : ''
+    } | Tastory`
   : 'Restaurant niet gevonden | Tastory';
 // Eigen, feitelijke samenvatting: de beschrijving komt vaak letterlijk van de
 // site van het restaurant (dubbele content voor Google). Deze zin is per
@@ -164,12 +206,26 @@ const textInput = restaurant
     }
   : null;
 const summary = textInput ? describeRestaurant(textInput) : '';
+// Alleen noemen wat er echt op de pagina staat.
+const metaShowsList = [
+  photos.length > 0 ? `foto's` : null,
+  menuImages.length > 0 || menuLink ? 'de menukaart' : null,
+  hours.length > 0 ? 'openingstijden' : null,
+].filter((x) => x !== null) as string[];
+const metaShows =
+  metaShowsList.length === 0
+    ? 'adres en contactgegevens'
+    : metaShowsList.length === 1
+      ? metaShowsList[0]
+      : `${metaShowsList.slice(0, -1).join(', ')} en ${metaShowsList[metaShowsList.length - 1]}`;
+// Zonder geneste template-strings: daar raakt de Astro-compiler hier van in
+// de war (dan vindt hij het einde van dit blok niet meer).
+const metaScore =
+  score !== null && reviewCount > 0
+    ? ' ' + formatScore(score) + '/5 uit ' + (reviewCount === 1 ? '1 review' : reviewCount + ' reviews') + '.'
+    : '';
 const metaLead = textInput
-  ? `${describeRestaurantShort(textInput)}${
-      score !== null && reviewCount > 0
-        ? ` ${formatScore(score)}/5 uit ${reviewCount === 1 ? '1 review' : `${reviewCount} reviews`}.`
-        : ''
-    } Bekijk foto's, menu en openingstijden op Tastory.`
+  ? describeRestaurantShort(textInput) + metaScore + ' Bekijk ' + metaShows + ' op Tastory.'
   : '';
 const description = restaurant ? metaLead : 'Dit restaurant staat niet (meer) op Tastory.';
 const keywords = restaurant
@@ -247,6 +303,7 @@ const breadcrumbs = [
   { name: 'Home', path: '/' },
   { name: 'Restaurants', path: '/restaurants' },
   ...(city ? [{ name: city, path: cityPath(city) }] : []),
+  ...(cityCuisineHub && primaryCuisine ? [{ name: primaryCuisine, path: cityCuisineHub.path }] : []),
   ...(restaurant ? [{ name, path: canonicalPath }] : []),
 ];
 const breadcrumbLd = {
@@ -596,6 +653,7 @@ const breadcrumbLd = {
             </div>
           </section>
         )}
+
       </div>
 
       <!-- Mobiel: vaste actiebalk onderin -->
@@ -1475,6 +1533,12 @@ const breadcrumbLd = {
     border-radius: 0 6px 6px 0;
   }
   /* In de buurt */
+  .hub-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 1.5rem;
+    margin-top: var(--space-lg);
+  }
   .nearby {
     margin-top: var(--space-2xl);
     padding-top: var(--space-2xl);
