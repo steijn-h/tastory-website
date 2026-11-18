@@ -1,6 +1,7 @@
 # 00 — Oriëntatie (18-11-2026)
 
 ## Waar staat wat
+
 - **Websitecode:** repo `steijn-h/tastory-website` (niet de app-repo). Astro 5, TypeScript, gehost op Vercel (`@astrojs/vercel`, regio Dublin).
 - **Rendering:** server-side (SSR, `output: 'server'`) met CDN-cache (`s-maxage=300`, stale-while-revalidate). **Geen** client-side rendering: alle inhoud staat in de ruwe HTML (gecontroleerd met `curl` zonder JavaScript: H1, beschrijving, reviews, JSON-LD staan erin).
 - **Data:** Supabase, gelezen met de publieke anon key (zelfde rechten als een gast in de app). Code in `src/lib/restaurants.ts`.
@@ -13,5 +14,6 @@
 - **Structured data:** homepage Organization + WebSite (met SearchAction) + SoftwareApplication; restaurantpagina Restaurant + BreadcrumbList (+ VideoObject); hubs ItemList + BreadcrumbList.
 
 ## Belangrijk verschil met de opdracht
+
 - **De site toont 274 restaurants, niet 424.** De anon key krijgt er 274 terug (een gast in de app ziet dus waarschijnlijk ook 274). De overige ±150 zijn waarschijnlijk afgeschermd met Row-Level Security of een status. Die kunnen dus ook niet in Google komen. Zie de audit.
 - Veel uit de opdracht was al gebouwd in eerdere rondes (zie `01-audit.md`, kolom "al gedaan").

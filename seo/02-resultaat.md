@@ -1,6 +1,7 @@
 # 02 — Resultaat (18-11-2026)
 
 ## Wat is er veranderd
+
 1. **Nieuw: keuken-pagina's voor heel Twente** — `/restaurants/twente/<keuken>`, per plaats gegroepeerd, met links naar de plaats(×keuken)pagina's. Alleen keukens met ≥5 restaurants staan in de sitemap en mogen in Google; kleinere bestaan wel maar met `noindex`. **14 nieuwe indexeerbare pagina's:** nederlands, internationaal, italiaans, amerikaans, chinees, japans, grieks, libanees, argentijns, indiaas, mexicaans, spaans, frans, indonesisch.
 2. **Stadspagina's** (`/restaurants/<plaats>`): blok "Uit eten in <plaats>: het aanbod" met keukens (gelinkt naar plaats×keuken of Twente-keuken), sfeer, prijsklassen en voorzieningen, en "Restaurants in de buurt van <plaats>" (dichtstbijzijnde plaatsen met afstand, berekend uit de coördinaten van de restaurants). Titel/meta beloven niet meer "beste" en "reviews" als die er niet zijn.
 3. **Restaurantpagina's:** titel noemt keuken en alleen wat er echt staat (foto's / menukaart / reviews); meta description idem. Breadcrumb krijgt de plaats×keukenpagina erbij (als die bestaat), en onderaan links naar de keuken in de plaats en in Twente.
@@ -8,6 +9,7 @@
 5. **Sitemap:** Twente-keukenpagina's toegevoegd (366 URL's in `sitemap-restaurants.xml`).
 
 ## Controles (lokaal, met een kopie van de echte restaurantgegevens)
+
 - `astro check` 0 fouten, Prettier ok, productie-build ok.
 - Inhoud staat in de ruwe HTML (curl): titel, meta, H1, canonical, JSON-LD.
 - JSON-LD op restaurant-, stads- en hubpagina's parseert (Restaurant/ItemList/BreadcrumbList).
@@ -15,6 +17,7 @@
 - Restaurantpagina's: minimaal 2, mediaan 4 inkomende interne links.
 
 ## Waar ik afweek van de opdracht, en waarom
+
 - **Geen pagina's per keuken × dorp** (chinees Wierden, sushi Tubbergen, steakhouse Haaksbergen enz.): er zijn er 1–2 per dorp, dus dunne pagina's (regel 2). In plaats daarvan één pagina per keuken voor Twente, per plaats ingedeeld. Plaats×keuken met ≥3 bestond al (35 stuks).
 - **"Beste restaurants in <plaats>" als ranglijst niet gebouwd:** geen enkel restaurant heeft nog een Tastory-score (0 van 274); 6 hebben reviews. Een ranglijst zou verzonnen zijn. Komt vanzelf zodra er reviews zijn (de lijsten sorteren al op score).
 - **Geen `lastmod` in de sitemap:** er is geen betrouwbare wijzigingsdatum; migratievoorstel staat in `01-audit.md`.
@@ -23,12 +26,15 @@
 - **Performance:** de top-3 uit eerdere metingen (fonts zelf serveren, eerste foto's eager, databasecache + time-out) is al eerder gedaan; geen nieuwe UI-wijzigingen.
 
 ## Open risico's
+
 - **Google Places-voorwaarden** voor opgeslagen adres/telefoon/openingstijden: zie `01-audit.md`. Niet aangepast; jij moet nagaan hoe de import liep.
 - **±150 restaurants niet zichtbaar** voor bezoekers en Google (424 vs 274).
 - Nieuwe pagina's hebben weken nodig voordat Google ze waardeert; geen garantie op betere posities.
 
 ## Drie voorbeeldpagina's (zoals ze nu gegenereerd worden)
+
 ### `/restaurants/twente/chinees`
+
 - **Title:** Chinese restaurants in Twente (17) — per plaats | Tastory
 - **Meta description:** 17 Chinese restaurants in Twente, per plaats: Enschede, Almelo, Goor, Denekamp, Hengelo, Hoge Hexel en meer. Met foto's, adres en openingstijden op Tastory.
 - **H1:** Chinese restaurants in Twente
@@ -49,6 +55,7 @@
 - **Schema:** ItemList (restaurants met URL) + BreadcrumbList
 
 ### `/restaurants/twente/japans`
+
 - **Title:** Japanse restaurants in Twente (11) — per plaats | Tastory
 - **Meta description:** 11 Japanse restaurants in Twente, per plaats: Enschede, Almelo, Hengelo, Hoge Hexel en Tubbergen. Met foto's, adres en openingstijden op Tastory.
 - **H1:** Japanse restaurants in Twente
@@ -63,6 +70,7 @@
 - **Schema:** ItemList (restaurants met URL) + BreadcrumbList
 
 ### `/restaurants/twente/italiaans`
+
 - **Title:** Italiaanse restaurants in Twente (28) — per plaats | Tastory
 - **Meta description:** 28 Italiaanse restaurants in Twente, per plaats: Enschede, Hengelo, Holten, Nijverdal, Wierden, Almelo en meer. Met foto's, adres en openingstijden op Tastory.
 - **H1:** Italiaanse restaurants in Twente
@@ -87,4 +95,3 @@
   - Italiaans in Tubbergen: Shalom
   - Italiaans in Zenderen: Al Capone
 - **Schema:** ItemList (restaurants met URL) + BreadcrumbList
-
