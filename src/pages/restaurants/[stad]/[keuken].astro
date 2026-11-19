@@ -13,6 +13,9 @@ import {
   cuisineRestaurantsLabel,
   groupByCuisine,
   MIN_RESTAURANTS_PER_CUISINE_PAGE,
+  MIN_RESTAURANTS_PER_REGION_CUISINE_PAGE,
+  REGION_NAME,
+  REGION_SLUG,
 } from '../../../lib/cuisine';
 import { priceLabel } from '../../../lib/format';
 import { SITE_URL } from '../../../lib/links';
@@ -88,14 +91,22 @@ const sameCuisineElsewhere = group
       .slice(0, 12)
   : [];
 
+const regionCount = all
+  ? (groupByCuisine(all).find((g) => g.slug === keuken)?.restaurants.length ?? 0)
+  : 0;
+const regionHub =
+  group && regionCount >= MIN_RESTAURANTS_PER_REGION_CUISINE_PAGE
+    ? `/restaurants/${REGION_SLUG}/${keuken}`
+    : null;
+
 const path = `/restaurants/${stad}/${keuken}`;
 const title = group
-  ? `${label} in ${cityName} (${restaurants.length}) — reviews & menu's | Tastory`
+  ? `${label} in ${cityName} (${restaurants.length}) — overzicht met prijs en sfeer | Tastory`
   : 'Niet gevonden | Tastory';
 const description = group
   ? `${label} in ${cityName}: ${countLabel(restaurants.length)} op Tastory${
       exampleText ? `, waaronder ${exampleText}` : ''
-    }. Bekijk foto's, menukaarten en reviews van gasten.`
+    }. Per restaurant foto's, adres, prijsklasse en openingstijden.`
   : 'Deze combinatie van stad en keuken staat (nog) niet op Tastory.';
 
 const itemList = group
@@ -205,6 +216,13 @@ const breadcrumbLd =
               <p>{intro}</p>
             </header>
             <RestaurantGrid restaurants={restaurants} searchPlaceholder={`Zoek in ${cityName}…`} />
+            {regionHub && (
+              <p class="region-link">
+                <a href={regionHub}>
+                  Alle {regionCount} {label.toLowerCase()} in {REGION_NAME}, per plaats →
+                </a>
+              </p>
+            )}
           </>
         )
       }
@@ -282,6 +300,13 @@ const breadcrumbLd =
     margin-top: 0.5rem;
     max-width: 70ch;
     line-height: 1.6;
+  }
+  .region-link {
+    margin-top: var(--space-xl);
+  }
+  .region-link a {
+    color: var(--brown);
+    font-weight: 500;
   }
   .state {
     padding: var(--space-2xl) 0;
