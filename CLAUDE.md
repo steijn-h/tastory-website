@@ -76,7 +76,7 @@ public/           # Static assets (images, favicon, robots.txt)
 
 - **Platform**: Vercel (`@astrojs/vercel`, `output: 'server'`), live op `https://www.tastory.nl`
 - **Env vars (Vercel)**: `SUPABASE_ANON_KEY` (verplicht voor alle restaurantdata), optioneel `SUPABASE_URL`
-- Server-gerenderde pagina's zetten zelf `Cache-Control: s-maxage=300` zodat Vercel ze 5 min cachet
+- Server-gerenderde pagina's zetten zelf `Cache-Control: s-maxage=1800` (30 min); de restaurantlijst komt via `/api/restaurants.json` (CDN, 10 min) om de database te sparen
 
 ## Restaurantpagina's (openbaar, TripAdvisor-stijl)
 

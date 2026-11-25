@@ -1,6 +1,7 @@
 // Data-toegang voor de restaurantpagina's. De filters zijn bewust gelijk aan
 // die van de app (rork-tastory-react), zodat gasten op de website precies zien
 // wat ze in de app als gast ook zien.
+import { SITE_URL } from './links';
 import { getSupabase } from './supabase';
 import { normalizeCity, safeHttpsUrl, slugify } from './format';
 
@@ -147,12 +148,15 @@ async function loadRestaurant(param: string): Promise<LookupResult> {
 }
 
 // Alle restaurants (licht) — gebruikt door overzicht, stadspagina's en
-// "meer in de buurt". Kort in het geheugen van de serverfunctie bewaard.
+// "meer in de buurt". Bijna elke pagina gebruikt deze lijst; om de database te
+// sparen komt hij op Vercel uit /api/restaurants.json, dat het CDN 10 minuten
+// bewaart (één databasevraag per 10 minuten, i.p.v. één per serverfunctie).
+// Daarnaast 10 minuten in het geheugen; is het ophalen mislukt, dan de oude.
 let listCache: { at: number; rows: RestaurantListItem[] } | null = null;
-const LIST_TTL_MS = 5 * 60 * 1000;
+const LIST_TTL_MS = 10 * 60 * 1000;
 
-export async function getAllRestaurants(): Promise<RestaurantListItem[] | null> {
-  if (listCache && Date.now() - listCache.at < LIST_TTL_MS) return listCache.rows;
+/** Rechtstreeks uit de database (alleen voor /api/restaurants.json en lokaal). */
+export async function loadAllRestaurantsFromDb(): Promise<RestaurantListItem[] | null> {
   const supabase = getSupabase();
   if (!supabase) return null;
   const { data, error } = await supabase
@@ -162,9 +166,30 @@ export async function getAllRestaurants(): Promise<RestaurantListItem[] | null> 
     .limit(1000);
   if (error) {
     console.error('[restaurants] getAllRestaurants', error.message);
-    return listCache?.rows ?? null;
+    return null;
   }
-  const rows = (data ?? []) as unknown as RestaurantListItem[];
+  return (data ?? []) as unknown as RestaurantListItem[];
+}
+
+async function loadAllRestaurantsViaCdn(): Promise<RestaurantListItem[] | null> {
+  try {
+    const res = await fetch(`${SITE_URL}/api/restaurants.json`, {
+      signal: AbortSignal.timeout(8000),
+    });
+    if (!res.ok) return null;
+    const rows = (await res.json()) as unknown;
+    return Array.isArray(rows) ? (rows as RestaurantListItem[]) : null;
+  } catch {
+    return null;
+  }
+}
+
+export async function getAllRestaurants(): Promise<RestaurantListItem[] | null> {
+  if (listCache && Date.now() - listCache.at < LIST_TTL_MS) return listCache.rows;
+  const onProduction = process.env.VERCEL_ENV === 'production';
+  const rows =
+    (onProduction ? await loadAllRestaurantsViaCdn() : null) ?? (await loadAllRestaurantsFromDb());
+  if (!rows) return listCache?.rows ?? null;
   listCache = { at: Date.now(), rows };
   return rows;
 }
@@ -435,9 +460,9 @@ async function loadStories(restaurantId: string, limit: number): Promise<Story[]
 
 // ── Kort bewaren per serverfunctie ─────────────────────────────────────────
 // Als de database traag is, hoeft niet elke bezoeker daarop te wachten: wat
-// net is opgehaald, wordt 5 minuten bewaard (net zo lang als Vercel de pagina
+// net is opgehaald, wordt 30 minuten bewaard (net zo lang als Vercel de pagina
 // zelf bewaart). Fouten worden niet bewaard, zodat het meteen opnieuw kan.
-const MEMO_TTL_MS = 5 * 60 * 1000;
+const MEMO_TTL_MS = 30 * 60 * 1000;
 const memo = new Map<string, { at: number; value: unknown }>();
 
 async function remember<T>(

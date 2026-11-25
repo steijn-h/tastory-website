@@ -8,6 +8,7 @@ Disallow: /account/
 Disallow: /inloggen
 Disallow: /auth/
 Disallow: /partials/
+Disallow: /api/
 Disallow: /restaurant/*/review
 
 Sitemap: https://www.tastory.nl/sitemap-index.xml
