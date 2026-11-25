@@ -9,7 +9,14 @@ import BackLink from '../../components/BackLink.astro';
 import { getAllRestaurants, groupByCity, restaurantPath } from '../../lib/restaurants';
 import { SITE_URL } from '../../lib/links';
 import { CITY_PHOTOS } from '../../data/city-photos';
-import { groupByCuisine, MIN_RESTAURANTS_PER_CUISINE_PAGE } from '../../lib/cuisine';
+import {
+  groupByCuisine,
+  MIN_RESTAURANTS_PER_CUISINE_PAGE,
+  MIN_RESTAURANTS_PER_REGION_CUISINE_PAGE,
+  REGION_SLUG,
+} from '../../lib/cuisine';
+import { nearestCities } from '../../lib/geo';
+import { priceLabel, priceRange } from '../../lib/format';
 
 const stad = (Astro.params.stad ?? '').toLowerCase();
 const all = await getAllRestaurants();
@@ -34,15 +41,64 @@ const intro = `${restaurants.length} ${restaurants.length === 1 ? 'restaurant' :
 const cuisineLinks = groupByCuisine(restaurants).filter(
   (c) => c.restaurants.length >= MIN_RESTAURANTS_PER_CUISINE_PAGE,
 );
+
+// Feitelijk overzicht van deze plaats (alleen eigen gegevens, per plaats
+// anders): keukens met links, sfeer, prijsklassen en voorzieningen.
+const regionCuisines = new Set(
+  (all ? groupByCuisine(all) : [])
+    .filter((c) => c.restaurants.length >= MIN_RESTAURANTS_PER_REGION_CUISINE_PAGE)
+    .map((c) => c.slug),
+);
+const cuisineFacts = groupByCuisine(restaurants).map((c) => ({
+  name: c.name,
+  count: c.restaurants.length,
+  href:
+    c.restaurants.length >= MIN_RESTAURANTS_PER_CUISINE_PAGE
+      ? `/restaurants/${stad}/${c.slug}`
+      : regionCuisines.has(c.slug)
+        ? `/restaurants/${REGION_SLUG}/${c.slug}`
+        : null,
+}));
+const vibeCounts = new Map<string, number>();
+for (const r of restaurants) {
+  for (const v of (r.vibe ?? '')
+    .split(',')
+    .map((x) => x.trim().toLowerCase())
+    .filter(Boolean)) {
+    vibeCounts.set(v, (vibeCounts.get(v) ?? 0) + 1);
+  }
+}
+const vibeFacts = [...vibeCounts.entries()].sort((a, b) => b[1] - a[1]).slice(0, 6);
+const priceFacts = [1, 2, 3, 4]
+  .map((p) => ({ p, n: restaurants.filter((r) => r.price_level === p).length }))
+  .filter((x) => x.n > 0);
+const countFacility = (word: string) =>
+  restaurants.filter((r) => (r.facilities ?? []).some((f) => f.toLowerCase().includes(word)))
+    .length;
+const facilityFacts = [
+  { label: 'met terras', n: countFacility('terras') },
+  { label: 'rolstoeltoegankelijk', n: countFacility('rolstoel') },
+  { label: 'met parkeren', n: countFacility('parkeer') },
+  { label: 'met vegetarische opties', n: countFacility('vegetar') },
+].filter((f) => f.n > 0);
+const nearby = group ? nearestCities(group, cities) : [];
 const otherCities = cities
   .filter((c) => c.slug !== stad)
   .sort((a, b) => b.restaurants.length - a.restaurants.length)
   .slice(0, 12);
+// Alleen beloven wat er staat: nog geen 'beste' (er zijn nauwelijks scores)
+// en 'reviews' pas als er reviews zijn.
+const hasReviews = restaurants.some(
+  (r) => (r.published_review_count ?? 0) + (r.pending_review_count ?? 0) > 0,
+);
+const topCuisineNames = cuisineFacts.slice(0, 3).map((c) => c.name);
 const title = group
-  ? `De beste restaurants in ${name} (${restaurants.length}) — reviews & foto's | Tastory`
+  ? `Restaurants in ${name} (${restaurants.length}) — uit eten in ${name}${hasReviews ? ', met reviews' : ''} | Tastory`
   : 'Stad niet gevonden | Tastory';
 const description = group
-  ? `Ontdek ${restaurants.length} restaurants in ${name} op Tastory. Lees eerlijke reviews van gasten, bekijk foto's en menukaarten en reserveer direct.`
+  ? `${restaurants.length} restaurants in ${name} op Tastory${
+      topCuisineNames.length ? `, o.a. ${topCuisineNames.join(', ')}` : ''
+    }. Met foto's, adres, openingstijden en prijsklasse per restaurant.`
   : 'Deze stad staat (nog) niet op Tastory.';
 
 const itemList = group
@@ -142,6 +198,68 @@ const breadcrumbLd = group
             </header>
             <RestaurantGrid restaurants={restaurants} searchPlaceholder={`Zoek in ${name}…`} />
           </>
+        )
+      }
+
+      {
+        group && (
+          <section class="facts" aria-labelledby="facts-title">
+            <h2 id="facts-title">Uit eten in {name}: het aanbod</h2>
+            <dl>
+              {cuisineFacts.length > 0 && (
+                <div>
+                  <dt>Keukens</dt>
+                  <dd>
+                    {cuisineFacts.map((c, i) => (
+                      <span class="fact">
+                        {c.href ? <a href={c.href}>{c.name}</a> : c.name}
+                        {` (${c.count})${i < cuisineFacts.length - 1 ? ', ' : ''}`}
+                      </span>
+                    ))}
+                  </dd>
+                </div>
+              )}
+              {vibeFacts.length > 0 && (
+                <div>
+                  <dt>Sfeer</dt>
+                  <dd>{vibeFacts.map(([v, n]) => `${v} (${n})`).join(', ')}</dd>
+                </div>
+              )}
+              {priceFacts.length > 0 && (
+                <div>
+                  <dt>Prijs</dt>
+                  <dd>
+                    {priceFacts
+                      .map((x) => `${x.n}× ${priceLabel(x.p)} (${priceRange(x.p)})`)
+                      .join(', ')}
+                  </dd>
+                </div>
+              )}
+              {facilityFacts.length > 0 && (
+                <div>
+                  <dt>Voorzieningen</dt>
+                  <dd>{facilityFacts.map((f) => `${f.n} ${f.label}`).join(', ')}</dd>
+                </div>
+              )}
+            </dl>
+          </section>
+        )
+      }
+
+      {
+        nearby.length > 0 && (
+          <nav class="others" aria-label={`Plaatsen in de buurt van ${name}`}>
+            <h2>Restaurants in de buurt van {name}</h2>
+            <ul>
+              {nearby.map(({ city: c, km }) => (
+                <li>
+                  <a href={`/restaurants/${c.slug}`}>
+                    {c.name} <span>{km} km</span>
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </nav>
         )
       }
 
@@ -284,6 +402,49 @@ const breadcrumbLd = group
   }
   .others a span {
     color: var(--text-muted);
+  }
+  /* global.css geeft elke <section> veel padding (voor de marketingpagina's). */
+  .facts {
+    padding: 0;
+    max-width: none;
+    margin-top: var(--space-3xl);
+    padding-top: var(--space-xl);
+    border-top: 1px solid var(--beige-deeper);
+  }
+  .facts h2 {
+    font-family: var(--serif);
+    font-size: var(--text-xl);
+    margin-bottom: var(--space-md);
+  }
+  .facts dl {
+    display: grid;
+    gap: 0.6rem;
+    font-size: var(--text-sm);
+    line-height: 1.6;
+  }
+  .facts dl > div {
+    display: grid;
+    grid-template-columns: 9rem 1fr;
+    gap: var(--space-md);
+  }
+  .facts dt {
+    font-weight: 500;
+    color: var(--text);
+  }
+  .facts dd {
+    color: var(--text-muted);
+  }
+  .facts a {
+    color: var(--brown-dark);
+  }
+  .facts .fact {
+    white-space: nowrap;
+  }
+  @media (max-width: 640px) {
+    .facts dl > div {
+      grid-template-columns: 1fr;
+      gap: 0;
+    }
   }
   @media (max-width: 700px) {
     .page {

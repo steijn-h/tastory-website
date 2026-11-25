@@ -6,6 +6,15 @@ import { slugify } from './format';
 /** Minimum aantal restaurants voor een eigen pagina; minder is te mager voor Google. */
 export const MIN_RESTAURANTS_PER_CUISINE_PAGE = 3;
 
+/**
+ * Pagina per keuken voor heel Twente (bijv. /restaurants/twente/chinees). Voor
+ * zoekopdrachten als "chinees Wierden": in zo'n dorp zijn er vaak maar 1–2,
+ * te weinig voor een eigen pagina, maar samen per plaats wel waardevol.
+ */
+export const REGION_SLUG = 'twente';
+export const REGION_NAME = 'Twente';
+export const MIN_RESTAURANTS_PER_REGION_CUISINE_PAGE = 5;
+
 export function splitCuisines(value: string | null | undefined): string[] {
   if (!value) return [];
   return [

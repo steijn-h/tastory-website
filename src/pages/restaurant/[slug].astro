@@ -39,6 +39,16 @@ import {
 import { APP_STORE_URL, SITE_URL } from '../../lib/links';
 import { describeRestaurant, describeRestaurantShort } from '../../lib/restaurant-text';
 import { imageSrcset, imageUrl } from '../../lib/image';
+import {
+  cuisineAdjective,
+  cuisineRestaurantsLabel,
+  cuisineSlug,
+  MIN_RESTAURANTS_PER_CUISINE_PAGE,
+  MIN_RESTAURANTS_PER_REGION_CUISINE_PAGE,
+  REGION_NAME,
+  REGION_SLUG,
+  splitCuisines,
+} from '../../lib/cuisine';
 
 const param = Astro.params.slug ?? '';
 const lookup = await getRestaurant(param);
@@ -83,7 +93,8 @@ if (lookup.status === 'not-found') {
 // ── Afgeleide gegevens ─────────────────────────────────────────────────────
 const name = restaurant?.name ?? 'Restaurant';
 const city = normalizeCity(restaurant?.city);
-const photos = splitUrls(restaurant?.photo_url);
+// Zonder dubbele links (komt soms voor in photo_url).
+const photos = [...new Set(splitUrls(restaurant?.photo_url))];
 const isPartner = restaurant ? isPartnerRestaurant(restaurant) : false;
 const videoUrl = safeHttpsUrl(restaurant?.video_url);
 const backgroundUrl = safeHttpsUrl(restaurant?.background_url);
@@ -135,18 +146,53 @@ const deepLinkUrl = restaurant ? `tastory://restaurant/${restaurant.id}` : 'tast
 const nearby = (allRestaurants ?? [])
   .filter((r) => restaurant && r.id !== restaurant.id && city && normalizeCity(r.city) === city)
   .slice(0, 4);
-// Mozaïek: hoofdbeeld + 0, 2 of 4 kleine foto's (nooit een leeg vak).
+// Mozaïek: hoofdbeeld + tot 4 kleine foto's (op de computer). De rest staat
+// verborgen klaar voor de telefoon, waar je door alle foto's veegt.
 const thumbPool = videoUrl ? photos : photos.slice(1);
-const thumbs = thumbPool.slice(0, thumbPool.length >= 4 ? 4 : thumbPool.length >= 2 ? 2 : 0);
+const thumbs = thumbPool.slice(0, 4);
+const extraPhotos = thumbPool.slice(4);
 const thumbOffset = videoUrl ? 0 : 1;
+const slideCount = 1 + thumbPool.length;
 const maxDistribution = stats ? Math.max(1, ...stats.distribution) : 1;
 const formatScore = (value: number) =>
   value.toLocaleString('nl-NL', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
 
+// Links naar keukenpagina’s: deze keuken in deze plaats (als die
+// pagina bestaat, dus ≥3 restaurants) en deze keuken in heel Twente.
+const primaryCuisine = splitCuisines(restaurant?.cuisine)[0] ?? null;
+const primaryCuisineSlug = primaryCuisine ? cuisineSlug(primaryCuisine) : null;
+const sameCuisine = (allRestaurants ?? []).filter(
+  (r) => primaryCuisineSlug && splitCuisines(r.cuisine).some((c) => cuisineSlug(c) === primaryCuisineSlug),
+);
+const cityCuisineCount = sameCuisine.filter((r) => city && normalizeCity(r.city) === city).length;
+const cityCuisineHub =
+  primaryCuisine && city && cityCuisineCount >= MIN_RESTAURANTS_PER_CUISINE_PAGE
+    ? { path: `${cityPath(city)}/${primaryCuisineSlug}`, label: `${cuisineRestaurantsLabel(primaryCuisine)} in ${city}` }
+    : null;
+const regionCuisineHub =
+  primaryCuisine && sameCuisine.length >= MIN_RESTAURANTS_PER_REGION_CUISINE_PAGE
+    ? { path: `/restaurants/${REGION_SLUG}/${primaryCuisineSlug}`, label: `${cuisineRestaurantsLabel(primaryCuisine)} in ${REGION_NAME}` }
+    : null;
+
 // ── SEO ────────────────────────────────────────────────────────────────────
 const canonicalPath = restaurant ? restaurantPath(restaurant) : `/restaurant/${param}`;
+// Titel belooft alleen wat er op de pagina staat (foto’s, menukaart, reviews).
+const titleKind = primaryCuisine
+  ? `${cuisineAdjective(primaryCuisine, false) ?? primaryCuisine} restaurant`
+  : 'restaurant';
+const titleExtras = [
+  photos.length > 0 ? `foto's` : null,
+  menuImages.length > 0 || menuLink ? 'menukaart' : null,
+  (restaurant?.published_review_count ?? 0) + (restaurant?.pending_review_count ?? 0) > 0 ? 'reviews' : null,
+].filter((x) => x !== null) as string[];
+const titleExtrasText =
+  titleExtras.length > 1
+    ? `${titleExtras.slice(0, -1).join(', ')} & ${titleExtras[titleExtras.length - 1]}`
+    : (titleExtras[0] ?? '');
 const title = restaurant
-  ? `${name}${city ? `, ${city}` : ''} — reviews, foto's & menu | Tastory`
+  ? `${name}${city ? `, ${city}` : ''} — ${titleKind}${
+      titleExtras.length ? `: ${titleExtrasText}` : ''
+    } | Tastory`
   : 'Restaurant niet gevonden | Tastory';
 // Eigen, feitelijke samenvatting: de beschrijving komt vaak letterlijk van de
 // site van het restaurant (dubbele content voor Google). Deze zin is per
@@ -164,12 +210,26 @@ const textInput = restaurant
     }
   : null;
 const summary = textInput ? describeRestaurant(textInput) : '';
+// Alleen noemen wat er echt op de pagina staat.
+const metaShowsList = [
+  photos.length > 0 ? `foto's` : null,
+  menuImages.length > 0 || menuLink ? 'de menukaart' : null,
+  hours.length > 0 ? 'openingstijden' : null,
+].filter((x) => x !== null) as string[];
+const metaShows =
+  metaShowsList.length === 0
+    ? 'adres en contactgegevens'
+    : metaShowsList.length === 1
+      ? metaShowsList[0]
+      : `${metaShowsList.slice(0, -1).join(', ')} en ${metaShowsList[metaShowsList.length - 1]}`;
+// Zonder geneste template-strings: daar raakt de Astro-compiler hier van in
+// de war (dan vindt hij het einde van dit blok niet meer).
+const metaScore =
+  score !== null && reviewCount > 0
+    ? ' ' + formatScore(score) + '/5 uit ' + (reviewCount === 1 ? '1 review' : reviewCount + ' reviews') + '.'
+    : '';
 const metaLead = textInput
-  ? `${describeRestaurantShort(textInput)}${
-      score !== null && reviewCount > 0
-        ? ` ${formatScore(score)}/5 uit ${reviewCount === 1 ? '1 review' : `${reviewCount} reviews`}.`
-        : ''
-    } Bekijk foto's, menu en openingstijden op Tastory.`
+  ? describeRestaurantShort(textInput) + metaScore + ' Bekijk ' + metaShows + ' op Tastory.'
   : '';
 const description = restaurant ? metaLead : 'Dit restaurant staat niet (meer) op Tastory.';
 const keywords = restaurant
@@ -247,6 +307,7 @@ const breadcrumbs = [
   { name: 'Home', path: '/' },
   { name: 'Restaurants', path: '/restaurants' },
   ...(city ? [{ name: city, path: cityPath(city) }] : []),
+  ...(cityCuisineHub && primaryCuisine ? [{ name: primaryCuisine, path: cityCuisineHub.path }] : []),
   ...(restaurant ? [{ name, path: canonicalPath }] : []),
 ];
 const breadcrumbLd = {
@@ -354,9 +415,9 @@ const breadcrumbLd = {
 
         <!-- Foto's / video -->
         {(videoUrl || photos.length > 0) && (
-          <section class:list={['media', `thumbs-${thumbs.length}`]} aria-label="Foto's">
+          <section class:list={['media', `thumbs-${thumbs.length}`, { 'has-video': videoUrl }]} aria-label="Foto's" data-media>
             {videoUrl ? (
-              <div class="media-main video-wrap" data-video-wrap>
+              <div class="media-main video-wrap" data-video-wrap style={photos[0] ? `--video-backdrop: url('${imageUrl(photos[0], 480)}')` : undefined}>
                 <video src={videoUrl} poster={photos[0] ? imageUrl(photos[0], 1280) : undefined} autoplay muted loop playsinline preload="metadata" class="media-img video" aria-label={`Video van ${name}, klik voor volledig scherm`} />
                 <div class="video-controls">
                   <button type="button" class="video-btn" data-video-sound aria-label="Geluid aan" aria-pressed="false">
@@ -377,13 +438,24 @@ const breadcrumbLd = {
               const index = i + thumbOffset;
               const isLast = i === thumbs.length - 1 && photos.length > thumbs.length + thumbOffset;
               return (
-                <button type="button" class="media-thumb photo-btn" data-index={index} aria-label={`Foto ${index + 1} vergroten`}>
-                  <img src={imageUrl(src, 480)} srcset={imageSrcset(src, [480])} sizes="(max-width: 900px) 50vw, 22vw" alt={`${name} — foto ${index + 1}`} loading="lazy" decoding="async" class="media-img" />
+                <button type="button" class:list={['media-thumb', 'photo-btn', { 'first-thumb': i === 0 }]} data-index={index} aria-label={`Foto ${index + 1} vergroten`}>
+                  <img src={imageUrl(src, 480)} srcset={imageSrcset(src, [480, 640])} sizes="(max-width: 700px) 100vw, (max-width: 900px) 50vw, 22vw" alt={`${name} — foto ${index + 1}`} loading="lazy" decoding="async" class="media-img" />
                   {isLast && <span class="media-more">Alle {photos.length} foto's</span>}
                 </button>
               );
             })}
+            {extraPhotos.map((src, i) => {
+              const index = i + 4 + thumbOffset;
+              return (
+                <button type="button" class="media-thumb media-extra photo-btn" data-index={index} aria-label={`Foto ${index + 1} vergroten`}>
+                  <img src={imageUrl(src, 640)} srcset={imageSrcset(src, [480, 640])} sizes="100vw" alt={`${name} — foto ${index + 1}`} loading="lazy" decoding="async" class="media-img" />
+                </button>
+              );
+            })}
           </section>
+        )}
+        {slideCount > 1 && (
+          <span class="media-count" data-media-count aria-hidden="true">1 / {slideCount}</span>
         )}
 
         <div class="layout">
@@ -596,6 +668,7 @@ const breadcrumbLd = {
             </div>
           </section>
         )}
+
       </div>
 
       <!-- Mobiel: vaste actiebalk onderin -->
@@ -727,6 +800,15 @@ const breadcrumbLd = {
   const video = videoWrap?.querySelector('video') as
     | (HTMLVideoElement & { webkitEnterFullscreen?: () => void })
     | null;
+  // Verhouding van de video doorgeven (telefoon: hoogte van het fotoblok).
+  const setVideoRatio = () => {
+    if (!video?.videoWidth || !video.videoHeight) return;
+    video
+      .closest<HTMLElement>('[data-media]')
+      ?.style.setProperty('--video-ratio', String(video.videoWidth / video.videoHeight));
+  };
+  video?.addEventListener('loadedmetadata', setVideoRatio);
+  setVideoRatio();
   const soundBtn = videoWrap?.querySelector<HTMLButtonElement>('[data-video-sound]');
   const setSoundState = () => {
     if (!video || !soundBtn) return;
@@ -798,6 +880,21 @@ const breadcrumbLd = {
       loadMore.disabled = false;
     }
   });
+
+  // Telefoon: teller "2 / 5" bijwerken tijdens het vegen.
+  const mediaRow = document.querySelector<HTMLElement>('[data-media]');
+  const mediaCount = document.querySelector<HTMLElement>('[data-media-count]');
+  if (mediaRow && mediaCount) {
+    const slides = mediaRow.querySelectorAll('.media-main, .media-thumb').length;
+    mediaRow.addEventListener(
+      'scroll',
+      () => {
+        const i = Math.round(mediaRow.scrollLeft / Math.max(1, mediaRow.clientWidth));
+        mediaCount.textContent = `${Math.min(slides, i + 1)} / ${slides}`;
+      },
+      { passive: true },
+    );
+  }
 
   // Fotoweergave met pijltjes en toetsenbord.
   const photos: string[] = JSON.parse(document.getElementById('photo-data')?.textContent ?? '[]');
@@ -1006,6 +1103,7 @@ const breadcrumbLd = {
   .tag {
     display: inline-flex;
     align-items: center;
+    white-space: nowrap;
     gap: 0.3rem;
     font-size: var(--text-xs);
     font-weight: 500;
@@ -1063,8 +1161,21 @@ const breadcrumbLd = {
     grid-template-columns: 1fr;
     grid-template-rows: 1fr;
   }
+  .media.thumbs-1 {
+    grid-template-columns: 2fr 1fr;
+  }
+  .media.thumbs-1 .media-thumb {
+    grid-row: 1 / -1;
+  }
   .media.thumbs-2 {
     grid-template-columns: 2fr 1fr;
+  }
+  /* 3 kleine foto's: de eerste over twee rijen, geen leeg vak. */
+  .media.thumbs-3 .first-thumb {
+    grid-row: 1 / -1;
+  }
+  .media-extra {
+    display: none;
   }
   .media-main {
     grid-row: 1 / -1;
@@ -1088,6 +1199,21 @@ const breadcrumbLd = {
   .photo-btn:hover .media-img {
     transform: scale(1.03);
   }
+  /* Teller onder de foto's, op de telefoon over de foto linksonder geschoven
+     (rechtsonder staan de knoppen van de video). */
+  .media-count {
+    display: none;
+    width: max-content;
+    position: relative;
+    z-index: 2;
+    margin: calc(-1 * var(--space-lg) - 2rem) auto calc(var(--space-lg) + 0.6rem) 0.75rem;
+    padding: 0.2rem 0.55rem;
+    border-radius: 100px;
+    background: rgba(0, 0, 0, 0.55);
+    color: #fff;
+    font-size: var(--text-xs);
+    pointer-events: none;
+  }
   .media-more {
     position: absolute;
     inset: 0;
@@ -1097,6 +1223,23 @@ const breadcrumbLd = {
     background: rgba(26, 18, 8, 0.5);
     color: #fff;
     font-weight: 500;
+  }
+  /* Video in de eigen verhouding (niets afsnijden); de ruimte eromheen vult
+     een vervaagde versie van de eerste foto. */
+  .video-wrap {
+    overflow: hidden;
+    background: #1d1712;
+  }
+  .video-wrap::before {
+    content: '';
+    position: absolute;
+    inset: -20px;
+    background: var(--video-backdrop, none) center / cover;
+    filter: blur(18px) brightness(0.55);
+  }
+  .media-img.video {
+    position: relative;
+    object-fit: contain;
   }
   .video {
     cursor: zoom-in;
@@ -1475,6 +1618,12 @@ const breadcrumbLd = {
     border-radius: 0 6px 6px 0;
   }
   /* In de buurt */
+  .hub-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 1.5rem;
+    margin-top: var(--space-lg);
+  }
   .nearby {
     margin-top: var(--space-2xl);
     padding-top: var(--space-2xl);
@@ -1633,11 +1782,38 @@ const breadcrumbLd = {
       margin-right: calc(-1 * var(--space-md));
       border-radius: 0;
     }
-    .media-thumb {
+    /* Telefoon: alle foto's naast elkaar, vegen om te bladeren. */
+    .media {
+      display: flex;
+      overflow-x: auto;
+      scroll-snap-type: x mandatory;
+      scrollbar-width: none;
+      gap: 0;
+      position: relative;
+    }
+    .media::-webkit-scrollbar {
       display: none;
     }
-    .media-main {
+    .media-main,
+    .media-thumb {
+      flex: 0 0 100%;
+      height: 100%;
+      scroll-snap-align: start;
       grid-row: auto;
+    }
+    .media-count {
+      display: block;
+    }
+    .media .media-extra {
+      display: block;
+    }
+    /* Op de telefoon staan alle foto's in de rij; het label is dan overbodig. */
+    .media-more {
+      display: none;
+    }
+    /* Hoogte volgt de verhouding van de video (staand of liggend), met grenzen. */
+    .media.has-video {
+      height: clamp(240px, calc(100vw / var(--video-ratio, 1.5)), 75vh);
     }
     .summary {
       grid-template-columns: 1fr;
