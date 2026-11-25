@@ -100,7 +100,7 @@ export const highlights = [
     date: '9 juni 2025',
     title: 'Innovatie vanuit frustratie',
     description:
-      'Vanuit onze ervaring is het een simpele vraag — welk restaurant? — wat keer op keer lastig te beantwoorden blijkt. Daarom bouwden wij Tastory.',
+      'Vanuit onze ervaring is het een simpele vraag (welk restaurant?) die keer op keer lastig te beantwoorden blijkt. Daarom bouwden wij Tastory.',
   },
 ];
 

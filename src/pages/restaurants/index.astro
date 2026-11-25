@@ -17,14 +17,17 @@ const cities = restaurants
   : [];
 
 if (restaurants) {
-  Astro.response.headers.set('Cache-Control', 'public, s-maxage=1800, stale-while-revalidate=86400');
+  Astro.response.headers.set(
+    'Cache-Control',
+    'public, s-maxage=1800, stale-while-revalidate=86400',
+  );
 } else {
   Astro.response.status = 503;
 }
 ---
 
 <BaseLayout
-  title="Restaurants ontdekken — reviews, foto's & menu's | Tastory"
+  title="Restaurants ontdekken in Twente met foto's, menu's en reviews | Tastory"
   description="Ontdek de beste restaurants van Nederland op Tastory. Lees eerlijke reviews van gasten, bekijk foto's en menukaarten en reserveer direct."
   keywords={[
     'restaurants',
@@ -39,7 +42,7 @@ if (restaurants) {
     set:html={JSON.stringify({
       '@context': 'https://schema.org',
       '@type': 'CollectionPage',
-      name: 'Restaurants — Tastory',
+      name: 'Restaurants | Tastory',
       url: `${SITE_URL}/restaurants`,
       inLanguage: 'nl-NL',
       potentialAction: {

@@ -111,7 +111,7 @@ export const POST: APIRoute = async ({ request, clientAddress }) => {
           ['Website / Instagram', link || '-'],
           [
             'Aangemeld door',
-            `${name || '(geen naam)'} <${email}>${isOwner ? ' — eigenaar/medewerker' : ''}`,
+            `${name || '(geen naam)'} <${email}>${isOwner ? ' (eigenaar/medewerker)' : ''}`,
           ],
           ['Waarom', reason || '-'],
         ];

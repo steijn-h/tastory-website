@@ -4,11 +4,10 @@ import PageHero from '../components/PageHero.astro';
 import { cacheStaticPage } from '../lib/cache';
 
 cacheStaticPage(Astro);
-
 ---
 
 <BaseLayout
-  title="Account verwijderen — Tastory"
+  title="Account verwijderen | Tastory"
   description="Wil je jouw Tastory-account verwijderen? Vul je e-mailadres en gebruikersnaam in en wij verwerken je verzoek."
 >
   <PageHero
@@ -63,7 +62,7 @@ cacheStaticPage(Astro);
         email: data.get('email') as string,
         username: data.get('username') as string,
         reason: data.get('reason') as string,
-        subject: 'Verzoek accountverwijdering — Tastory website',
+        subject: 'Verzoek accountverwijdering via de Tastory-website',
       });
 
       feedback.textContent =

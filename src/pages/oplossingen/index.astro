@@ -5,11 +5,10 @@ import Icon from '../../components/Icon.astro';
 import { cacheStaticPage } from '../../lib/cache';
 
 cacheStaticPage(Astro);
-
 ---
 
 <BaseLayout
-  title="Oplossingen voor restaurants & gasten — Tastory"
+  title="Oplossingen voor restaurants & gasten | Tastory"
   description="Tastory verbindt toprestaurants met de juiste gasten via kwalitatieve video. Ontdek hoe onze app waarde creëert voor restaurants en foodies die op zoek zijn naar de beste restaurantbeleving."
 >
   <PageHero
@@ -22,7 +21,7 @@ cacheStaticPage(Astro);
     set:html={JSON.stringify({
       '@context': 'https://schema.org',
       '@type': 'WebPage',
-      name: 'Oplossingen voor restaurants & gasten — Tastory',
+      name: 'Oplossingen voor restaurants & gasten | Tastory',
       url: 'https://www.tastory.nl/oplossingen',
       description:
         'Tastory verbindt toprestaurants met de juiste gasten via kwalitatieve video. Ontdek hoe onze app waarde creëert voor restaurants en foodies.',

@@ -4,11 +4,10 @@ import PageHero from '../components/PageHero.astro';
 import { cacheStaticPage } from '../lib/cache';
 
 cacheStaticPage(Astro);
-
 ---
 
 <BaseLayout
-  title="Over Tastory — Het verhaal achter dé Nederlandse restaurantapp"
+  title="Over Tastory: het verhaal achter dé Nederlandse restaurantapp"
   description="Tastory verbindt restaurants en gasten via kwalitatieve videocontent. Ontdek ons verhaal en waarom wij geloven in eerlijke restaurantpresentatie en een betere restaurantbeleving voor iedereen."
 >
   <PageHero
@@ -100,7 +99,7 @@ cacheStaticPage(Astro);
     set:html={JSON.stringify({
       '@context': 'https://schema.org',
       '@type': 'AboutPage',
-      name: 'Over Tastory — Het verhaal achter dé Nederlandse restaurantapp',
+      name: 'Over Tastory: het verhaal achter dé Nederlandse restaurantapp',
       url: 'https://www.tastory.nl/over-ons',
       description:
         'Tastory verbindt restaurants en gasten via kwalitatieve videocontent. Ontdek ons verhaal en waarom wij geloven in eerlijke restaurantpresentatie.',

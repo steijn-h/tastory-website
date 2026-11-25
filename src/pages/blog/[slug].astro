@@ -19,7 +19,7 @@ const { Content } = await post.render();
 ---
 
 <BaseLayout
-  title={`${post.data.title} — Tastory Blog`}
+  title={`${post.data.title} | Tastory Blog`}
   description={post.data.description}
   keywords={post.data.tags}
 >
@@ -80,7 +80,9 @@ const { Content } = await post.render();
         <Content />
       </div>
       <div class="blog-back">
-        <a href={`${import.meta.env.BASE_URL}blog`} class="btn-secondary-light">&larr; Terug naar alle artikelen</a>
+        <a href={`${import.meta.env.BASE_URL}blog`} class="btn-secondary-light"
+          >&larr; Terug naar alle artikelen</a
+        >
       </div>
     </div>
   </article>

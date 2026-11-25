@@ -21,15 +21,15 @@ Het verhaal van Tastory begint met een frustrerende ervaring. Na afloop van het 
 
 We identificeerden vijf kernproblemen met de huidige manier waarop we restaurants ontdekken:
 
-1. **Details zijn versnipperd over diverse kanalen** — Informatie over restaurants is verspreid over Google, Instagram, TripAdvisor en meer. Nergens vind je alles op één plek.
+1. **Details zijn versnipperd over diverse kanalen**: Informatie over restaurants is verspreid over Google, Instagram, TripAdvisor en meer. Nergens vind je alles op één plek.
 
-2. **Verouderde en onnauwkeurige informatie** — Online restaurantinformatie is vaak niet meer actueel. Menukaarten, openingstijden en foto's kloppen regelmatig niet.
+2. **Verouderde en onnauwkeurige informatie**: Online restaurantinformatie is vaak niet meer actueel. Menukaarten, openingstijden en foto's kloppen regelmatig niet.
 
-3. **Opgeslagen informatie moeilijk terug te vinden** — Je hebt ooit een leuk restaurant gezien op Instagram, maar waar was dat ook alweer? Het terugvinden van opgeslagen tips is een uitdaging.
+3. **Opgeslagen informatie moeilijk terug te vinden**: Je hebt ooit een leuk restaurant gezien op Instagram, maar waar was dat ook alweer? Het terugvinden van opgeslagen tips is een uitdaging.
 
-4. **Informatieovervloed veroorzaakt keuzestress** — Te veel opties en te veel bronnen maken het kiezen eerder moeilijker dan makkelijker.
+4. **Informatieovervloed veroorzaakt keuzestress**: Te veel opties en te veel bronnen maken het kiezen eerder moeilijker dan makkelijker.
 
-5. **Subjectieve en onbetrouwbare reviews** — Reviews zijn vaak sterk gekleurd door persoonlijke voorkeuren en geven geen representatief beeld van de werkelijke ervaring.
+5. **Subjectieve en onbetrouwbare reviews**: Reviews zijn vaak sterk gekleurd door persoonlijke voorkeuren en geven geen representatief beeld van de werkelijke ervaring.
 
 ## De kernvraag
 
@@ -42,6 +42,6 @@ Het antwoord op beide vragen bleek een overtuigend _ja_. Uit gesprekken met tien
 
 ## Van frustratie naar innovatie
 
-Tastory is geboren vanuit de overtuiging dat het kiezen van een restaurant een leuke, inspirerende ervaring moet zijn — niet een bron van stress. Onze app brengt alle relevante informatie samen op één plek, gepresenteerd op een authentieke en aantrekkelijke manier.
+Tastory is geboren vanuit de overtuiging dat het kiezen van een restaurant een leuke, inspirerende ervaring moet zijn, geen bron van stress. Onze app brengt alle relevante informatie samen op één plek, gepresenteerd op een authentieke en aantrekkelijke manier.
 
 Zo transformeren we de restaurantkeuze van giswerk naar een weloverwogen keuze.

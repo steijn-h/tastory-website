@@ -4,11 +4,10 @@ import PageHero from '../components/PageHero.astro';
 import { cacheStaticPage } from '../lib/cache';
 
 cacheStaticPage(Astro);
-
 ---
 
 <BaseLayout
-  title="Portfolio — Tastory"
+  title="Portfolio | Tastory"
   description="Bekijk ons werk: foto's en video's die wij voor restaurants hebben gemaakt."
 >
   <PageHero
@@ -21,10 +20,10 @@ cacheStaticPage(Astro);
     set:html={JSON.stringify({
       '@context': 'https://schema.org',
       '@type': 'CollectionPage',
-      name: 'Portfolio — Tastory',
+      name: 'Portfolio | Tastory',
       url: 'https://www.tastory.nl/portfolio',
       description:
-        'Bekijk ons werk: professionele foto\'s en video\'s die Tastory voor restaurants heeft gemaakt. Kwalitatieve content die restaurants het beste laat zien.',
+        "Bekijk ons werk: professionele foto's en video's die Tastory voor restaurants heeft gemaakt. Kwalitatieve content die restaurants het beste laat zien.",
       inLanguage: 'nl-NL',
       breadcrumb: {
         '@type': 'BreadcrumbList',
@@ -54,7 +53,7 @@ cacheStaticPage(Astro);
         <div class="video-wrapper">
           <iframe
             src="https://www.youtube.com/embed/jbv-DdTNohI?vq=hd1080&rel=0"
-            title="Tastory — restaurantvideo"
+            title="Restaurantvideo van Tastory"
             frameborder="0"
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
             allowfullscreen></iframe>

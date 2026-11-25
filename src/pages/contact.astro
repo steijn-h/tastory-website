@@ -4,11 +4,10 @@ import PageHero from '../components/PageHero.astro';
 import { cacheStaticPage } from '../lib/cache';
 
 cacheStaticPage(Astro);
-
 ---
 
 <BaseLayout
-  title="Contact — Tastory | Meld jouw restaurant aan"
+  title="Contact | Meld jouw restaurant aan bij Tastory"
   description="Neem contact op met Tastory. Meld jouw restaurant aan of stel je vraag. Wij helpen je graag op weg naar meer gasten en een sterkere online aanwezigheid."
 >
   <PageHero
@@ -98,7 +97,7 @@ cacheStaticPage(Astro);
     set:html={JSON.stringify({
       '@context': 'https://schema.org',
       '@type': 'ContactPage',
-      name: 'Contact — Tastory',
+      name: 'Contact | Tastory',
       url: 'https://www.tastory.nl/contact',
       description:
         'Neem contact op met Tastory. Meld jouw restaurant aan of stel je vraag. Wij helpen je graag op weg.',
@@ -156,7 +155,7 @@ cacheStaticPage(Astro);
         company: data.get('company') as string,
         message: data.get('message') as string,
         callback: data.get('callback') as string,
-        subject: 'Nieuw contactbericht — Tastory website',
+        subject: 'Nieuw contactbericht via de Tastory-website',
       });
 
       feedback.textContent =
