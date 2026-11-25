@@ -4,11 +4,10 @@ import PageHero from '../../components/PageHero.astro';
 import { cacheStaticPage } from '../../lib/cache';
 
 cacheStaticPage(Astro);
-
 ---
 
 <BaseLayout
-  title="Meld je aan als restaurant — Tastory"
+  title="Meld je aan als restaurant | Tastory"
   description="Meld jouw restaurant aan bij Tastory en presenteer jezelf via kwalitatieve videocontent aan de juiste gasten."
 >
   <PageHero
@@ -21,7 +20,7 @@ cacheStaticPage(Astro);
     set:html={JSON.stringify({
       '@context': 'https://schema.org',
       '@type': 'WebPage',
-      name: 'Meld je aan als restaurant — Tastory',
+      name: 'Meld je aan als restaurant | Tastory',
       url: 'https://www.tastory.nl/aanmelden/restaurant',
       description:
         'Meld jouw restaurant aan bij Tastory en presenteer jezelf via kwalitatieve videocontent aan de juiste gasten.',
@@ -104,7 +103,8 @@ cacheStaticPage(Astro);
         }),
       });
       const result = await res.json().catch(() => ({}));
-      if (!res.ok || !result.ok) throw new Error(result.message ?? 'Er ging iets mis. Probeer het later opnieuw.');
+      if (!res.ok || !result.ok)
+        throw new Error(result.message ?? 'Er ging iets mis. Probeer het later opnieuw.');
       feedback.textContent =
         'Bedankt voor je aanmelding! Je ontvangt een bevestiging per e-mail en we nemen zo snel mogelijk contact met je op.';
       feedback.className = 'signup-feedback signup-feedback--success';

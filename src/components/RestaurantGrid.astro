@@ -466,6 +466,9 @@ const CITIES_COLLAPSED = 10;
         .forEach((v) => selectedCities.add(v));
       cityButtons.forEach((b) => pressed(b, selectedCities.has(b.dataset.cityBtn ?? '')));
     }
+    // Zoekterm uit de link (?q=); de pagina zelf wordt zonder querystring bewaard.
+    const qFromUrl = new URLSearchParams(location.search).get('q');
+    if (search && qFromUrl && !search.value) search.value = qFromUrl;
     if (cityItems.length) renderCities();
     if (selectedCities.size || search?.value) apply();
   });

@@ -21,15 +21,15 @@ Een belangrijke mijlpaal voor Tastory: wij zijn officieel eigenaar van het woord
 
 De weg naar onze officiële merkregistratie:
 
-- **10 oktober 2025** — Depotdatum bij BOIP en inschrijving handelsregister
-- **16 oktober 2025** — Publicatiedatum van het depot
-- **23 december 2025** — Officiële registratiedatum van het woordmerk
+- **10 oktober 2025**: Depotdatum bij BOIP en inschrijving handelsregister
+- **16 oktober 2025**: Publicatiedatum van het depot
+- **23 december 2025**: Officiële registratiedatum van het woordmerk
 
 ## Wat betekent dit?
 
 Het bezitten van het woordmerk Tastory is een belangrijk en memorabel ingrediënt in onze culinaire reis. We zijn nu officieel eigenaar van een merk dat voor vele verhalen bij restaurants en met gasten zal zorgen.
 
-De naam Tastory — een samenvoegsel van _taste_ en _story_ — vat perfect samen waar wij voor staan: het delen van smaakverhalen. Elke restaurantervaring is een verhaal waard, en wij zorgen ervoor dat die verhalen gedeeld worden.
+De naam Tastory, een samenvoegsel van _taste_ en _story_, vat perfect samen waar wij voor staan: het delen van smaakverhalen. Elke restaurantervaring is een verhaal waard, en wij zorgen ervoor dat die verhalen gedeeld worden.
 
 ## Vooruit kijken
 

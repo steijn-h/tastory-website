@@ -16,7 +16,27 @@ export default defineConfig({
       formats: ['image/webp'],
       minimumCacheTTL: 60 * 60 * 24 * 30,
     },
+    // Pagina's één keer maken en daarna voor heel Vercel bewaren (niet per
+    // regio zoals het gewone CDN): geen trage eerste bezoeker per regio meer.
+    // Na 30 minuten wordt op de achtergrond een verse versie gemaakt; de
+    // bezoeker krijgt intussen de bewaarde. Uitgezonderd: alles met een
+    // inlog, querystring of formulier.
+    isr: {
+      expiration: 60 * 30,
+      exclude: [
+        /^\/account/,
+        /^\/auth\//,
+        /^\/inloggen/,
+        /^\/partials\//,
+        /^\/api\//,
+        /^\/restaurant\/[^/]+\/review/,
+        /^\/_image/,
+      ],
+    },
   }),
+  // Links naar een volgende pagina alvast ophalen zodra je eroverheen gaat,
+  // zodat de pagina direct opent als je klikt.
+  prefetch: { prefetchAll: true, defaultStrategy: 'hover' },
   // Eén URL per pagina (geen /contact én /contact/): anders ziet Google
   // dubbele pagina's.
   trailingSlash: 'never',

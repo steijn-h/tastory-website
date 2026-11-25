@@ -28,7 +28,10 @@ if (all === null) {
 } else if (!group) {
   Astro.response.status = 404;
 } else {
-  Astro.response.headers.set('Cache-Control', 'public, s-maxage=1800, stale-while-revalidate=86400');
+  Astro.response.headers.set(
+    'Cache-Control',
+    'public, s-maxage=1800, stale-while-revalidate=86400',
+  );
 }
 
 const name = group?.name ?? 'Onbekende stad';
@@ -93,7 +96,7 @@ const hasReviews = restaurants.some(
 );
 const topCuisineNames = cuisineFacts.slice(0, 3).map((c) => c.name);
 const title = group
-  ? `Restaurants in ${name} (${restaurants.length}) — uit eten in ${name}${hasReviews ? ', met reviews' : ''} | Tastory`
+  ? `Restaurants in ${name} (${restaurants.length}), uit eten in ${name}${hasReviews ? ' met reviews' : ''} | Tastory`
   : 'Stad niet gevonden | Tastory';
 const description = group
   ? `${restaurants.length} restaurants in ${name} op Tastory${

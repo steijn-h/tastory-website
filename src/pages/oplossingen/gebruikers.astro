@@ -6,11 +6,10 @@ import { appFunctions } from '../../data/home';
 import { cacheStaticPage } from '../../lib/cache';
 
 cacheStaticPage(Astro);
-
 ---
 
 <BaseLayout
-  title="Oplossingen voor gasten — Tastory"
+  title="Oplossingen voor gasten | Tastory"
   description="Ontdek restaurants die écht bij jou passen. Download de app, proef en deel jouw ervaringen."
 >
   <PageHero
@@ -23,7 +22,7 @@ cacheStaticPage(Astro);
     set:html={JSON.stringify({
       '@context': 'https://schema.org',
       '@type': ['WebPage', 'Service'],
-      name: 'Oplossingen voor gasten — Tastory',
+      name: 'Oplossingen voor gasten | Tastory',
       url: 'https://www.tastory.nl/oplossingen/gebruikers',
       description:
         'Ontdek restaurants die écht bij jou passen. Download de Tastory app, proef en deel jouw ervaringen.',

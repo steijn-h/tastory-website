@@ -4,11 +4,10 @@ import PageHero from '../components/PageHero.astro';
 import { cacheStaticPage } from '../lib/cache';
 
 cacheStaticPage(Astro);
-
 ---
 
 <BaseLayout
-  title="Veelgestelde vragen — Tastory | Restaurants & Gasten"
+  title="Veelgestelde vragen over Tastory | Restaurants & gasten"
   description="Antwoorden op de meest gestelde vragen over Tastory. Hoe werkt de restaurantapp? Hoe meld ik mijn restaurant aan? Hoe vind ik restaurants in de buurt? Alles op een rij."
 >
   <PageHero
@@ -36,7 +35,8 @@ cacheStaticPage(Astro);
           <details class="faq-item">
             <summary><span>Op welke apparaten is Tastory beschikbaar?</span></summary>
             <p>
-              Tastory is nu beschikbaar voor iOS. Download de app gratis via de App Store. Android volgt binnenkort.
+              Tastory is nu beschikbaar voor iOS. Download de app gratis via de App Store. Android
+              volgt binnenkort.
             </p>
           </details>
           <details class="faq-item">
@@ -90,7 +90,7 @@ cacheStaticPage(Astro);
     set:html={JSON.stringify({
       '@context': 'https://schema.org',
       '@type': 'FAQPage',
-      name: 'Veelgestelde vragen — Tastory',
+      name: 'Veelgestelde vragen | Tastory',
       url: 'https://www.tastory.nl/faq',
       inLanguage: 'nl-NL',
       speakable: {

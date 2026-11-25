@@ -12,11 +12,10 @@ const posts = (await getCollection('blog')).sort(
 const base = import.meta.env.BASE_URL;
 
 cacheStaticPage(Astro);
-
 ---
 
 <BaseLayout
-  title="Blog — Tastory"
+  title="Blog | Tastory"
   description="Lees de laatste artikelen en updates van Tastory. Blijf op de hoogte van onze reis."
 >
   <PageHero

@@ -34,7 +34,10 @@ if (all === null) {
 } else if (!city || !group) {
   Astro.response.status = 404;
 } else {
-  Astro.response.headers.set('Cache-Control', 'public, s-maxage=1800, stale-while-revalidate=86400');
+  Astro.response.headers.set(
+    'Cache-Control',
+    'public, s-maxage=1800, stale-while-revalidate=86400',
+  );
 }
 
 const cityName = city?.name ?? '';
@@ -101,7 +104,7 @@ const regionHub =
 
 const path = `/restaurants/${stad}/${keuken}`;
 const title = group
-  ? `${label} in ${cityName} (${restaurants.length}) — overzicht met prijs en sfeer | Tastory`
+  ? `${label} in ${cityName} (${restaurants.length}) met prijs en sfeer | Tastory`
   : 'Niet gevonden | Tastory';
 const description = group
   ? `${label} in ${cityName}: ${countLabel(restaurants.length)} op Tastory${
