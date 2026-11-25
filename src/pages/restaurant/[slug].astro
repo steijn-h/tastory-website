@@ -93,7 +93,8 @@ if (lookup.status === 'not-found') {
 // ── Afgeleide gegevens ─────────────────────────────────────────────────────
 const name = restaurant?.name ?? 'Restaurant';
 const city = normalizeCity(restaurant?.city);
-const photos = splitUrls(restaurant?.photo_url);
+// Zonder dubbele links (komt soms voor in photo_url).
+const photos = [...new Set(splitUrls(restaurant?.photo_url))];
 const isPartner = restaurant ? isPartnerRestaurant(restaurant) : false;
 const videoUrl = safeHttpsUrl(restaurant?.video_url);
 const backgroundUrl = safeHttpsUrl(restaurant?.background_url);
@@ -145,10 +146,13 @@ const deepLinkUrl = restaurant ? `tastory://restaurant/${restaurant.id}` : 'tast
 const nearby = (allRestaurants ?? [])
   .filter((r) => restaurant && r.id !== restaurant.id && city && normalizeCity(r.city) === city)
   .slice(0, 4);
-// Mozaïek: hoofdbeeld + 0, 2 of 4 kleine foto's (nooit een leeg vak).
+// Mozaïek: hoofdbeeld + tot 4 kleine foto's (op de computer). De rest staat
+// verborgen klaar voor de telefoon, waar je door alle foto's veegt.
 const thumbPool = videoUrl ? photos : photos.slice(1);
-const thumbs = thumbPool.slice(0, thumbPool.length >= 4 ? 4 : thumbPool.length >= 2 ? 2 : 0);
+const thumbs = thumbPool.slice(0, 4);
+const extraPhotos = thumbPool.slice(4);
 const thumbOffset = videoUrl ? 0 : 1;
+const slideCount = 1 + thumbPool.length;
 const maxDistribution = stats ? Math.max(1, ...stats.distribution) : 1;
 const formatScore = (value: number) =>
   value.toLocaleString('nl-NL', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
@@ -411,9 +415,9 @@ const breadcrumbLd = {
 
         <!-- Foto's / video -->
         {(videoUrl || photos.length > 0) && (
-          <section class:list={['media', `thumbs-${thumbs.length}`]} aria-label="Foto's" data-media>
+          <section class:list={['media', `thumbs-${thumbs.length}`, { 'has-video': videoUrl }]} aria-label="Foto's" data-media>
             {videoUrl ? (
-              <div class="media-main video-wrap" data-video-wrap>
+              <div class="media-main video-wrap" data-video-wrap style={photos[0] ? `--video-backdrop: url('${imageUrl(photos[0], 480)}')` : undefined}>
                 <video src={videoUrl} poster={photos[0] ? imageUrl(photos[0], 1280) : undefined} autoplay muted loop playsinline preload="metadata" class="media-img video" aria-label={`Video van ${name}, klik voor volledig scherm`} />
                 <div class="video-controls">
                   <button type="button" class="video-btn" data-video-sound aria-label="Geluid aan" aria-pressed="false">
@@ -434,16 +438,24 @@ const breadcrumbLd = {
               const index = i + thumbOffset;
               const isLast = i === thumbs.length - 1 && photos.length > thumbs.length + thumbOffset;
               return (
-                <button type="button" class="media-thumb photo-btn" data-index={index} aria-label={`Foto ${index + 1} vergroten`}>
+                <button type="button" class:list={['media-thumb', 'photo-btn', { 'first-thumb': i === 0 }]} data-index={index} aria-label={`Foto ${index + 1} vergroten`}>
                   <img src={imageUrl(src, 480)} srcset={imageSrcset(src, [480, 640])} sizes="(max-width: 700px) 100vw, (max-width: 900px) 50vw, 22vw" alt={`${name} — foto ${index + 1}`} loading="lazy" decoding="async" class="media-img" />
                   {isLast && <span class="media-more">Alle {photos.length} foto's</span>}
                 </button>
               );
             })}
+            {extraPhotos.map((src, i) => {
+              const index = i + 4 + thumbOffset;
+              return (
+                <button type="button" class="media-thumb media-extra photo-btn" data-index={index} aria-label={`Foto ${index + 1} vergroten`}>
+                  <img src={imageUrl(src, 640)} srcset={imageSrcset(src, [480, 640])} sizes="100vw" alt={`${name} — foto ${index + 1}`} loading="lazy" decoding="async" class="media-img" />
+                </button>
+              );
+            })}
           </section>
         )}
-        {thumbs.length > 0 && (
-          <span class="media-count" data-media-count aria-hidden="true">1 / {thumbs.length + 1}</span>
+        {slideCount > 1 && (
+          <span class="media-count" data-media-count aria-hidden="true">1 / {slideCount}</span>
         )}
 
         <div class="layout">
@@ -788,6 +800,15 @@ const breadcrumbLd = {
   const video = videoWrap?.querySelector('video') as
     | (HTMLVideoElement & { webkitEnterFullscreen?: () => void })
     | null;
+  // Verhouding van de video doorgeven (telefoon: hoogte van het fotoblok).
+  const setVideoRatio = () => {
+    if (!video?.videoWidth || !video.videoHeight) return;
+    video
+      .closest<HTMLElement>('[data-media]')
+      ?.style.setProperty('--video-ratio', String(video.videoWidth / video.videoHeight));
+  };
+  video?.addEventListener('loadedmetadata', setVideoRatio);
+  setVideoRatio();
   const soundBtn = videoWrap?.querySelector<HTMLButtonElement>('[data-video-sound]');
   const setSoundState = () => {
     if (!video || !soundBtn) return;
@@ -1140,8 +1161,21 @@ const breadcrumbLd = {
     grid-template-columns: 1fr;
     grid-template-rows: 1fr;
   }
+  .media.thumbs-1 {
+    grid-template-columns: 2fr 1fr;
+  }
+  .media.thumbs-1 .media-thumb {
+    grid-row: 1 / -1;
+  }
   .media.thumbs-2 {
     grid-template-columns: 2fr 1fr;
+  }
+  /* 3 kleine foto's: de eerste over twee rijen, geen leeg vak. */
+  .media.thumbs-3 .first-thumb {
+    grid-row: 1 / -1;
+  }
+  .media-extra {
+    display: none;
   }
   .media-main {
     grid-row: 1 / -1;
@@ -1165,13 +1199,14 @@ const breadcrumbLd = {
   .photo-btn:hover .media-img {
     transform: scale(1.03);
   }
-  /* Teller onder de foto's, op de telefoon over de foto rechtsonder geschoven. */
+  /* Teller onder de foto's, op de telefoon over de foto linksonder geschoven
+     (rechtsonder staan de knoppen van de video). */
   .media-count {
     display: none;
     width: max-content;
     position: relative;
     z-index: 2;
-    margin: calc(-1 * var(--space-lg) - 2rem) 0.25rem calc(var(--space-lg) + 0.6rem) auto;
+    margin: calc(-1 * var(--space-lg) - 2rem) auto calc(var(--space-lg) + 0.6rem) 0.75rem;
     padding: 0.2rem 0.55rem;
     border-radius: 100px;
     background: rgba(0, 0, 0, 0.55);
@@ -1188,6 +1223,23 @@ const breadcrumbLd = {
     background: rgba(26, 18, 8, 0.5);
     color: #fff;
     font-weight: 500;
+  }
+  /* Video in de eigen verhouding (niets afsnijden); de ruimte eromheen vult
+     een vervaagde versie van de eerste foto. */
+  .video-wrap {
+    overflow: hidden;
+    background: #1d1712;
+  }
+  .video-wrap::before {
+    content: '';
+    position: absolute;
+    inset: -20px;
+    background: var(--video-backdrop, none) center / cover;
+    filter: blur(18px) brightness(0.55);
+  }
+  .media-img.video {
+    position: relative;
+    object-fit: contain;
   }
   .video {
     cursor: zoom-in;
@@ -1751,6 +1803,17 @@ const breadcrumbLd = {
     }
     .media-count {
       display: block;
+    }
+    .media .media-extra {
+      display: block;
+    }
+    /* Op de telefoon staan alle foto's in de rij; het label is dan overbodig. */
+    .media-more {
+      display: none;
+    }
+    /* Hoogte volgt de verhouding van de video (staand of liggend), met grenzen. */
+    .media.has-video {
+      height: clamp(240px, calc(100vw / var(--video-ratio, 1.5)), 75vh);
     }
     .summary {
       grid-template-columns: 1fr;
