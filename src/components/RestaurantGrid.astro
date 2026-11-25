@@ -104,16 +104,6 @@ const CITIES_COLLAPSED = 10;
       <section class="cities" aria-labelledby="cities-title">
         <div class="cities-head">
           <h2 id="cities-title">Kies een stad uit Twente</h2>
-          <label class="city-search">
-            <span class="sr-only">Zoek een stad</span>
-            <input
-              type="search"
-              placeholder="Zoek een stad en druk op Enter"
-              autocomplete="off"
-              enterkeyhint="done"
-              data-city-search
-            />
-          </label>
         </div>
         <ul class="chips" data-city-list>
           {cities.map((c, i) => (
@@ -152,6 +142,7 @@ const CITIES_COLLAPSED = 10;
       <input
         type="search"
         data-search
+        enterkeyhint="search"
         placeholder={searchPlaceholder}
         autocomplete="off"
         value={initialQuery}
@@ -282,7 +273,6 @@ const CITIES_COLLAPSED = 10;
     const filterChips = Array.from(root.querySelectorAll<HTMLButtonElement>('[data-filter]'));
     const cityButtons = Array.from(root.querySelectorAll<HTMLButtonElement>('[data-city-btn]'));
     const cityItems = Array.from(root.querySelectorAll<HTMLElement>('[data-city-item]'));
-    const citySearch = root.querySelector<HTMLInputElement>('[data-city-search]');
     const cityMore = root.querySelector<HTMLButtonElement>('[data-city-more]');
     const cityEmpty = root.querySelector<HTMLElement>('[data-city-empty]');
     const collapsedCities = Number(root.dataset.collapsed) || 10;
@@ -322,19 +312,15 @@ const CITIES_COLLAPSED = 10;
     };
 
     const renderCities = () => {
-      const q = (citySearch?.value ?? '').trim().toLowerCase();
       let shown = 0;
       cityItems.forEach((li, i) => {
         const value = li.dataset.cityItem ?? '';
-        const visible = q
-          ? value.includes(q)
-          : citiesExpanded || i < collapsedCities || selectedCities.has(value);
+        const visible = citiesExpanded || i < collapsedCities || selectedCities.has(value);
         li.hidden = !visible;
         if (visible) shown++;
       });
       if (cityEmpty) cityEmpty.hidden = shown > 0;
       if (cityMore) {
-        cityMore.hidden = Boolean(q);
         cityMore.textContent = citiesExpanded
           ? 'Minder steden tonen'
           : `Alle ${cityItems.length} steden tonen`;
@@ -398,22 +384,22 @@ const CITIES_COLLAPSED = 10;
     cityButtons.forEach((b) =>
       b.addEventListener('click', () => toggleCity(b.dataset.cityBtn ?? '')),
     );
-    citySearch?.addEventListener('input', renderCities);
-    citySearch?.addEventListener('keydown', (e) => {
+    // Enter in de zoekbalk: is het (het begin van) een plaatsnaam, dan die stad
+    // aanzetten en het zoekveld leegmaken; anders alleen het toetsenbord sluiten.
+    search?.addEventListener('keydown', (e) => {
       if (e.key !== 'Enter') return;
       e.preventDefault();
-      const q = citySearch.value.trim().toLowerCase();
-      if (!q) return;
-      // Precies die stad, anders de eerste die begint met / bevat wat je typte.
+      const q = search.value.trim().toLowerCase();
       const values = cityItems.map((li) => li.dataset.cityItem ?? '');
-      const hit =
-        values.find((v) => v === q) ??
-        values.find((v) => v.startsWith(q)) ??
-        values.find((v) => v.includes(q));
-      if (!hit) return;
-      if (!selectedCities.has(hit)) toggleCity(hit);
-      citySearch.value = '';
-      renderCities();
+      const hit = q
+        ? (values.find((v) => v === q) ?? values.find((v) => v.startsWith(q)))
+        : undefined;
+      if (hit) {
+        if (!selectedCities.has(hit)) toggleCity(hit);
+        search.value = '';
+        refresh();
+      }
+      search.blur();
     });
     cityMore?.addEventListener('click', () => {
       citiesExpanded = !citiesExpanded;
@@ -509,22 +495,6 @@ const CITIES_COLLAPSED = 10;
     font-family: var(--serif);
     font-size: var(--text-xl);
     font-weight: 500;
-  }
-  .city-search input {
-    width: 280px;
-    max-width: 100%;
-    padding: 0.55rem 0.95rem;
-    border: 1px solid var(--beige-deeper);
-    border-radius: 100px;
-    background: var(--beige);
-    font: inherit;
-    font-size: var(--text-sm);
-    color: var(--text);
-  }
-  .city-search input:focus {
-    outline: none;
-    border-color: var(--brown);
-    background: var(--white);
   }
   .chips {
     list-style: none;
@@ -762,10 +732,6 @@ const CITIES_COLLAPSED = 10;
   @media (max-width: 520px) {
     .cities {
       padding: var(--space-md);
-    }
-    .city-search,
-    .city-search input {
-      width: 100%;
     }
     .grid {
       grid-template-columns: repeat(2, minmax(0, 1fr));
