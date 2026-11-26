@@ -146,13 +146,12 @@ const deepLinkUrl = restaurant ? `tastory://restaurant/${restaurant.id}` : 'tast
 const nearby = (allRestaurants ?? [])
   .filter((r) => restaurant && r.id !== restaurant.id && city && normalizeCity(r.city) === city)
   .slice(0, 4);
-// Mozaïek: hoofdbeeld + tot 4 kleine foto's (op de computer). De rest staat
-// verborgen klaar voor de telefoon, waar je door alle foto's veegt.
+// Overal hetzelfde: één grote foto (of video) met twee kleine ernaast. Zijn
+// er meer, dan klapt "Bekijk meer foto's" de rest eronder uit.
 const thumbPool = videoUrl ? photos : photos.slice(1);
-const thumbs = thumbPool.slice(0, 4);
-const extraPhotos = thumbPool.slice(4);
+const thumbs = thumbPool.slice(0, 2);
+const extraPhotos = thumbPool.slice(2);
 const thumbOffset = videoUrl ? 0 : 1;
-const slideCount = 1 + thumbPool.length;
 const maxDistribution = stats ? Math.max(1, ...stats.distribution) : 1;
 const formatScore = (value: number) =>
   value.toLocaleString('nl-NL', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
@@ -436,26 +435,30 @@ const breadcrumbLd = {
             )}
             {thumbs.map((src, i) => {
               const index = i + thumbOffset;
-              const isLast = i === thumbs.length - 1 && photos.length > thumbs.length + thumbOffset;
               return (
-                <button type="button" class:list={['media-thumb', 'photo-btn', { 'first-thumb': i === 0 }]} data-index={index} aria-label={`Foto ${index + 1} vergroten`}>
-                  <img src={imageUrl(src, 480)} srcset={imageSrcset(src, [480, 640])} sizes="(max-width: 700px) 100vw, (max-width: 900px) 50vw, 22vw" alt={`${name}, foto ${index + 1}`} loading="lazy" decoding="async" class="media-img" />
-                  {isLast && <span class="media-more">Alle {photos.length} foto's</span>}
-                </button>
-              );
-            })}
-            {extraPhotos.map((src, i) => {
-              const index = i + 4 + thumbOffset;
-              return (
-                <button type="button" class="media-thumb media-extra photo-btn" data-index={index} aria-label={`Foto ${index + 1} vergroten`}>
-                  <img src={imageUrl(src, 640)} srcset={imageSrcset(src, [480, 640])} sizes="100vw" alt={`${name}, foto ${index + 1}`} loading="lazy" decoding="async" class="media-img" />
+                <button type="button" class="media-thumb photo-btn" data-index={index} aria-label={`Foto ${index + 1} vergroten`}>
+                  <img src={imageUrl(src, 640)} srcset={imageSrcset(src, [480, 640])} sizes="(max-width: 700px) 34vw, 22vw" alt={`${name}, foto ${index + 1}`} loading="lazy" decoding="async" class="media-img" />
                 </button>
               );
             })}
           </section>
         )}
-        {slideCount > 1 && (
-          <span class="media-count" data-media-count aria-hidden="true">1 / {slideCount}</span>
+        {extraPhotos.length > 0 && (
+          <div class="media-more-wrap">
+            <div class="media-extra" id="media-extra" data-media-extra hidden>
+              {extraPhotos.map((src, i) => {
+                const index = i + 2 + thumbOffset;
+                return (
+                  <button type="button" class="photo-btn" data-index={index} aria-label={`Foto ${index + 1} vergroten`}>
+                    <img src={imageUrl(src, 640)} srcset={imageSrcset(src, [480, 640])} sizes="(max-width: 700px) 50vw, 33vw" alt={`${name}, foto ${index + 1}`} loading="lazy" decoding="async" class="media-img" />
+                  </button>
+                );
+              })}
+            </div>
+            <button type="button" class="btn btn-ghost btn-sm media-toggle" aria-expanded="false" aria-controls="media-extra" data-media-toggle>
+              Bekijk meer foto's ({extraPhotos.length})
+            </button>
+          </div>
         )}
 
         <div class="layout">
@@ -881,19 +884,16 @@ const breadcrumbLd = {
     }
   });
 
-  // Telefoon: teller "2 / 5" bijwerken tijdens het vegen.
-  const mediaRow = document.querySelector<HTMLElement>('[data-media]');
-  const mediaCount = document.querySelector<HTMLElement>('[data-media-count]');
-  if (mediaRow && mediaCount) {
-    const slides = mediaRow.querySelectorAll('.media-main, .media-thumb').length;
-    mediaRow.addEventListener(
-      'scroll',
-      () => {
-        const i = Math.round(mediaRow.scrollLeft / Math.max(1, mediaRow.clientWidth));
-        mediaCount.textContent = `${Math.min(slides, i + 1)} / ${slides}`;
-      },
-      { passive: true },
-    );
+  // "Bekijk meer foto's": de overige foto's onder het blok uitklappen.
+  const mediaToggle = document.querySelector<HTMLButtonElement>('[data-media-toggle]');
+  const mediaExtra = document.querySelector<HTMLElement>('[data-media-extra]');
+  if (mediaToggle && mediaExtra) {
+    const label = mediaToggle.textContent?.trim() ?? '';
+    mediaToggle.addEventListener('click', () => {
+      mediaExtra.hidden = !mediaExtra.hidden;
+      mediaToggle.setAttribute('aria-expanded', String(!mediaExtra.hidden));
+      mediaToggle.textContent = mediaExtra.hidden ? label : 'Minder foto\'s tonen';
+    });
   }
 
   // Fotoweergave met pijltjes en toetsenbord.
@@ -1149,7 +1149,7 @@ const breadcrumbLd = {
   /* Media */
   .media {
     display: grid;
-    grid-template-columns: 2fr 1fr 1fr;
+    grid-template-columns: 2fr 1fr;
     grid-template-rows: 1fr 1fr;
     gap: 8px;
     height: clamp(280px, 42vw, 460px);
@@ -1161,21 +1161,27 @@ const breadcrumbLd = {
     grid-template-columns: 1fr;
     grid-template-rows: 1fr;
   }
-  .media.thumbs-1 {
-    grid-template-columns: 2fr 1fr;
-  }
   .media.thumbs-1 .media-thumb {
     grid-row: 1 / -1;
   }
-  .media.thumbs-2 {
-    grid-template-columns: 2fr 1fr;
-  }
-  /* 3 kleine foto's: de eerste over twee rijen, geen leeg vak. */
-  .media.thumbs-3 .first-thumb {
-    grid-row: 1 / -1;
+  .media-more-wrap {
+    margin: calc(-1 * var(--space-2xl) + var(--space-sm)) 0 var(--space-2xl);
   }
   .media-extra {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 8px;
+    margin-bottom: var(--space-sm);
+  }
+  .media-extra[hidden] {
     display: none;
+  }
+  .media-extra .photo-btn {
+    aspect-ratio: 4 / 3;
+    border-radius: var(--radius-sm);
+  }
+  .media-toggle {
+    display: inline-flex;
   }
   .media-main {
     grid-row: 1 / -1;
@@ -1198,31 +1204,6 @@ const breadcrumbLd = {
   }
   .photo-btn:hover .media-img {
     transform: scale(1.03);
-  }
-  /* Teller onder de foto's, op de telefoon over de foto linksonder geschoven
-     (rechtsonder staan de knoppen van de video). */
-  .media-count {
-    display: none;
-    width: max-content;
-    position: relative;
-    z-index: 2;
-    margin: calc(-1 * var(--space-lg) - 2rem) auto calc(var(--space-lg) + 0.6rem) 0.75rem;
-    padding: 0.2rem 0.55rem;
-    border-radius: 100px;
-    background: rgba(0, 0, 0, 0.55);
-    color: #fff;
-    font-size: var(--text-xs);
-    pointer-events: none;
-  }
-  .media-more {
-    position: absolute;
-    inset: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: rgba(26, 18, 8, 0.5);
-    color: #fff;
-    font-weight: 500;
   }
   /* Video in de eigen verhouding (niets afsnijden); de ruimte eromheen vult
      een vervaagde versie van de eerste foto. */
@@ -1771,49 +1752,28 @@ const breadcrumbLd = {
       text-align: left;
       max-width: none;
     }
-    /* .media.thumbs-2 mee, anders wint die regel en blijft er een lege kolom over. */
-    .media,
-    .media.thumbs-2 {
-      grid-template-columns: 1fr;
-      grid-template-rows: 1fr;
-      height: 260px;
+    /* Telefoon: zelfde indeling, iets lager en tot de rand. */
+    .media {
+      height: 300px;
+      gap: 4px;
       margin-bottom: var(--space-lg);
       margin-left: calc(-1 * var(--space-md));
       margin-right: calc(-1 * var(--space-md));
       border-radius: 0;
     }
-    /* Telefoon: alle foto's naast elkaar, vegen om te bladeren. */
-    .media {
-      display: flex;
-      overflow-x: auto;
-      scroll-snap-type: x mandatory;
-      scrollbar-width: none;
-      gap: 0;
-      position: relative;
-    }
-    .media::-webkit-scrollbar {
-      display: none;
-    }
-    .media-main,
-    .media-thumb {
-      flex: 0 0 100%;
-      height: 100%;
-      scroll-snap-align: start;
-      grid-row: auto;
-    }
-    .media-count {
-      display: block;
-    }
-    .media .media-extra {
-      display: block;
-    }
-    /* Op de telefoon staan alle foto's in de rij; het label is dan overbodig. */
-    .media-more {
-      display: none;
-    }
-    /* Hoogte volgt de verhouding van de video (staand of liggend), met grenzen. */
     .media.has-video {
-      height: clamp(240px, calc(100vw / var(--video-ratio, 1.5)), 75vh);
+      height: clamp(260px, calc(66vw / var(--video-ratio, 1.5)), 70vh);
+    }
+    .media-more-wrap {
+      margin: calc(-1 * var(--space-lg) + var(--space-sm)) 0 var(--space-lg);
+    }
+    .media-extra {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 4px;
+    }
+    .media-toggle {
+      width: 100%;
+      justify-content: center;
     }
     .summary {
       grid-template-columns: 1fr;
