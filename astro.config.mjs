@@ -76,6 +76,13 @@ export default defineConfig({
       // website, bijv. bevestiging van een restaurantaanmelding. Geheim:
       // alleen op de server. Zonder key geeft het formulier een nette fout.
       RESEND_API_KEY: envField.string({ context: 'server', access: 'secret', optional: true }),
+      // Google Places (New) voor de Google-score op restaurantpagina's. Geheim:
+      // alleen op de server. Zonder key toont de pagina geen Google-score.
+      GOOGLE_PLACES_API_KEY: envField.string({
+        context: 'server',
+        access: 'secret',
+        optional: true,
+      }),
     },
   },
 });

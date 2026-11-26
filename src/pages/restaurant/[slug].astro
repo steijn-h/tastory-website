@@ -499,6 +499,7 @@ const breadcrumbLd = {
               {stats && stats.count > 0 && (
                 <div class="summary">
                   <div class="summary-score">
+                    <span class="summary-source">Op Tastory</span>
                     {score !== null && <span class="big-score">{formatScore(score)}</span>}
                     {score !== null && <RatingStars rating={score} size={20} />}
                     <span class="muted">{reviewCount === 1 ? '1 geverifieerde review' : `${reviewCount} geverifieerde reviews`}</span>
@@ -534,6 +535,20 @@ const breadcrumbLd = {
                   </dl>
                 </div>
               )}
+
+              {/* Google-score: los van de Tastory-score, live opgehaald (zie /api/google-rating). */}
+              <div class="google-rating" data-google-rating data-restaurant={restaurant.id} hidden>
+                <div class="google-main">
+                  <span class="summary-source">Op Google Maps</span>
+                  <span class="google-line">
+                    <span class="google-score" data-g-score></span>
+                    <span class="google-stars" data-g-stars aria-hidden="true"><span>★★★★★</span><span class="google-stars-fill">★★★★★</span></span>
+                    <span class="muted" data-g-count></span>
+                  </span>
+                </div>
+                <a class="google-link" data-g-link href="#" target="_blank" rel="noopener nofollow">Bekijk op Google Maps ↗</a>
+                <p class="google-note">Deze score en het aantal reviews komen van Google Maps en tellen niet mee in de Tastory-score.</p>
+              </div>
 
               {reviewPage === null ? (
                 <p class="muted empty">Reviews kunnen op dit moment niet geladen worden.</p>
@@ -854,6 +869,37 @@ const breadcrumbLd = {
     if (!document.fullscreenElement) closedFullscreen();
   });
   video?.addEventListener('webkitendfullscreen', closedFullscreen);
+
+  // Google-score pas ophalen als de reviews in beeld komen (elke opvraag kost
+  // geld bij Google), en niet voor bots.
+  const googleBox = document.querySelector<HTMLElement>('[data-google-rating]');
+  if (googleBox && 'IntersectionObserver' in window && !/bot|crawl|spider|headless|lighthouse/i.test(navigator.userAgent)) {
+    const loadGoogle = async () => {
+      try {
+        const res = await fetch(`/api/google-rating?id=${encodeURIComponent(googleBox.dataset.restaurant ?? '')}`);
+        if (res.status !== 200) return;
+        const g = (await res.json()) as { rating: number; count: number; url: string };
+        const nl = (n: number, d = 0) => n.toLocaleString('nl-NL', { minimumFractionDigits: d, maximumFractionDigits: d });
+        googleBox.querySelector('[data-g-score]')!.textContent = nl(g.rating, 1);
+        googleBox.querySelector<HTMLElement>('.google-stars-fill')!.style.width = `${(g.rating / 5) * 100}%`;
+        googleBox.querySelector('[data-g-count]')!.textContent = g.count === 1 ? '1 review op Google' : `${nl(g.count)} reviews op Google`;
+        googleBox.querySelector<HTMLAnchorElement>('[data-g-link]')!.href = g.url;
+        googleBox.hidden = false;
+      } catch {
+        // Geen Google-score; de pagina werkt gewoon door.
+      }
+    };
+    const io = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((e) => e.isIntersecting)) {
+          io.disconnect();
+          void loadGoogle();
+        }
+      },
+      { rootMargin: '300px 0px' },
+    );
+    io.observe(document.getElementById('reviews') ?? googleBox);
+  }
 
   // Meer reviews laden (HTML-fragment van /partials/reviews).
   const loadMore = document.getElementById('load-more') as HTMLButtonElement | null;
@@ -1335,6 +1381,70 @@ const breadcrumbLd = {
     flex-direction: column;
     align-items: flex-start;
     gap: 0.35rem;
+  }
+  .summary-source {
+    font-size: var(--text-xs);
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+  .google-rating {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem var(--space-lg);
+    background: var(--white);
+    border: 1px solid var(--beige-dark);
+    border-radius: var(--radius-md);
+    padding: var(--space-md) var(--space-lg);
+    margin-bottom: var(--space-md);
+  }
+  .google-rating[hidden] {
+    display: none;
+  }
+  .google-main {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+  .google-line {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .google-score {
+    font-family: var(--serif);
+    font-size: 1.6rem;
+    line-height: 1;
+    font-weight: 600;
+  }
+  .google-stars {
+    position: relative;
+    display: inline-block;
+    color: var(--beige-deeper);
+    font-size: 1rem;
+    letter-spacing: 1px;
+    line-height: 1;
+  }
+  .google-stars-fill {
+    position: absolute;
+    inset: 0 auto 0 0;
+    overflow: hidden;
+    white-space: nowrap;
+    color: #fbbc04;
+  }
+  .google-link {
+    color: var(--brown);
+    font-size: var(--text-sm);
+    font-weight: 500;
+  }
+  .google-note {
+    flex-basis: 100%;
+    font-size: var(--text-xs);
+    color: var(--text-muted);
   }
   .big-score {
     font-family: var(--serif);
