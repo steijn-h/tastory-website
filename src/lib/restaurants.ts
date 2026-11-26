@@ -425,6 +425,24 @@ async function loadBrandColor(restaurantId: string): Promise<string | null> {
   return /^#[0-9a-f]{6}$/i.test(value) ? value.toLowerCase() : null;
 }
 
+/**
+ * Google place_id van het restaurant (kolom google_place_id). Alleen het id
+ * wordt bewaard; dat mag volgens de voorwaarden van Google Places. Bestaat de
+ * kolom (nog) niet of is er geen id, dan null en toont de pagina niets extra's.
+ */
+async function loadGooglePlaceId(restaurantId: string): Promise<string | null> {
+  const supabase = getSupabase();
+  if (!supabase) return null;
+  const { data, error } = await supabase
+    .from('restaurants')
+    .select('google_place_id')
+    .eq('id', restaurantId)
+    .maybeSingle();
+  if (error || !data) return null;
+  const value = String((data as { google_place_id?: unknown }).google_place_id ?? '').trim();
+  return /^[A-Za-z0-9_-]{10,300}$/.test(value) ? value : null;
+}
+
 async function loadStories(restaurantId: string, limit: number): Promise<Story[]> {
   const supabase = getSupabase();
   if (!supabase) return [];
@@ -521,6 +539,14 @@ export function getStories(restaurantId: string, limit = 12): Promise<Story[]> {
   return remember(
     `stories:${restaurantId}:${limit}`,
     () => loadStories(restaurantId, limit),
+    () => true,
+  );
+}
+
+export function getGooglePlaceId(restaurantId: string): Promise<string | null> {
+  return remember(
+    `place:${restaurantId}`,
+    () => loadGooglePlaceId(restaurantId),
     () => true,
   );
 }

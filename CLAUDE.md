@@ -86,6 +86,7 @@ public/           # Static assets (images, favicon, robots.txt)
 - `/partials/reviews` levert HTML voor "Meer reviews laden"
 - Reviewers tonen als `@gebruikersnaam` of alleen voornaam — nooit de volledige naam
 - Filters op reviews/stories gelijk houden aan de app (`rork-tastory-react`)
+- Google-score: alleen `google_place_id` bewaren, score live via `/api/google-rating` (no-store); zie `docs/GOOGLE-REVIEWS.md`
 
 ## Ingelogd deel (webapp)
 
