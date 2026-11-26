@@ -17,7 +17,7 @@ const BOT_RE = /bot|crawl|spider|slurp|preview|facebookexternalhit|headless|ligh
 // Eenvoudige rem per serverfunctie tegen herhaald opvragen door één bezoeker.
 const hits = new Map<string, { at: number; n: number }>();
 const WINDOW_MS = 10 * 60 * 1000;
-const MAX_PER_WINDOW = 20;
+const MAX_PER_WINDOW = 60;
 
 function limited(ip: string): boolean {
   const now = Date.now();
